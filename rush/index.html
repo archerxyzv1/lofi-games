@@ -1,0 +1,3518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/lofigame/assets/favicon.png" />
+<title>Lofi Rush</title>
+<style>
+  :root{
+    --blue:#0057ff;
+    --blue-deep:#003ecb;
+    --blue-dark:#002a7a;
+    --navy:#041e57;
+    --cyan:#00b7ff;
+    --ice:#59d8ff;
+    --ice-pale:#c9f1fc;
+    --ice-soft:#e8f6ff;
+    --ink:#0a2a5e;
+    --muted:#3d5a8a;
+    --gold:#ffc21f;
+    --gold-deep:#b97e06;
+    --pink:#ff5c8a;
+    --radius:16px;
+    --facet:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 7px, rgba(255,255,255,0) 7px 14px),
+      repeating-linear-gradient(0deg, rgba(0,42,122,.08) 0 7px, rgba(0,42,122,0) 7px 14px);
+  }
+  html{ background:var(--navy); }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(760px 300px at 10% -60px, rgba(89,216,255,.5), transparent 70%),
+      radial-gradient(860px 340px at 92% -40px, rgba(0,183,255,.38), transparent 70%),
+      radial-gradient(600px 500px at 50% 115%, rgba(0,87,255,.5), transparent 70%),
+      linear-gradient(180deg,#031a4f 0%, #06389f 34%, #0057d9 62%, #0083e8 100%);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:980px; margin:0 auto; padding:20px 16px 44px; position:relative; }
+  .vapour{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .vapour span{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(190,235,255,.5), rgba(190,235,255,0));
+    filter:blur(6px);
+  }
+  .vapour span:nth-child(1){ width:420px;height:120px; left:-80px; top:16%; animation:drift 26s linear infinite; }
+  .vapour span:nth-child(2){ width:520px;height:140px; left:55%; top:52%; animation:drift 34s linear infinite reverse; }
+  .vapour span:nth-child(3){ width:340px;height:100px; left:30%; top:78%; animation:drift 30s linear infinite; }
+  @keyframes drift{ from{ transform:translateX(-30px);} to{ transform:translateX(70px);} }
+  @media (prefers-reduced-motion: reduce){ .vapour span{ animation:none !important; } }
+  .head{ position:relative; z-index:1; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .head h1{ margin:0; line-height:0; }
+  .logo{ width:min(430px,88vw); height:auto; display:block; filter:drop-shadow(0 4px 0 rgba(0,42,122,.45)) drop-shadow(0 12px 20px rgba(0,10,40,.4)); }
+  .head p{ margin:8px 0 0; color:#d6e9ff; font-size:16px; font-weight:600; line-height:1.45; max-width:560px; text-shadow:0 1px 3px rgba(0,20,70,.5); }
+  .head-actions{ flex:none; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .pix{
+    background:var(--facet), linear-gradient(180deg,#8fe8ff 0%,#29c5ff 48%,#0095f2 100%);
+    border:3px solid var(--blue-dark); color:#fff;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+    box-shadow:0 5px 0 var(--blue-dark),
+      inset 0 3px 0 rgba(255,255,255,.9),
+      inset 3px 0 0 rgba(255,255,255,.35),
+      inset -3px 0 0 rgba(0,42,122,.22),
+      inset 0 -7px 0 rgba(0,42,122,.28);
+  }
+  .icon-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .icon-btn svg{ width:23px; height:23px; display:block; }
+  .icon-btn .slash{ display:none; }
+  .icon-btn.muted{ color:#dcefff; }
+  .icon-btn.muted .waves{ display:none; }
+  .icon-btn.muted .slash{ display:block; }
+  .icon-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .icon-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .cube-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .cube-btn svg{ width:23px; height:23px; display:block; }
+  .cube-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .cube-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .stage-wrap{ position:relative; z-index:1; margin-top:96px; margin-bottom:62px; }
+  .peek{
+    position:absolute; right:24px; top:-92px; z-index:0;
+    width:96px; height:52px; overflow:hidden; pointer-events:none;
+    transform-origin:50% 100%;
+    animation:peekBob 3.4s ease-in-out infinite;
+  }
+  .peek img{
+    display:block; width:96px; height:auto;
+    filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 -2px 0 #fff);
+  }
+  @keyframes peekBob{
+    0%,100%{ transform:translateY(7px) rotate(-3deg); }
+    50%{ transform:translateY(0) rotate(-3deg); }
+  }
+  .snow-edge{
+    position:absolute; left:-8px; right:-8px; z-index:3; pointer-events:none;
+    background-repeat:no-repeat; background-size:100% 100%;
+  }
+  .snow-edge-top{ top:-56px; height:58px; background-image:url(/lofigame/assets/snow-86cf839d.webp); }
+  .snow-edge-bottom{ bottom:-48px; height:58px; background-image:url(/lofigame/assets/snow-22495d8e.webp); }
+  .stage-rock{
+    position:absolute; bottom:-62px; z-index:3; pointer-events:none;
+    filter:drop-shadow(0 5px 7px rgba(2,20,70,.4));
+  }
+  .rock-bl{ left:-14px; width:138px; }
+  .rock-br{ right:-14px; width:106px; }
+  .hud-in{
+    position:absolute; top:10px; left:10px; right:10px; z-index:4;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+    pointer-events:none;
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  .hud-in.hud-hidden{ opacity:0; visibility:hidden; }
+  .hud-group{ display:flex; gap:6px; flex-wrap:wrap; }
+  .hud-group.right{ justify-content:flex-end; }
+  .chip{
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark); border-radius:10px;
+    box-shadow:0 3px 0 var(--blue-dark);
+    padding:5px 11px; font-size:14px; font-weight:800; line-height:1.15;
+    font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;
+  }
+  .chip .unit{ font-size:11px; font-weight:700; color:var(--muted); }
+  .chip .hearts{ font-size:12.5px; letter-spacing:1.5px; }
+  /* Rush meter: a slim ice bar under the HUD, fills toward RUSH mode */
+  .rush-wrap{
+    position:absolute; top:54px; left:50%; transform:translateX(-50%); z-index:4;
+    width:min(300px,58%); pointer-events:none;
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  .rush-wrap.hud-hidden{ opacity:0; visibility:hidden; }
+  .rush-label{
+    text-align:center; font-family:'Baloo 2','Arial Black',Arial,sans-serif;
+    font-size:11px; font-weight:800; letter-spacing:.18em; color:#fff;
+    text-shadow:0 1px 0 rgba(0,42,122,.8), 0 0 8px rgba(0,183,255,.8);
+    margin-bottom:3px;
+  }
+  .rush-track{
+    height:12px; border-radius:7px; border:2.5px solid var(--blue-dark);
+    background:rgba(4,30,87,.65); box-shadow:0 2px 0 var(--blue-dark);
+    overflow:hidden;
+  }
+  .rush-fill{
+    height:100%; width:0%;
+    background:linear-gradient(90deg,#59d8ff,#00b7ff,#ffc21f);
+    transition:width .15s linear;
+  }
+  .rush-wrap.rushing .rush-label{ color:var(--gold); }
+  .stage{
+    position:relative; z-index:2;
+    border-radius:18px; overflow:hidden;
+    border:4px solid var(--blue-dark);
+    box-shadow:0 8px 0 var(--blue-dark), 0 26px 44px rgba(0,10,40,.45);
+    background:linear-gradient(180deg,#0b2a6b 0%, #274b8f 55%, #7fb2dd 100%);
+  }
+  canvas{ display:block; width:100%; height:auto; aspect-ratio:16/9; touch-action:none; }
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    padding:18px; text-align:center;
+    background:rgba(190,228,255,.45);
+    backdrop-filter:blur(2px);
+  }
+  .overlay[hidden]{ display:none; }
+  .panel{
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:16px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.4);
+    padding:22px 24px; max-width:440px; width:100%;
+  }
+  .panel h2{ margin:0 0 6px; font-size:24px; font-weight:800; letter-spacing:-.01em; }
+  .panel p{ margin:0 0 14px; color:var(--muted); font-size:15px; line-height:1.5; }
+  .panel-snow{
+    position:absolute; top:-17px; left:-10px; right:-10px; height:38px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  .btn{
+    appearance:none; cursor:pointer; position:relative;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    min-height:50px; padding:12px 28px; border-radius:12px;
+    font-weight:800; font-size:17px;
+  }
+  .btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  #overOverlay{ background:rgba(3,22,70,.45); backdrop-filter:blur(3px); }
+  .ice-panel{ position:relative; text-align:center; }
+  .ice-panel h2{ color:var(--ink); }
+  .ice-sub{ margin:0 0 16px; color:var(--muted); font-size:14.5px; line-height:1.45; }
+  .ice-x{
+    position:absolute; top:10px; right:10px; z-index:2;
+    width:34px; height:34px; border-radius:10px; cursor:pointer;
+    border:2.5px solid var(--blue-dark); color:#fff;
+    background:var(--facet), linear-gradient(180deg,#ff8fb8,#f43f7f);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6);
+    font-size:15px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .ice-x:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6); }
+  .ice-x:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .over-panel{ padding:30px 24px 22px; }
+  .over-avatar{
+    width:86px; height:86px; margin:4px auto 10px; border-radius:50%;
+    background:radial-gradient(circle at 50% 30%, #ffffff 0%, #c9f1fc 62%, #59d8ff 100%);
+    border:3px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 -8px 14px rgba(0,149,242,.45);
+    display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
+  }
+  .over-avatar img{ width:78px; height:auto; display:block; transform:translateY(6px); }
+  .over-panel h2{ margin:0 0 4px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .over-sub{ margin:0 0 16px; color:var(--muted); font-size:14px; line-height:1.45; }
+  .result-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:0 0 18px; }
+  .result-grid div{
+    background:var(--ice-soft); border:2px solid #8fd0ff; border-radius:12px; padding:12px 6px 10px;
+    box-shadow:inset 0 2px 0 #fff, inset 0 -6px 10px rgba(0,149,242,.14);
+  }
+  .result-grid small{ display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .result-grid strong{ display:block; font-size:22px; margin-top:3px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .result-grid strong .unit{ font-size:13px; font-weight:700; color:var(--muted); }
+  .newbest{ display:none; margin:0 auto 14px; font-weight:800; color:#7a5200; font-size:13px; }
+  .newbest.show{
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d); border:2px solid var(--gold-deep); border-radius:999px;
+    padding:6px 14px; box-shadow:0 2px 0 rgba(185,126,6,.8);
+  }
+  .over-actions{ display:flex; align-items:flex-end; justify-content:center; gap:8px; }
+  .mini-rock{ width:58px; height:auto; flex:none; pointer-events:none; filter:drop-shadow(0 3px 4px rgba(0,20,70,.3)); }
+  .mini-rock.flip{ transform:scaleX(-1); }
+  .over-hint{ margin:12px 0 0; font-size:12.5px; color:var(--muted); }
+  .touch{
+    position:relative; z-index:1;
+    display:flex; gap:10px; margin-top:12px;
+  }
+  .touch button{
+    flex:1; min-height:58px; border-radius:12px; cursor:pointer; position:relative; overflow:hidden;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    font-weight:800; font-size:17px; padding-top:9px;
+  }
+  .touch button.arrow{ font-size:22px; }
+  .touch button::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:12px; pointer-events:none;
+    background:
+      radial-gradient(13px 8px at 14% 100%, #ffffff 98%, transparent),
+      radial-gradient(17px 10px at 40% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 63% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 10px at 88% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eaf7ff);
+  }
+  .touch button:active{ transform:translateY(3px); }
+  .guide{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 14px;
+  }
+  .guide::before, .ach::before{
+    content:""; position:absolute; top:-15px; left:12px; right:12px; height:26px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  .guide h2{ margin:0 0 4px; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .guide > p{ margin:0 0 14px; color:var(--muted); font-size:14px; }
+  .guide ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px 22px; }
+  .guide li{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #cdeaff; font-size:14px; }
+  .guide li .keys-inline{ flex:none; display:inline-flex; gap:4px; min-width:86px; }
+  .guide kbd{
+    font-family:inherit; background:var(--ice-soft); border:1.5px solid #8fd0ff; border-bottom-width:3px;
+    border-radius:6px; padding:2px 7px; font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .guide li span{ color:var(--ink); font-weight:600; }
+  @media (max-width:560px){ .guide ul{ grid-template-columns:1fr; } }
+  .ach{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 20px;
+  }
+  .ach-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .ach-head h2{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .ach ul{ list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .ach li{
+    display:flex; align-items:center; gap:12px;
+    border:2px solid #cdeaff; border-radius:12px; padding:12px 14px; min-height:52px;
+    background:rgba(255,255,255,.65);
+  }
+  .ach li .dot{
+    flex:none; width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); border:2px solid #8fd0ff; color:var(--muted); font-size:16px; font-weight:800;
+  }
+  .ach li.unlocked .dot{ background:#e7f8ef; border-color:#9adbb6; color:#149653; }
+  .ach li .txt{ flex:1; min-width:0; }
+  .ach li .txt strong{ display:block; font-size:15px; }
+  .ach li .txt span{ display:block; font-size:13px; color:var(--muted); margin-top:1px; }
+  .ach li .pts{ flex:none; font-weight:800; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .ach li.unlocked .pts{ color:var(--gold-deep); }
+  .ach li .state{ flex:none; font-size:12px; font-weight:700; color:var(--muted); }
+  .ach li.unlocked .state{ color:#149653; }
+  .toast{
+    position:fixed; left:50%; bottom:22px; transform:translate(-50%, 90px);
+    z-index:20; background:var(--blue-dark); color:#fff; border:2.5px solid var(--ice); border-radius:12px;
+    box-shadow:0 5px 0 rgba(0,10,40,.6);
+    padding:13px 18px; font-size:14px; font-weight:600; max-width:min(92vw,440px); text-align:center;
+    transition:transform .3s ease; pointer-events:none;
+  }
+  .toast.show{ transform:translate(-50%, 0); }
+  .toast b{ color:#ffd34d; }
+  .panel h2, .guide h2, .ach-head h2{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.01em; }
+  .panel.start-panel{
+    background:transparent; border:none; box-shadow:none; padding:4px;
+    max-width:520px;
+  }
+  .start-logo{
+    display:block; margin:0 auto; width:auto;
+    height:clamp(110px, 30vw, 190px);
+    filter:drop-shadow(0 5px 0 rgba(0,42,122,.4)) drop-shadow(0 12px 20px rgba(0,10,40,.35));
+  }
+  .play-pill{
+    position:relative; cursor:pointer; margin-top:16px;
+    min-width:min(240px,74vw); min-height:60px; padding:16px 42px 14px;
+    border-radius:14px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800;
+    font-size:27px; letter-spacing:.16em;
+    display:inline-flex; align-items:center; justify-content:center; gap:13px;
+  }
+  .play-pill::before{
+    content:""; position:absolute; top:-3px; left:10px; right:10px; height:15px; pointer-events:none;
+    background:
+      radial-gradient(13px 9px at 12% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 11px at 34% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 55% 100%, #ffffff 98%, transparent),
+      radial-gradient(19px 12px at 76% 100%, #ffffff 98%, transparent),
+      radial-gradient(14px 9px at 93% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eef8ff);
+    border-radius:14px 14px 0 0;
+  }
+  .play-pill::after{
+    content:""; position:absolute; left:22%; right:22%; bottom:-10px; height:11px; pointer-events:none;
+    background:linear-gradient(180deg,#29c5ff,#c9f1fc);
+    clip-path:polygon(0 0, 100% 0, 92% 70%, 84% 12%, 74% 100%, 64% 18%, 54% 78%, 45% 10%, 34% 92%, 25% 16%, 15% 66%, 7% 12%);
+  }
+  .play-pill:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .play-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:3px; }
+  .play-tri{
+    width:25px; height:25px; flex:none; background:#ffffff;
+    clip-path:polygon(24% 16%, 24% 84%, 86% 50%);
+    filter:drop-shadow(0 2px 0 rgba(0,42,122,.45));
+  }
+  .settings-overlay{
+    position:fixed; inset:0; z-index:30;
+    background:rgba(3,22,70,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    overflow-y:auto;
+  }
+  .settings-overlay[hidden]{ display:none !important; }
+  .settings-panel{
+    position:relative; width:min(94vw,404px); margin:auto;
+    background:var(--facet), linear-gradient(180deg,#2f9dff 0%,#0057ff 58%,#003ecb 100%);
+    border:3px solid var(--blue-dark); border-radius:20px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.5);
+    padding:16px 14px 14px;
+  }
+  .settings-panel::before{
+    content:""; position:absolute; top:-2px; left:14px; right:14px; height:14px;
+    background:
+      radial-gradient(18px 11px at 10% 0, #ffffff 98%, transparent),
+      radial-gradient(24px 13px at 36% 0, #ffffff 98%, transparent),
+      radial-gradient(20px 12px at 63% 0, #ffffff 98%, transparent),
+      radial-gradient(26px 13px at 90% 0, #ffffff 98%, transparent);
+    pointer-events:none;
+  }
+  .settings-panel h2{
+    margin:2px 0 12px; text-align:center;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-size:30px; font-weight:800; letter-spacing:.06em;
+    color:var(--gold);
+    text-shadow:0 2px 0 #b97e06, 0 4px 0 rgba(0,42,122,.6), 2px 0 0 rgba(0,42,122,.4), -2px 0 0 rgba(0,42,122,.4);
+  }
+  .set-inner{
+    background:#f4fbff; border:2px dashed #7fb2f0; border-radius:14px;
+    padding:18px 16px 16px;
+  }
+  .set-row{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .set-row.split{ justify-content:space-between; gap:8px; flex-wrap:wrap; row-gap:6px; }
+  .set-ico{ flex:none; width:30px; display:flex; align-items:center; justify-content:center; color:var(--blue); }
+  .set-ico svg{ width:26px; height:26px; display:block; }
+  .set-label{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue); }
+  .tips-wrap{ display:inline-flex; align-items:center; gap:9px; }
+  input[type=range].vol{
+    -webkit-appearance:none; appearance:none; flex:1; min-width:0; height:18px;
+    border-radius:8px; border:2.5px solid var(--blue-dark); background:#bcd9f7; outline:none; cursor:pointer;
+  }
+  input[type=range].vol::-webkit-slider-runnable-track{ background:transparent; }
+  input[type=range].vol::-webkit-slider-thumb{
+    -webkit-appearance:none; width:32px; height:32px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  input[type=range].vol::-moz-range-track{ height:18px; border-radius:8px; background:#bcd9f7; }
+  input[type=range].vol::-moz-range-progress{ height:18px; border-radius:8px; background:var(--cyan); }
+  input[type=range].vol::-moz-range-thumb{
+    width:28px; height:28px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  .switch{
+    flex:none; width:42px; height:42px; border-radius:11px; cursor:pointer;
+    color:transparent;
+    background:linear-gradient(180deg,#eef6fb,#c9deee);
+    border:2.5px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    font-size:21px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .switch.on{ color:#149653; background:var(--facet), linear-gradient(180deg,#ffffff,#b8f4d2); }
+  .switch:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 #fff; }
+  .notice-btn{
+    position:relative; cursor:pointer; border:none; background:none; padding:6px 28px 6px 6px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue);
+  }
+  .nbadge{
+    position:absolute; top:-7px; right:2px; min-width:19px; height:19px; padding:0 4px;
+    border-radius:999px; background:#e23c3c; color:#fff; border:1.5px solid #fff;
+    font-size:11px; font-weight:800; line-height:17px; text-align:center;
+  }
+  .notice-text{
+    margin:0 0 14px; background:#fff8e1; border:1px solid #f0d48a; border-radius:12px;
+    padding:10px 12px; font-size:13.5px; line-height:1.5; color:#6b5310;
+  }
+  .wallet-status{ margin:0 0 12px; font-size:13px; line-height:1.5; color:var(--muted); min-height:0; }
+  .wallet-status:empty{ display:none; }
+  .set-actions{ display:flex; gap:12px; }
+  .set-connect, .set-ok{
+    flex:1; min-height:52px; border-radius:12px; cursor:pointer;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:18px; letter-spacing:.02em;
+  }
+  .set-connect{
+    background:var(--facet), linear-gradient(180deg,#ff9a86,#f2604c); color:#fff;
+    border:3px solid #8f2d1d; box-shadow:0 4px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55);
+    text-shadow:0 1px 2px rgba(143,45,29,.45);
+  }
+  .set-connect.connected{ font-size:14.5px; letter-spacing:0; }
+  .set-ok{
+    background:var(--facet), linear-gradient(180deg,#ffd964,#f5b81d); color:#5b3d00;
+    border:3px solid #8a5f04; box-shadow:0 4px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6);
+  }
+  .set-connect:active, .set-ok:active{ transform:translateY(2px); }
+  .set-connect:active{ box-shadow:0 2px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55); }
+  .set-ok:active{ box-shadow:0 2px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6); }
+  @media (max-width:560px){
+    .stage-wrap{ margin-top:80px; margin-bottom:52px; }
+    .peek{ right:14px; top:-74px; width:76px; height:42px; }
+    .peek img{ width:76px; }
+    .snow-edge-top{ top:-46px; height:46px; }
+    .snow-edge-bottom{ bottom:-38px; height:46px; }
+    .stage-rock{ bottom:-50px; }
+    .rock-bl{ left:-8px; width:96px; }
+    .rock-br{ right:-8px; width:76px; }
+    .hud-in{ top:7px; left:7px; right:7px; }
+    .chip{ font-size:12px; padding:4px 8px; gap:4px; }
+    .chip .hearts{ font-size:11px; letter-spacing:1px; }
+    .chip.speed{ display:none; }
+    .rush-wrap{ top:46px; width:52%; }
+    .rush-label{ font-size:10px; }
+    .overlay{ padding:8px; }
+    .panel{ padding:12px 14px; border-radius:14px; }
+    .panel h2{ font-size:18px; margin-bottom:4px; }
+    .panel p{ font-size:13px; line-height:1.4; margin-bottom:8px; }
+    .btn{ min-height:44px; padding:8px 22px; font-size:15px; }
+    .result-grid{ margin-bottom:10px; }
+    .result-grid div{ padding:7px 4px; }
+    .result-grid strong{ font-size:16px; }
+    .over-panel{ padding:20px 14px 14px; }
+    .over-panel h2{ font-size:24px; }
+    .over-avatar{ width:64px; height:64px; margin-bottom:6px; }
+    .over-avatar img{ width:58px; }
+    .over-sub{ font-size:12.5px; margin-bottom:10px; }
+    .over-hint{ display:none; }
+    .mini-rock{ width:42px; }
+    .panel-snow{ height:30px; top:-13px; }
+    .touch{ gap:7px; }
+    .touch button{ min-height:54px; font-size:15px; }
+    .touch button.arrow{ font-size:20px; }
+    #startOverlay{ padding:6px; }
+    .panel.start-panel{ padding:0; }
+    .start-logo{ height:clamp(76px, 25vw, 110px); }
+    .play-pill{
+      margin-top:10px; min-width:0; min-height:50px;
+      padding:12px 30px 11px; font-size:21px; letter-spacing:.13em; gap:10px;
+    }
+    .play-tri{ width:20px; height:20px; }
+  }
+  @media (max-width:760px){
+    #overOverlay{ padding:6px; }
+    .over-panel{ padding:11px 16px 10px; }
+    .over-avatar{ display:none; }
+    .over-panel h2{ font-size:22px; margin-bottom:2px; }
+    .over-sub{ font-size:12.5px; margin-bottom:6px; }
+    .over-panel:has(.newbest.show) .over-sub{ display:none; }
+    .newbest{ margin-bottom:6px; padding:5px 12px; font-size:12px; }
+    .result-grid{ gap:6px; margin-bottom:8px; }
+    .result-grid div{ padding:6px 4px 5px; }
+    .result-grid small{ font-size:9.5px; }
+    .result-grid strong{ font-size:15px; margin-top:2px; }
+    .over-actions .btn{ min-height:40px; padding:8px 20px; font-size:15px; }
+    .mini-rock{ width:34px; }
+    .over-hint{ display:none; }
+  }
+  @media (max-width:400px){
+    #overOverlay{ padding:4px; }
+    .over-panel{ padding:10px 12px 8px; }
+    .over-panel h2{ font-size:19px; }
+    .over-sub{ font-size:11.5px; margin-bottom:6px; }
+    .newbest{ margin-bottom:6px; padding:3px 10px; font-size:11.5px; }
+    .result-grid{ margin-bottom:8px; }
+    .result-grid div{ padding:5px 3px 4px; }
+    .result-grid small{ font-size:9px; }
+    .result-grid strong{ font-size:14px; }
+    .over-actions .btn{ min-height:36px; padding:6px 16px; font-size:14px; }
+    .mini-rock{ width:27px; }
+    .panel-snow{ height:24px; top:-10px; }
+  }
+  /* Desktop stage sizing: the game card never stretches past its native
+     960px canvas, stays centered in the page column with the page
+     background showing on both sides, and never grows taller than 85vh
+     (width capped through the 16:9 ratio) so the controls below stay
+     reachable. The start logo scales with the stage, not the viewport.
+     Mobile (<=760px) keeps the full-width stage, untouched. */
+  @media (min-width:761px){
+    .stage-wrap{
+      width:min(960px, calc(85vh * 16 / 9));
+      margin-left:auto; margin-right:auto;
+    }
+    .touch{
+      width:min(960px, calc(85vh * 16 / 9));
+      margin-left:auto; margin-right:auto;
+    }
+    .stage{ container-type:inline-size; }
+    .start-logo{ height:clamp(100px, 20cqw, 190px); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .toast{ transition:none; }
+    .btn:active{ transform:none; }
+    .peek{ animation:none; }
+  }
+  /* ---------- FINAL desktop sizing, matched to the wide frame the
+     user marked out (about three quarters of the screen wide, like
+     Dogecat's So Fast stage at 1280x572, a 2.24:1 ratio): a compact
+     header (logo ~210px wide, whole block short) and a WIDE, short
+     stage in the 1280/572 ratio, capped near 74% of the viewport
+     width and sized from the viewport height so header + stage +
+     touch controls fit on ONE screen. The snow ledge and peeking
+     yeti above the stage are tightened to match. These rules sit
+     LAST in the stylesheet so they win the cascade over every
+     earlier desktop rule. Phones (760px and under) keep their
+     existing layout untouched. ---------- */
+  @media (min-width:761px){
+    .wrap{ max-width:1456px; padding-top:12px; }
+    .head{ margin-bottom:8px; }
+    .logo{ width:210px; }
+    .head p{ margin-top:4px; font-size:14px; }
+    .stage-wrap{
+      width:min(1420px, 74vw, 100%, calc((100vh - 328px) * 1280 / 572));
+      width:min(1420px, 74vw, 100%, calc((100dvh - 328px) * 1280 / 572));
+      margin:82px auto 56px;
+    }
+    /* the wide view itself: on desktop the canvas shows the world at
+       1280x572 (2.24:1); phones keep the original 16:9 frame */
+    canvas{ aspect-ratio:1280/572; }
+    .touch{
+      width:min(1420px, 74vw, 100%, calc((100vh - 328px) * 1280 / 572));
+      width:min(1420px, 74vw, 100%, calc((100dvh - 328px) * 1280 / 572));
+      margin-left:auto; margin-right:auto;
+    }
+    /* peeking yeti: the clip box never moves, only the picture
+       inside it bobs, so no cut edge can ever show; the box's
+       bottom edge lands deep in the snow ledge's solid band, and
+       the picture's white outline keeps clear air at the top and
+       sides of the box */
+    .peek{ animation:none; width:118px; height:84px; top:-98px; right:21px; }
+    .peek img{
+      width:112px; margin:6px 3px 0;
+      transform-origin:50% 100%;
+      animation:peekBob 3.4s ease-in-out infinite;
+    }
+    /* the top ledge sits ON the frame: flush with its sides and
+       overlapping its top edge by 6px, icicle tips resting on the
+       frame's border instead of floating above it */
+    .snow-edge-top{ top:-36px; height:42px; left:0; right:0; }
+    .snow-edge-bottom{ bottom:-44px; height:44px; left:0; right:0; }
+    .stage-rock{ bottom:-52px; }
+    .rock-bl{ width:110px; }
+    .rock-br{ width:86px; }
+  }
+  @media (min-width:761px) and (prefers-reduced-motion: reduce){
+    .peek img{ animation:none; }
+  }
+  /* ---------- Panel fit fix (desktop): the Game Over and Pause
+     panels scale with the stage itself, in container units (the
+     stage is a container and its height is a fixed 572/1280 of its
+     width), so each whole panel — title, subtitle, result tiles
+     and the action button — always sits inside the frame with
+     clear air on every side, at any window size or zoom, clear of
+     the snow ledge above and the ice rocks and snow border below,
+     with clear space under the Rush again button inside the panel.
+     The yeti medallion sits on the Game Over panel's top edge,
+     half above it and never clipped, and is larger than before.
+     Phones (760px and under) keep their layout untouched. ---------- */
+  @media (min-width:761px){
+    #overOverlay, #pauseOverlay{ padding:3cqw 18px 4cqw; }
+    #overOverlay{ padding:4.6cqw 18px 4cqw; }
+    .ice-panel .panel-snow{ height:2.6cqw; top:-1.2cqw; }
+    .over-panel{
+      max-width:min(700px, 76cqw);
+      padding:4.9cqw 3.2cqw 2.9cqw;
+    }
+    .over-avatar{
+      position:absolute; left:50%; top:-3.9cqw; z-index:2;
+      transform:translateX(-50%);
+      width:8.4cqw; height:8.4cqw; margin:0;
+    }
+    /* when the golden New best badge shows, the flavour line and
+       the Enter hint step aside for it (the same trade the phone
+       panel makes), so the taller panel still centres with the
+       medallion clear of the frame's top edge */
+    .over-panel:has(.newbest.show) .over-sub,
+    .over-panel:has(.newbest.show) .over-hint{ display:none; }
+    .over-avatar img{ width:7.6cqw; }
+    .over-panel h2{ font-size:max(23px, 2.9cqw); margin-bottom:.35cqw; }
+    .over-sub{ font-size:max(13px, 1.08cqw); margin-bottom:1cqw; }
+    .newbest{ font-size:max(12.5px, .95cqw); padding:.4cqw 1.1cqw; margin-bottom:1cqw; }
+    .result-grid{ gap:.7cqw; margin-bottom:1.1cqw; }
+    .result-grid div{ padding:.95cqw .5cqw .8cqw; }
+    .result-grid small{ font-size:max(10.5px, .78cqw); }
+    .result-grid strong{ font-size:max(19px, 1.95cqw); margin-top:.25cqw; }
+    .result-grid strong .unit{ font-size:max(13px, .95cqw); }
+    .mini-rock{ width:4.6cqw; }
+    .over-hint{ margin-top:.85cqw; font-size:max(11.5px, .9cqw); }
+    #overOverlay .btn, #pauseOverlay .btn{
+      min-height:max(46px, 3.9cqw); font-size:max(15px, 1.25cqw); padding:.9cqw 2.2cqw;
+    }
+    /* px floors on the Pause rows, so on a short desktop stage —
+       a 720p window, where 1cqw is under 9px — the Pause title,
+       the flavour line and the Resume button stay full-size and
+       readable instead of shrinking with the frame */
+    #pauseOverlay .panel{ padding:max(15px, 1.7cqw) max(16px, 1.8cqw); }
+    #pauseOverlay .panel h2{ font-size:max(21px, 1.8cqw); margin-bottom:max(4px, .4cqw); }
+    .ice-sub{ font-size:max(13px, .95cqw); margin-bottom:max(10px, 1cqw); }
+  }
+  /* ---------- FINAL phone fixes, same rules as the other Lofi
+     games: the header logo stays the compact desktop size instead
+     of stretching across the whole phone screen, the snow ledges
+     sit flush with the frame's sides and the ice rocks tuck in so
+     nothing pokes past the frame, the peeking yeti is a touch
+     bigger, and the Game Over panel keeps clear air under the
+     Rush again button instead of the button resting on the
+     panel's bottom edge. These rules sit LAST so they win over
+     every earlier phone rule. Desktop is untouched above. ---------- */
+  @media (max-width:760px){
+    .logo{ width:210px; }
+    .head p{ font-size:14.5px; margin-top:6px; }
+    .snow-edge-top{ left:0; right:0; }
+    .snow-edge-bottom{ left:0; right:0; }
+    .rock-bl{ left:-4px; }
+    .rock-br{ right:-4px; }
+    .peek{ width:88px; height:48px; top:-80px; }
+    .peek img{ width:88px; }
+    #overOverlay .over-panel{ padding-bottom:16px; }
+  }
+  /* ---------- FINAL phone portrait frame: on phones the stage is
+     a tall portrait frame (8:11, matching the 960x1320 canvas view
+     the script switches to at this width), more tall and less
+     wide, so the three-lane track shows much more road ahead and
+     the stage plus the touch controls right below it fill most of
+     the first screen. Desktop (761px and up) keeps its wide
+     2.24:1 frame untouched above. ---------- */
+  @media (max-width:760px){
+    canvas{ aspect-ratio:8/11; }
+  }
+  /* ---------- stage panel, stage-up banner, run stage results ---------- */
+  .stage-panel{
+    margin:14px auto 0; max-width:460px; text-align:left;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:14px;
+    box-shadow:0 5px 0 var(--blue-dark);
+    padding:10px 12px 12px;
+  }
+  .stage-panel-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px; }
+  .stage-panel-head .sp-title{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15px; color:var(--ink); letter-spacing:.04em; }
+  .stage-panel-head .sp-xp{ font-size:12.5px; font-weight:800; color:var(--gold-deep); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .stage-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:5px 10px; }
+  .stage-row{
+    display:flex; align-items:center; gap:7px;
+    font-size:12.5px; font-weight:700; color:var(--muted);
+    background:rgba(255,255,255,.6); border:2px solid #cdeaff; border-radius:9px;
+    padding:5px 8px;
+  }
+  .stage-row .sr-name{ flex:1; min-width:0; }
+  .stage-row .sr-xp{ flex:none; font-size:11.5px; font-weight:800; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .stage-row .sr-state{ flex:none; font-size:11px; font-weight:800; }
+  .stage-row.done{ color:var(--ink); border-color:#9adbb6; background:#e7f8ef; }
+  .stage-row.done .sr-state{ color:#149653; }
+  .stage-row.done .sr-xp{ color:var(--gold-deep); }
+  .stage-row.current{
+    color:var(--ink); border-color:var(--gold-deep);
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d);
+    box-shadow:0 2px 0 rgba(185,126,6,.7);
+  }
+  .stage-row.current .sr-state{ color:#7a5200; }
+  .stage-row.current .sr-xp{ color:#7a5200; }
+  .stage-banner{
+    position:absolute; top:64px; left:50%; z-index:5;
+    transform:translate(-50%,-8px);
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d);
+    border:3px solid var(--gold-deep); border-radius:999px;
+    box-shadow:0 4px 0 rgba(185,126,6,.8), 0 14px 28px rgba(0,10,40,.35);
+    color:#7a5200;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800;
+    font-size:19px; letter-spacing:.02em;
+    padding:9px 22px; white-space:nowrap;
+    opacity:0; pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease;
+  }
+  .stage-banner.show{ opacity:1; transform:translate(-50%,0); }
+  .stage-banner[hidden]{ display:none; }
+  .over-stages{ margin:0 0 12px; font-size:13.5px; font-weight:700; color:var(--gold-deep); line-height:1.45; }
+  .over-stages[hidden]{ display:none; }
+  /* the start overlay scrolls if the stage panel makes it
+     taller than a short stage; auto margins keep it centred
+     when it fits and scrollable from the top when it does not */
+  #startOverlay{ overflow-y:auto; }
+  .panel.start-panel{ margin:auto; }
+  @media (max-width:560px){
+    .stage-list{ gap:4px 6px; }
+    .stage-row{ font-size:11px; padding:4px 6px; gap:5px; }
+    .stage-row .sr-xp{ font-size:10.5px; }
+    .stage-row .sr-state{ font-size:10px; }
+    .stage-banner{ font-size:15px; top:52px; padding:7px 16px; }
+    .stage-panel{ padding:8px 9px 9px; margin-top:10px; }
+    .over-stages{ font-size:12px; margin-bottom:8px; }
+  }
+  /* ---------- site header + footer: the compact hub chrome that
+     frames the game page (Back + brand + profile / sign-in pill
+     on top, a slim link band below), sitting outside the game
+     canvas; gameplay styles above are untouched ---------- */
+  .site-head{
+    position:sticky; top:0; z-index:15;
+    background:rgba(244,251,255,.92);
+    border-bottom:1px solid rgba(143,208,255,.65);
+    backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+  }
+  .site-head-in{
+    max-width:1456px; margin:0 auto; padding:0 16px; height:52px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .site-head [hidden]{ display:none !important; }
+  .back-btn{
+    display:inline-flex; align-items:center; gap:5px; flex:none;
+    font-size:13.5px; font-weight:800; color:var(--blue-deep); text-decoration:none;
+    background:#fff; border:1.5px solid #8fd0ff; border-radius:999px;
+    padding:6px 14px 6px 10px; min-height:32px;
+  }
+  .back-btn svg{ width:15px; height:15px; display:block; }
+  .back-btn:hover{ border-color:var(--cyan); color:var(--blue-dark); }
+  .back-btn:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .site-brand{
+    display:inline-flex; align-items:center; gap:8px; flex:none;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:700; font-size:17px;
+    color:var(--ink); text-decoration:none; min-height:44px;
+  }
+  .site-brand img{ width:28px; height:28px; border-radius:50%; object-fit:cover; object-position:50% 30%; display:block; background:var(--ice-soft); }
+  .auth-cluster{ margin-left:auto; display:flex; align-items:center; }
+  .nav-pending{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:600; color:var(--muted);
+    background:#fff; border:1.5px solid #cdeaff;
+    padding:6px 14px; border-radius:999px; min-height:32px; white-space:nowrap;
+  }
+  .nav-pending .spin{
+    width:13px; height:13px; flex:none; border-radius:50%;
+    border:2px solid var(--ice-pale); border-top-color:var(--blue);
+    animation:navSpin .8s linear infinite;
+  }
+  @keyframes navSpin{ to{ transform:rotate(360deg); } }
+  .pill{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:inherit; font-size:13px; font-weight:700; color:var(--blue-deep);
+    background:#fff; border:1.5px solid #8fd0ff; border-radius:999px;
+    padding:5px 13px 5px 7px; min-height:32px; white-space:nowrap;
+    text-decoration:none; cursor:pointer;
+  }
+  .pill:hover{ border-color:var(--cyan); color:var(--blue-dark); }
+  .pill:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .pill-signin img{ width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:50% 30%; flex:none; display:block; background:var(--ice-soft); }
+  .pill-avatar{
+    width:20px; height:20px; border-radius:50%; overflow:hidden; flex:none;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); color:var(--blue);
+  }
+  .pill-avatar img{ width:100%; height:100%; object-fit:cover; object-position:50% 30%; display:block; }
+  .pill-avatar svg{ width:13px; height:13px; display:block; }
+  .site-foot{
+    position:relative; z-index:1;
+    background:rgba(3,26,79,.88);
+    border-top:1px solid rgba(89,216,255,.35);
+    color:#d6e9ff;
+  }
+  .site-foot-in{
+    max-width:1456px; margin:0 auto; padding:13px 16px;
+    display:flex; align-items:center; gap:10px 22px; flex-wrap:wrap;
+    font-size:13.5px;
+  }
+  .foot-brand{ display:inline-flex; align-items:center; gap:8px; font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:700; color:#fff; font-size:15px; }
+  .foot-brand img{ width:24px; height:24px; border-radius:50%; object-fit:cover; object-position:50% 30%; background:var(--ice-soft); display:block; }
+  .foot-links{ display:flex; gap:6px 18px; flex-wrap:wrap; }
+  .foot-links a{ color:#a8d8ff; text-decoration:none; font-weight:600; }
+  .foot-links a:hover{ color:#fff; text-decoration:underline; }
+  .foot-links a:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .foot-note{ margin-left:auto; color:#8fb8e8; font-size:12.5px; }
+  @media (max-width:640px){
+    .site-head-in{ gap:10px; padding:0 12px; }
+    .site-brand span{ display:none; }
+    .foot-note{ margin-left:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .nav-pending .spin{ animation:none; }
+  }
+  /* ---------- polish: soft glow + cute hover micro-animations ---------- */
+  .chip{ box-shadow:0 3px 0 var(--blue-dark), 0 0 10px rgba(89,216,255,.28); }
+  .chip:nth-child(1){ box-shadow:0 3px 0 var(--blue-dark), 0 0 12px rgba(255,194,31,.22); }
+  #hudIn .chip{ filter:drop-shadow(0 0 6px rgba(201,241,252,.45)); }
+  .rush-label{ text-shadow:0 1px 0 rgba(0,42,122,.8), 0 0 10px rgba(0,183,255,.9), 0 0 18px rgba(89,216,255,.45); }
+  .rush-wrap.rushing .rush-fill{ box-shadow:0 0 12px rgba(255,194,31,.95), 0 0 22px rgba(255,194,31,.45); }
+  .rush-wrap.rushing .rush-label{ text-shadow:0 1px 0 rgba(0,42,122,.8), 0 0 12px rgba(255,194,31,.95), 0 0 20px rgba(255,194,31,.5); }
+  .stage-banner{ box-shadow:0 4px 0 rgba(185,126,6,.8), 0 0 18px rgba(255,211,77,.55), 0 14px 28px rgba(0,10,40,.35); }
+  .toast{ box-shadow:0 5px 0 rgba(0,10,40,.6), 0 0 16px rgba(89,216,255,.35); }
+  .newbest.show{ box-shadow:0 2px 0 rgba(185,126,6,.8), 0 0 14px rgba(255,211,77,.55); }
+  @media (hover:hover){
+    .btn, .play-pill, .icon-btn, .cube-btn, .touch button, .pill, .back-btn, .set-ok, .set-connect{
+      transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .btn:hover, .play-pill:hover{ transform:translateY(-2px); filter:brightness(1.06); }
+    .icon-btn:hover, .cube-btn:hover{ transform:translateY(-2px) scale(1.05); }
+    .touch button:hover{ transform:translateY(-1px); filter:brightness(1.04); }
+    .pill:hover, .back-btn:hover{ transform:translateY(-1px); }
+    .guide, .ach, .stage-panel{ transition:transform .2s ease, box-shadow .2s ease; }
+    .guide:hover, .ach:hover{ transform:translateY(-2px); }
+    .ach li, .stage-row{ transition:transform .16s ease, background .16s ease, border-color .16s ease; }
+    .ach li:hover{ transform:translateY(-1px) scale(1.01); }
+    .stage-row:hover{ transform:translateY(-1px); }
+    .ach li.unlocked:hover .dot{ box-shadow:0 0 10px rgba(20,150,83,.35); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .btn, .play-pill, .icon-btn, .cube-btn, .touch button, .pill, .back-btn,
+    .guide, .ach, .stage-panel, .ach li, .stage-row{ transition:none !important; }
+    .btn:hover, .play-pill:hover, .icon-btn:hover, .cube-btn:hover,
+    .touch button:hover, .pill:hover, .back-btn:hover,
+    .guide:hover, .ach:hover, .ach li:hover, .stage-row:hover{ transform:none !important; }
+  }
+</style>
+<style>/* Light entrance animation (repo-only patch, re-applied after each re-export) */
+@keyframes lofi-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body{animation:lofi-fade-in .45s ease-out both}
+@media (prefers-reduced-motion:reduce){body{animation:none}}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="back-btn" href="/lofigame/" aria-label="Back to Lofi Games">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 4.5 7.5 12 15 19.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <a class="site-brand" href="/lofigame/">
+      <img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" />
+      <span>Lofi Games</span>
+    </a>
+    <div class="auth-cluster">
+      <span class="nav-pending" id="navPending" role="status"><span class="spin" aria-hidden="true"></span>Loading</span>
+      <button class="pill pill-signin" id="pillSignin" type="button" hidden>
+        <img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" />
+        Sign in
+      </button>
+      <a class="pill pill-user" id="pillUser" href="/lofigame/#/player" hidden>
+        <span class="pill-avatar" id="pillAvatar"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></span>
+        <span id="pillName">Player</span>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="vapour" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<main class="wrap">
+  <div class="head">
+    <div>
+      <h1><img class="logo" src="/lofigame/assets/logo-5349ba0a.webp" alt="Lofi Rush" /></h1>
+      <p>Switch lanes. Chain the coins. Chase the moon.</p>
+    </div>
+    <div class="head-actions">
+      <button class="cube-btn pix" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+          </g>
+          <g fill="#ffffff" stroke="currentColor" stroke-width="1.7">
+            <circle cx="9" cy="7" r="2.4"/><circle cx="15" cy="12" r="2.4"/><circle cx="8" cy="17" r="2.4"/>
+          </g>
+        </svg>
+      </button>
+      <button class="icon-btn pix" id="soundBtn" type="button" aria-pressed="false" aria-label="Sound on. Tap to mute." title="Sound on / off (M)">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+          <g class="waves" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/>
+            <path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+          </g>
+          <line class="slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke="#d64545" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+  <div class="peek" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+  <div class="snow-edge snow-edge-top" aria-hidden="true"></div>
+  <div class="stage">
+    <canvas id="game" width="960" height="540" aria-label="Lofi Rush game. Lofi the yeti slides downhill on a three-lane ice track toward a huge full moon. Switch lanes with left and right, jump ice blocks, logs, barriers, snowmen, snow rocks and sign boards with up, slide under torii gates with down. Chain coins to fill the Rush meter. Three hearts per run, ten stages, the moon waits at 3,000 metres."></canvas>
+
+    <div class="hud-in hud-hidden" id="hudIn" aria-label="Run stats">
+      <div class="hud-group">
+        <span class="chip">🏃 <span id="hudDist">0</span><span class="unit">m</span></span>
+        <span class="chip"><span class="hearts" id="hudHearts">❤️❤️❤️</span></span>
+      </div>
+      <div class="hud-group right">
+        <span class="chip">⭐ <span id="xpTotal">0</span><span class="unit">XP</span></span>
+        <span class="chip">🏆 <span id="hudBest">0</span><span class="unit">m</span></span>
+        <span class="chip speed">🏔 <span id="hudStage">Stage 1</span></span>
+      </div>
+    </div>
+    <div class="rush-wrap hud-hidden" id="rushWrap" aria-hidden="true">
+      <div class="rush-label" id="rushLabel">RUSH</div>
+      <div class="rush-track"><div class="rush-fill" id="rushFill"></div></div>
+    </div>
+    <div class="stage-banner" id="stageBanner" hidden><span id="stageBannerText"></span></div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="panel start-panel">
+        <img class="start-logo" src="/lofigame/assets/start-logo-247e38a2.webp" alt="Lofi Rush" />
+        <button class="play-pill pix" id="startBtn" type="button" aria-label="Start run"><span class="play-tri" aria-hidden="true"></span>PLAY</button>
+        <div class="stage-panel" id="stagePanel" aria-label="Stages">
+          <div class="stage-panel-head">
+            <span class="sp-title">Stages</span>
+            <span class="sp-xp" id="stageXpTotal">Stage XP 0</span>
+          </div>
+          <ul class="stage-list" id="stageList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="pauseOverlay" hidden>
+      <div class="panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <button class="ice-x" id="pauseClose" type="button" aria-label="Close and resume">✕</button>
+        <h2>Paused</h2>
+        <p class="ice-sub">Catching your breath on the slope.</p>
+        <button class="btn pix" id="resumeBtn" type="button">Resume</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="overOverlay" hidden>
+      <div class="panel over-panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <div class="over-avatar" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+        <h2 id="overTitle">Game Over</h2>
+        <p class="over-sub" id="overSub">Lofi ran out of hearts on the slope.</p>
+        <p class="newbest" id="newBest">🏆 New best run!</p>
+        <div class="result-grid">
+          <div><small>Distance</small><strong><span id="resDist">0</span> <span class="unit">m</span></strong></div>
+          <div><small>Coins</small><strong id="resCoins">0</strong></div>
+          <div><small>Best</small><strong><span id="resBest">0</span> <span class="unit">m</span></strong></div>
+        </div>
+        <p class="over-stages" id="overStages" hidden></p>
+        <div class="over-actions">
+          <img class="mini-rock" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+          <button class="btn pix" id="restartBtn" type="button">↻ Rush again</button>
+          <img class="mini-rock flip" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+        </div>
+        <p class="over-hint">or press Enter</p>
+      </div>
+    </div>
+  </div>
+  <div class="snow-edge snow-edge-bottom" aria-hidden="true"></div>
+  <img class="stage-rock rock-bl" src="/lofigame/assets/rock-39b343c2.webp" alt="" aria-hidden="true" />
+  <img class="stage-rock rock-br" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+  </div>
+
+  <div class="touch" aria-label="Touch controls">
+    <button type="button" class="pix arrow" id="leftBtn" aria-label="Switch lane left">◀</button>
+    <button type="button" class="pix arrow" id="upBtn" aria-label="Jump">▲</button>
+    <button type="button" class="pix arrow" id="downBtn" aria-label="Slide">▼</button>
+    <button type="button" class="pix arrow" id="rightBtn" aria-label="Switch lane right">▶</button>
+    <button type="button" class="pix" id="pauseBtn">Pause</button>
+  </div>
+
+  <section class="guide" aria-label="How to play">
+    <h2>How to play</h2>
+    <p class="goal">Slide down the three-lane ice track toward the moon at 3,000 m. Jump the ice blocks, logs, barriers, snowmen, snow rocks and sign boards, slide under the torii gates, switch lanes around the rocks. Chain coins to fill the Rush meter. Three hearts per run, ten stages.</p>
+    <ul>
+      <li><span class="keys-inline"><kbd>←</kbd><kbd>→</kbd><kbd>A</kbd><kbd>D</kbd></span><span>Switch lanes</span></li>
+      <li><span class="keys-inline"><kbd>↑</kbd><kbd>W</kbd><kbd>Space</kbd></span><span>Jump over ice blocks, logs, barriers, snowmen, snow rocks and sign boards</span></li>
+      <li><span class="keys-inline"><kbd>↓</kbd><kbd>S</kbd></span><span>Slide under torii gates</span></li>
+      <li><span class="keys-inline"><kbd>🪙</kbd></span><span>Coins in a row build your chain and Rush meter</span></li>
+      <li><span class="keys-inline"><kbd>⚡</kbd></span><span>Full meter: RUSH mode, fast and untouchable</span></li>
+      <li><span class="keys-inline"><kbd>❤️</kbd><kbd>🛡️</kbd><kbd>⭐</kbd></span><span>Pickups: a heart back, a shield, a Rush boost</span></li>
+      <li><span class="keys-inline"><kbd>P</kbd><kbd>M</kbd></span><span>Pause · Sound on / off</span></li>
+      <li><span class="keys-inline"><kbd>Touch</kbd></span><span>Swipe to switch, jump or slide, or use the buttons</span></li>
+      <li><span class="keys-inline"><kbd>Enter</kbd></span><span>Start · Rush again</span></li>
+    </ul>
+  </section>
+
+  <section class="ach" aria-label="Achievements">
+    <div class="ach-head">
+      <h2>🏆 Achievements</h2>
+    </div>
+    <ul id="achList"></ul>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <span class="foot-brand"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" />Lofi Games</span>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="/lofigame/">All games</a>
+      <a href="/lofigame/dash/">Lofi Dash</a>
+      <a href="/lofigame/crossing/">Frozen Crossing</a>
+      <a href="/lofigame/climb/">Lofi Climb</a>
+    </nav>
+    <span class="foot-note">Lofi Rush · Play like a yeti.</span>
+  </div>
+</footer>
+
+<div class="settings-overlay" id="settingsOverlay" hidden>
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle">SETTINGS</h2>
+    <div class="set-inner">
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V6l10-2v11.5"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="16.5" cy="15.5" r="2.6"/>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="musicVol" min="0" max="100" value="55" aria-label="Music volume" />
+      </div>
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+            <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/><path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+            </g>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="soundVol" min="0" max="100" value="80" aria-label="Sound volume" />
+      </div>
+      <div class="set-row split">
+        <span class="tips-wrap">
+          <span class="set-label" id="tipsLabel">Game tips</span>
+          <button class="switch on" id="tipsToggle" type="button" role="switch" aria-checked="true" aria-labelledby="tipsLabel">✓</button>
+        </span>
+        <button class="notice-btn" id="noticeBtn" type="button">Notice<span class="nbadge" id="noticeBadge">1</span></button>
+      </div>
+      <p class="notice-text" id="noticeText" hidden>Ten stages to the moon at 3,000 m. Coins in a row build your chain, a full Rush meter makes you untouchable, and heart, shield and star pickups on the track help on the way. Connect a SUI wallet here and your address shows on the Connect button.</p>
+      <p class="wallet-status" id="walletStatus" role="status"></p>
+      <div class="set-actions">
+        <button class="set-connect" id="connectBtn" type="button">Connect</button>
+        <button class="set-ok" id="settingsOk" type="button">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var W = 960, H = 540, HORIZON = 172, TRACK_Y = 472, MOON_DIST = 3000;
+  /* wide-view geometry, set by applyStageSize() below: the lane
+     spacing at the player, the track trapezoid's half-widths at the
+     horizon and at the bottom edge, the lane-line endpoints, and
+     KX, the horizontal scale of the scenery (1 in the phone view) */
+  var LANE_OFF = 252, TRK_TOP = 96, TRK_BOT = 438, LINE_TOP = 38.4, LINE_BOT = 334, KX = 1;
+  /* moon height and star band, also set by applyStageSize(): the
+     phone portrait view has a much taller sky, so the moon sits
+     lower in it and the stars spread across it; the wide desktop
+     view keeps the original 104 / 150 values exactly */
+  var MOON_Y = 104, STAR_H = 150;
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var hudDist = document.getElementById('hudDist');
+  var hudHearts = document.getElementById('hudHearts');
+  var hudBest = document.getElementById('hudBest');
+  var hudStage = document.getElementById('hudStage');
+  var hudIn = document.getElementById('hudIn');
+  var rushWrap = document.getElementById('rushWrap');
+  var rushFill = document.getElementById('rushFill');
+  var rushLabel = document.getElementById('rushLabel');
+  var startOverlay = document.getElementById('startOverlay');
+  var pauseOverlay = document.getElementById('pauseOverlay');
+  var overOverlay = document.getElementById('overOverlay');
+  var toastEl = document.getElementById('toast');
+  var stageBanner = document.getElementById('stageBanner');
+  var stageBannerText = document.getElementById('stageBannerText');
+  var stageList = document.getElementById('stageList');
+  var stageXpTotal = document.getElementById('stageXpTotal');
+  var overStages = document.getElementById('overStages');
+
+  /* ---------- achievements: the hub card's five, 210 XP in total ---------- */
+  var ACH = [
+    { id:'first',   name:'First slide',          desc:'Start your first slide downhill',              xp:10  },
+    { id:'chain',   name:'10-coin chain',        desc:'Chain 10 coins without a break',               xp:25  },
+    { id:'perfect', name:'First Perfect dodge',  desc:'Dodge an obstacle at the last moment',         xp:25  },
+    { id:'stage3',  name:'Reach stage 3',        desc:'Reach stage 3 in one run',                     xp:50  },
+    { id:'moon',    name:'Reach the moon',       desc:'Slide all 3,000 m to the moon',                xp:100 }
+  ];
+  var unlocked = {};
+  var achList = document.getElementById('achList');
+  var xpTotal = document.getElementById('xpTotal');
+
+  /* ---------- saved progress: the best distance, the unlocked
+     achievements and the sound / tips settings live in this
+     browser only, under one key for this game; nothing leaves
+     the device and a reload no longer wipes them ---------- */
+  var SAVE_KEY = 'lofi_rush_save_v1';
+  var saved = {};
+  try{ saved = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; }catch(e){ saved = {}; }
+  if(saved.unlocked && typeof saved.unlocked === 'object'){
+    for(var sk in saved.unlocked){ if(saved.unlocked[sk]) unlocked[sk] = true; }
+  }
+  var savedBest = (typeof saved.best === 'number' && saved.best > 0) ? saved.best : 0;
+  /* stage progress: the highest stage completed (0-10) and the
+     stage XP earned from it; saves written before stages existed
+     have neither field and simply start at 0 / 0, with their best
+     and unlocked achievements untouched */
+  var level = (typeof saved.level === 'number' && isFinite(saved.level) && saved.level > 0) ? Math.min(10, Math.floor(saved.level)) : 0;
+  var levelXP = (typeof saved.levelXP === 'number' && isFinite(saved.levelXP) && saved.levelXP > 0) ? Math.floor(saved.levelXP) : 0;
+  function saveProgress(){
+    try{
+      var cur = {};
+      try{ cur = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; }catch(e){}
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        best: (typeof best === 'number' && isFinite(best)) ? Math.floor(best) : (typeof cur.best === 'number' ? cur.best : 0),
+        level: (typeof level === 'number' && isFinite(level)) ? level : (typeof cur.level === 'number' ? cur.level : 0),
+        levelXP: (typeof levelXP === 'number' && isFinite(levelXP)) ? levelXP : (typeof cur.levelXP === 'number' ? cur.levelXP : 0),
+        unlocked: unlocked,
+        muted: muted === true,
+        soundVol: Math.round(soundVolVal * 100),
+        musicVol: Math.round(musicVolVal * 100),
+        tipsOn: (typeof tipsOn === 'boolean') ? tipsOn : (cur.tipsOn !== false)
+      }));
+      fbTouchLocal();
+      fbScheduleSave();
+    }catch(e){}
+  }
+
+  function renderAch(){
+    achList.innerHTML = '';
+    var total = 0;
+    ACH.forEach(function(a){
+      var on = !!unlocked[a.id];
+      if(on) total += a.xp;
+      var li = document.createElement('li');
+      if(on) li.className = 'unlocked';
+      li.innerHTML =
+        '<span class="dot" aria-hidden="true">' + (on ? '✓' : '·') + '</span>' +
+        '<span class="txt"><strong></strong><span></span></span>' +
+        '<span class="pts">' + a.xp + ' XP</span>' +
+        '<span class="state">' + (on ? 'Unlocked' : 'Locked') + '</span>';
+      li.querySelector('.txt strong').textContent = a.name;
+      li.querySelector('.txt span').textContent = a.desc;
+      achList.appendChild(li);
+    });
+    /* uncapped total: achievement XP plus stage (level) XP,
+       shown as one plain number with no cap */
+    xpTotal.textContent = String(total + ((typeof levelXP === 'number' && isFinite(levelXP)) ? levelXP : 0));
+  }
+
+  var toastTimer = null;
+  function toast(html){
+    toastEl.innerHTML = html;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+  function unlock(id){
+    if(unlocked[id]) return;
+    unlocked[id] = true;
+    saveProgress();
+    renderAch();
+    var a = ACH.filter(function(x){ return x.id===id; })[0];
+    if(a) toast('Achievement unlocked: <b>' + a.name + '</b> · +' + a.xp + ' XP');
+    if(sfx.chime) sfx.chime(); else sfx.unlock();
+    /* spark burst on collect, reusing the sparks particle system;
+       spawnAchievementSparks is defined later in this scope, so
+       guard for the very first unlocks before it exists */
+    try{ if(typeof spawnAchievementSparks === 'function') spawnAchievementSparks(); }catch(e){}
+    fbScheduleUnlock(id);
+  }
+  renderAch();
+
+  /* ---------- sticker art ---------- */
+  function makeSilhouette(img, color){
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    var g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = color;
+    g.fillRect(0, 0, c.width, c.height);
+    return c;
+  }
+  function loadSticker(src){
+    var o = { img: new Image(), ready: false, silWhite: null, silDark: null };
+    o.img.onload = function(){
+      o.silWhite = makeSilhouette(o.img, '#ffffff');
+      o.silDark = makeSilhouette(o.img, '#14304d');
+      o.ready = true;
+    };
+    o.img.src = src;
+    return o;
+  }
+  function drawSticker(o, x, y, w, h){
+    if(!o.ready) return;
+    var d, k, dirs = [[1,0],[-1,0],[0,1],[0,-1],[0.7,0.7],[-0.7,0.7],[0.7,-0.7],[-0.7,-0.7]];
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silDark, x + d[0]*5.5, y + d[1]*5.5, w, h); }
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silWhite, x + d[0]*3.5, y + d[1]*3.5, w, h); }
+    ctx.drawImage(o.img, x, y, w, h);
+  }
+  var yetiSticker = loadSticker('/lofigame/assets/yeti-ca776e9d.webp');
+
+  /* ---------- soft glow sprites: pre-rendered once, drawn with
+     drawImage in the canvas (no per-frame shadowBlur) ---------- */
+  function makeGlowSprite(inner, outer){
+    var c = document.createElement('canvas'); c.width = 128; c.height = 128;
+    var g = c.getContext('2d');
+    var grad = g.createRadialGradient(64,64,4, 64,64,64);
+    grad.addColorStop(0, inner);
+    grad.addColorStop(0.45, outer);
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad; g.fillRect(0,0,128,128);
+    return c;
+  }
+  var glowGold = makeGlowSprite('rgba(255,233,163,0.55)','rgba(255,194,31,0.22)');
+  var glowCyan = makeGlowSprite('rgba(201,241,252,0.60)','rgba(89,216,255,0.22)');
+  var glowMoon = makeGlowSprite('rgba(255,243,208,0.50)','rgba(255,240,190,0.18)');
+  function drawGlowSprite(sprite, cx, cy, size){
+    ctx.drawImage(sprite, cx - size/2, cy - size/2, size, size);
+  }
+
+  /* ---------- scenery cut out of Archer's own photos ----------
+     The snowy pines and the mountain ranges are cut from his
+     winter landscape; the sky itself is drawn in code (see
+     drawBackground). (His torii photo carries a watermark,
+     so the gate in the game is drawn in code in the same shape
+     instead.) */
+  function loadPic(src){
+    var o = { img: new Image(), ready: false };
+    o.img.onload = function(){ o.ready = true; };
+    o.img.src = src;
+    return o;
+  }
+  var mtnLPic = loadPic('/lofigame/assets/mtn-3453b74b.png');
+  var mtnRPic = loadPic('/lofigame/assets/mtn-a989db4a.png');
+  var pinePics = [loadPic('/lofigame/assets/pine-26c606a3.png'), loadPic('/lofigame/assets/pine-d206baaf.png')];
+  /* Archer's two lamps for the roadside: the wooden post with its
+     warm hanging lantern (its little "Boozy Mug" sign cropped out
+     of the sprite), and the blue glowing stone lantern — both cut
+     to transparency from his photos */
+  var lampPics = [loadPic('/lofigame/assets/lamp-fdceced6.webp'), loadPic('/lofigame/assets/lamp-b2419b82.webp')];
+  /* Archer's four jump-over sprites, cut to transparency from
+     his photos: the two snowmen (the purple one's "Road Trip"
+     logo cropped out), the snow-covered rocks and the wooden
+     sign board (its little floating snow cloud cropped out) */
+  var snowmanPPic = loadPic('/lofigame/assets/snowman-5ab98f83.webp');
+  var snowmanRPic = loadPic('/lofigame/assets/snowman-470a46da.webp');
+  var snowRocksPic = loadPic('/lofigame/assets/snowrocks-1e513fcf.webp');
+  var signBoardPic = loadPic('/lofigame/assets/signboard-88daf714.webp');
+
+  /* ---------- sound effects (synthesised, no audio files) ---------- */
+  var AC = null, muted = (saved.muted === true), sfxGain = null, musicGain = null;
+  var soundVolVal = (typeof saved.soundVol === 'number') ? Math.min(100, Math.max(0, saved.soundVol)) / 100 : 0.8;
+  var musicVolVal = (typeof saved.musicVol === 'number') ? Math.min(100, Math.max(0, saved.musicVol)) / 100 : 0.55;
+  function applyVolumes(){
+    if(!AC || !sfxGain || !musicGain) return;
+    var s = muted ? 0 : soundVolVal, m = muted ? 0 : musicVolVal;
+    sfxGain.gain.value = s*s*0.9;
+    musicGain.gain.value = m*m*0.45;
+  }
+  function audio(){
+    if(!AC){
+      try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ AC = null; }
+      if(AC){
+        sfxGain = AC.createGain(); sfxGain.connect(AC.destination);
+        musicGain = AC.createGain(); musicGain.connect(AC.destination);
+        applyVolumes();
+      }
+    }
+    if(AC && AC.state === 'suspended') AC.resume();
+    return AC;
+  }
+  function tone(f0, f1, dur, type, vol, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(sfxGain || ac.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noiseHit(dur, vol, freq, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var len = Math.max(1, Math.floor(ac.sampleRate * dur));
+    var buf = ac.createBuffer(1, len, ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var n=0;n<len;n++) d[n] = (Math.random()*2 - 1) * (1 - n/len);
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq;
+    var g = ac.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(sfxGain || ac.destination);
+    src.start(t0);
+  }
+  var sfx = {
+    click:  function(){ tone(620, 520, 0.07, 'triangle', 0.12); },
+    start:  function(){ tone(440, 440, 0.09, 'triangle', 0.14); tone(660, 660, 0.09, 'triangle', 0.14, 0.09); tone(880, 880, 0.14, 'triangle', 0.15, 0.18); },
+    jump:   function(){ tone(280, 640, 0.16, 'sine', 0.16); noiseHit(0.1, 0.05, 2400); },
+    slide:  function(){ tone(500, 220, 0.12, 'sine', 0.1); noiseHit(0.18, 0.08, 1400); },
+    switchS:function(){ noiseHit(0.08, 0.06, 3000); tone(700, 900, 0.06, 'sine', 0.06); },
+    coin:   function(chain){
+      var step = Math.min(chain, 12);
+      var f = 880 * Math.pow(1.059, step);
+      tone(f, f, 0.07, 'sine', 0.13); tone(f*1.335, f*1.335, 0.11, 'sine', 0.12, 0.05);
+    },
+    perfect:function(){ tone(1046, 1046, 0.08, 'triangle', 0.13); tone(1568, 1568, 0.14, 'triangle', 0.13, 0.06); },
+    rush:   function(){ tone(392, 392, 0.1, 'sawtooth', 0.07); tone(523, 523, 0.1, 'sawtooth', 0.07, 0.07); tone(659, 659, 0.1, 'sawtooth', 0.07, 0.14); tone(1046, 1046, 0.22, 'triangle', 0.14, 0.21); noiseHit(0.4, 0.1, 3600, 0.1); },
+    power:  function(){ tone(660, 660, 0.09, 'triangle', 0.13); tone(990, 990, 0.14, 'triangle', 0.13, 0.07); },
+    shieldBreak: function(){ noiseHit(0.16, 0.2, 2600); tone(880, 300, 0.16, 'triangle', 0.14); },
+    crash:  function(){ noiseHit(0.28, 0.3, 700); tone(160, 42, 0.32, 'sine', 0.28); },
+    gameOver: function(){
+      noiseHit(0.26, 0.28, 700); tone(160, 46, 0.3, 'sine', 0.24);
+      tone(392, 392, 0.17, 'triangle', 0.15, 0.14);
+      tone(330, 330, 0.17, 'triangle', 0.15, 0.32);
+      tone(262, 262, 0.2, 'triangle', 0.15, 0.5);
+      tone(196, 165, 0.46, 'sine', 0.17, 0.7);
+    },
+    win: function(){
+      tone(523, 523, 0.12, 'triangle', 0.15);
+      tone(659, 659, 0.12, 'triangle', 0.15, 0.1);
+      tone(784, 784, 0.12, 'triangle', 0.15, 0.2);
+      tone(1046, 1046, 0.2, 'triangle', 0.16, 0.3);
+      tone(1318, 1318, 0.34, 'sine', 0.14, 0.42);
+    },
+    unlock: function(){ tone(660, 660, 0.1, 'triangle', 0.14); tone(880, 880, 0.1, 'triangle', 0.14, 0.09); tone(1100, 1100, 0.18, 'triangle', 0.15, 0.18); },
+    chime: function(){ tone(784, 784, 0.09, 'sine', 0.12); tone(988, 988, 0.09, 'sine', 0.12, 0.07); tone(1318, 1318, 0.16, 'triangle', 0.13, 0.14); },
+    stageChime: function(){ tone(523, 523, 0.09, 'triangle', 0.13); tone(659, 659, 0.09, 'triangle', 0.13, 0.08); tone(784, 784, 0.09, 'triangle', 0.13, 0.16); tone(1046, 1046, 0.18, 'sine', 0.13, 0.24); }
+  };
+  var soundBtn = document.getElementById('soundBtn');
+  function setMuted(m){
+    muted = m;
+    applyVolumes();
+    soundBtn.classList.toggle('muted', muted);
+    soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+    saveProgress();
+  }
+  soundBtn.addEventListener('click', function(){
+    setMuted(!muted);
+    if(!muted) sfx.click();
+  });
+  setMuted(muted);
+
+  /* ---------- background music: a small cheerful loop, synthesised live ---------- */
+  var musicTimer = null, musicStep = 0, musicNext = 0, musicStarted = false;
+  var LEAD = [76,0,79,0,83,0,79,0, 84,0,83,0,79,0,76,0, 77,0,79,0,83,0,84,0, 83,0,79,0,77,0,74,0];
+  var BASS = [52,57,59,52];
+  function midiHz(m){ return 440*Math.pow(2,(m-69)/12); }
+  function musicNote(midi, t0, dur, type, vol){
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = midiHz(midi);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(musicGain);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function scheduleMusic(){
+    if(!AC || !musicGain) return;
+    while(musicNext < AC.currentTime + 0.24){
+      var step = musicStep, t0 = musicNext;
+      var lead = LEAD[step % LEAD.length];
+      if(lead) musicNote(lead, t0, 0.22, 'triangle', 0.15);
+      if(step % 8 === 0) musicNote(BASS[Math.floor(step/8) % 4], t0, 0.44, 'sine', 0.14);
+      if(step % 8 === 4) musicNote(BASS[Math.floor(step/8) % 4] + 7, t0, 0.26, 'sine', 0.06);
+      musicStep++;
+      musicNext += 0.227;
+    }
+  }
+  function startMusic(){
+    if(musicStarted) return;
+    var ac = audio(); if(!ac || !musicGain) return;
+    musicStarted = true;
+    musicStep = 0;
+    musicNext = ac.currentTime + 0.08;
+    musicTimer = setInterval(scheduleMusic, 74);
+  }
+
+  /* ---------- happy pops by Lofi's head ---------- */
+  var headPops = [];
+  var tipsOn = saved.tipsOn !== false;
+  var popTimer = 1.1;
+  var POP_ITEMS = [
+    { t:'Zoom!', e:false }, { t:'To the moon!', e:false }, { t:'Chain!', e:false },
+    { t:'Wheee!', e:false }, { t:'So fast!', e:false }, { t:'Brrr!', e:false },
+    { t:'😊', e:true }, { t:'😄', e:true }, { t:'⭐', e:true },
+    { t:'✨', e:true }, { t:'❄️', e:true }, { t:'🌕', e:true }, { t:'💨', e:true }
+  ];
+  var lastPopIdx = -1;
+  function spawnHeadPop(text){
+    var item;
+    if(text){ item = { t:text, e:false }; }
+    else{
+      var idx = Math.floor(Math.random()*POP_ITEMS.length);
+      if(idx === lastPopIdx) idx = (idx + 1) % POP_ITEMS.length;
+      lastPopIdx = idx;
+      item = POP_ITEMS[idx];
+    }
+    headPops.push({
+      text: item.t, emoji: item.e,
+      t: 0, life: 2.2,
+      dx0: 62 + Math.random()*22,
+      travel: reduced ? 32 : 72,
+      dy0: -12 + Math.random()*14,
+      ph: Math.random()*6.28
+    });
+  }
+  function tickHeadPops(dt, allowSpawn){
+    for(var i=headPops.length-1;i>=0;i--){
+      headPops[i].t += dt;
+      if(headPops[i].t >= headPops[i].life) headPops.splice(i,1);
+    }
+    if(allowSpawn && tipsOn && state === 'playing'){
+      popTimer -= dt;
+      if(popTimer <= 0){
+        spawnHeadPop();
+        popTimer = 2.8 + Math.random()*3.0;
+      }
+    }
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+  function hash(n){ var x = Math.sin(n*127.1)*43758.5453; return x - Math.floor(x); }
+  /* day-to-night blend factor for the whole scene: 0 at the
+     start of the run, 1 at the moon, eased so dusk gathers
+     through the middle stages and full night lands near the
+     end; driven by dist, so it is smooth, freezes on pause
+     and resets with the run */
+  function stageK(){
+    var s = (typeof stage === 'number' && isFinite(stage)) ? stage : 1;
+    return Math.min(1, Math.max(0, (s - 1) / 9));
+  }
+  function nightK(){
+    var p = Math.min(1, Math.max(0, dist / MOON_DIST));
+    var distK = Math.pow(p, 0.8);
+    /* subtle day-night shift per stage: as the stage number rises
+       the sky darkens a touch more and smoothly (dist still drives
+       the in-stage easing, stage nudges it), never hurting readability */
+    return Math.min(1, distK * 0.84 + stageK() * 0.16);
+  }
+  function lerpHex(a, b, k){
+    var pa = [parseInt(a.slice(1,3),16), parseInt(a.slice(3,5),16), parseInt(a.slice(5,7),16)];
+    var pb = [parseInt(b.slice(1,3),16), parseInt(b.slice(3,5),16), parseInt(b.slice(5,7),16)];
+    return 'rgb(' + Math.round(pa[0]+(pb[0]-pa[0])*k) + ',' + Math.round(pa[1]+(pb[1]-pa[1])*k) + ',' + Math.round(pa[2]+(pb[2]-pa[2])*k) + ')';
+  }
+
+  /* ---------- the rush ----------
+     A three-lane downhill in perspective. Everything on the track has
+     a lane (0,1,2) and a depth z: 0 at the horizon, 1 at Lofi. Lofi
+     switches lanes, jumps ice blocks, slides under ice arches and
+     steers around rocks. Coins in a row build a chain; the chain and
+     Perfect dodges fill the Rush meter. Ten stages, one every
+     300 m, the moon at 3,000 m, three hearts. */
+  var STAGE_AT = [0, 300, 600, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000];
+  var state = 'ready'; // ready | playing | paused | over | won
+  var dist = 0, best = savedBest, coinsRun = 0, chain = 0, bestChain = 0;
+  var hearts = 3, shield = false;
+  var stage = 1;
+  var runStages = [], runStageXP = 0;
+  var sparks = [];
+  var rushMeter = 0, rushing = 0; // rushing = seconds left of RUSH mode
+  var invincible = 0, runTime = 0;
+  var ents = [];
+  var spawnT = 1.2, powerT = 9;
+  var scroll = 0;
+  var lastSwitchAt = -10, perfectDone = false;
+
+  var player = { lane: 1, laneF: 1, jumpY: 0, vy: 0, grounded: true, slideT: 0, runPhase: 0 };
+
+  function stageFor(d){
+    var s = 1;
+    for(var i=1;i<STAGE_AT.length;i++){ if(d >= STAGE_AT[i]) s = i+1; }
+    return Math.min(10, s);
+  }
+  /* ---------- stages as levels: completing stage n (reaching
+     its boundary) awards 12 x n XP, once ever; the highest
+     completed stage and its XP persist as level / levelXP in
+     the save. Stages 1-9 complete at their start boundary
+     (STAGE_AT[n-1]: stage 3 at 600 m); stage 10 IS the moon
+     and completes at 3,000 m. ---------- */
+  function stageXP(n){ return 12 * n; }
+  function renderStages(){
+    if(!stageList) return;
+    stageList.innerHTML = '';
+    for(var n=1;n<=10;n++){
+      var st = n <= level ? 'done' : (n === level + 1 ? 'current' : 'locked');
+      var li = document.createElement('li');
+      li.className = 'stage-row ' + st;
+      li.innerHTML =
+        '<span class="sr-name"></span>' +
+        '<span class="sr-xp">+' + stageXP(n) + ' XP</span>' +
+        '<span class="sr-state">' + (st === 'done' ? '✓ Done' : (st === 'current' ? 'Next' : 'Locked')) + '</span>';
+      li.querySelector('.sr-name').textContent = (n === 10)
+        ? 'Stage 10 · The moon · 3,000 m'
+        : 'Stage ' + n + ' · ' + STAGE_AT[n-1] + ' m';
+      stageList.appendChild(li);
+    }
+    if(stageXpTotal) stageXpTotal.textContent = 'Stage XP ' + levelXP;
+  }
+  var bannerQueue = [], bannerBusy = false;
+  function showStageBanner(text){
+    bannerQueue.push(text);
+    pumpStageBanner();
+  }
+  function pumpStageBanner(){
+    if(bannerBusy || !bannerQueue.length || !stageBanner) return;
+    bannerBusy = true;
+    var text = bannerQueue.shift();
+    stageBannerText.textContent = text;
+    stageBanner.hidden = false;
+    /* force a reflow so the show transition runs */
+    void stageBanner.offsetWidth;
+    stageBanner.classList.add('show');
+    setTimeout(function(){
+      stageBanner.classList.remove('show');
+      stageBanner.hidden = true;
+      bannerBusy = false;
+      pumpStageBanner();
+    }, 1800);
+  }
+  function spawnSparks(){
+    var cxp = W/2, cyp = HORIZON + 70;
+    var cols = ['#ffc21f','#59d8ff','#ff5c8a','#ffffff','#8fe8ff'];
+    var count = reduced ? 8 : 26;
+    for(var i=0;i<count;i++){
+      var a = Math.random()*6.283, sp = 60 + Math.random()*230;
+      sparks.push({ kind:'spark', x:cxp, y:cyp, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 130, t:0, life:0.7 + Math.random()*0.5, c:cols[i % cols.length], s:2.5 + Math.random()*3, rot:0, vr:0 });
+    }
+  }
+  function spawnSnowBurst(){
+    var cxp = W/2, cyp = HORIZON + 60;
+    var count = reduced ? 6 : 18;
+    for(var i=0;i<count;i++){
+      sparks.push({ kind:'snow', x:cxp + (Math.random()-0.5)*220, y:cyp + (Math.random()-0.5)*36, vx:(Math.random()-0.5)*46, vy:-18 + Math.random()*36, t:0, life:0.9 + Math.random()*0.7, c:'#ffffff', s:2 + Math.random()*3.2, rot:0, vr:0 });
+    }
+  }
+  function spawnConfetti(){
+    var cxp = W/2, cyp = HORIZON + 56;
+    var cols = ['#ff5c8a','#ffc21f','#00b7ff','#7ed321','#ff8a5c','#c9a7ff','#59d8ff'];
+    var count = reduced ? 6 : 22;
+    for(var i=0;i<count;i++){
+      var a2 = -Math.PI/2 + (Math.random()-0.5)*1.6, sp2 = 90 + Math.random()*170;
+      sparks.push({ kind:'confetti', x:cxp + (Math.random()-0.5)*60, y:cyp, vx:Math.cos(a2)*sp2, vy:Math.sin(a2)*sp2, t:0, life:1.0 + Math.random()*0.6, c:cols[i % cols.length], s:4 + Math.random()*4, rot:Math.random()*6.28, vr:(Math.random()-0.5)*9 });
+    }
+  }
+  function spawnAchievementSparks(){
+    var px = W/2, py = HORIZON + 90;
+    try{ px = laneX(player.laneF, 1); py = TRACK_Y - 120; }catch(e){}
+    var cols = ['#ffc21f','#ffe9a3','#ffffff','#59d8ff'];
+    var count = reduced ? 6 : 16;
+    for(var i=0;i<count;i++){
+      var a = Math.random()*6.283, sp = 50 + Math.random()*150;
+      sparks.push({ kind:'spark', x:px, y:py, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 70, t:0, life:0.55 + Math.random()*0.45, c:cols[i % cols.length], s:2.2 + Math.random()*2.6, rot:0, vr:0 });
+    }
+  }
+  function tickSparks(dt){
+    for(var i=sparks.length-1;i>=0;i--){
+      var p = sparks[i];
+      p.t += dt;
+      if(p.t >= p.life){ sparks.splice(i,1); continue; }
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      if(p.kind === 'snow'){ p.vy += 22 * dt; p.x += Math.sin((p.t + p.s)*4) * 10 * dt; }
+      else if(p.kind === 'confetti'){ p.vy += 150 * dt; p.vx *= (1 - 0.6*dt); p.rot += (p.vr || 0) * dt; }
+      else { p.vy += 320 * dt; }
+      if(p.rot !== undefined && p.kind !== 'confetti') p.rot += (p.vr || 0) * dt;
+    }
+  }
+  function drawSparks(){
+    if(!sparks.length) return;
+    sparks.forEach(function(p){
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - p.t / p.life);
+      ctx.fillStyle = p.c;
+      if(p.kind === 'snow'){
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.s * 0.7, 0, 6.29); ctx.fill();
+      } else if(p.kind === 'confetti'){
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0);
+        ctx.fillRect(-p.s/2, -p.s*0.28, p.s, p.s*0.56);
+      } else {
+        ctx.fillRect(p.x - p.s/2, p.y - p.s/2, p.s, p.s);
+      }
+      ctx.restore();
+    });
+  }
+  function awardStage(n){
+    level = n;
+    levelXP += stageXP(n);
+    runStages.push(n);
+    runStageXP += stageXP(n);
+    saveProgress();
+    renderAch();
+    renderStages();
+    showStageBanner(n === 10 ? 'The moon reached! +120 XP' : 'Stage ' + n + ' reached! +' + stageXP(n) + ' XP');
+    if(sfx.stageChime) sfx.stageChime(); else sfx.unlock();
+    spawnSparks();
+    spawnSnowBurst();
+    spawnConfetti();
+  }
+  function checkStageAwards(){
+    while(level < 9 && dist >= STAGE_AT[level]) awardStage(level + 1);
+    if(level === 9 && dist >= MOON_DIST) awardStage(10);
+  }
+  /* pseudo-3D projection, the way Dogecat's Very Run builds its
+     world ahead of the runner: ONE perspective factor drives the
+     ground line, the lane spread and every sprite's scale at
+     once (screen scale = focal / depth, screen x = lane offset x
+     scale, screen y = horizon + ground height / depth). An
+     object at the horizon (z = 0) sits at the vanishing point
+     with near-zero size, then grows NON-LINEARLY as it
+     approaches — slowly at first, faster and faster close up —
+     reaches full size at the player (z = 1) and keeps growing
+     past z = 1 until it slides off the bottom and side edges
+     (despawn at z = 1.28). Nothing ever pops in at full size.
+     A trail laid at equal steps in z reads on screen as items
+     equally spaced in world depth, shrinking and crowding
+     together toward the horizon */
+  function persp(z){
+    if(z <= 0) return 0;
+    return Math.pow(z, 1.7);
+  }
+  function laneX(lane, z){
+    return W/2 + (lane - 1) * LANE_OFF * persp(z);
+  }
+  function depthY(z){ return HORIZON + (TRACK_Y - HORIZON) * persp(z); }
+  function depthS(z){ return persp(z); }
+  /* streaming scenery depth: cycles 0..1.3 instead of 0..1, at
+     the same z rate as before, so trees, lamps, road blocks and
+     sidewalk seams travel PAST the player's ground line and
+     slide off the bottom / side edges before wrapping back to a
+     point at the horizon — they never vanish mid-screen */
+  function streamZ(i, n, off){
+    var f = (i/n + (off || 0) + scroll*0.55/1.3) % 1;
+    if(f < 0) f += 1;
+    return f * 1.3;
+  }
+  function sideWalkW(){ return TRK_BOT * 0.21; }
+
+  function heartsStr(){
+    var s = '';
+    for(var i=0;i<3;i++) s += (i < hearts) ? '❤️' : '🖤';
+    return s;
+  }
+  function updateHud(){
+    hudDist.textContent = Math.floor(dist);
+    hudHearts.textContent = heartsStr();
+    hudBest.textContent = Math.floor(best);
+    var nextB = stage >= 10 ? MOON_DIST : STAGE_AT[stage];
+    hudStage.textContent = 'Stage ' + stage + ' · ' + Math.floor(dist) + ' / ' + nextB + ' m';
+    var pct = rushing > 0 ? Math.round(rushing/6*100) : Math.round(rushMeter);
+    rushFill.style.width = pct + '%';
+    rushWrap.classList.toggle('rushing', rushing > 0);
+    rushLabel.textContent = rushing > 0 ? '⚡ RUSH! ⚡' : 'RUSH';
+  }
+  function setHudVisible(v){
+    hudIn.classList.toggle('hud-hidden', !v);
+    rushWrap.classList.toggle('hud-hidden', !v);
+  }
+
+  function resetRun(){
+    dist = 0; coinsRun = 0; chain = 0; bestChain = 0;
+    hearts = 3; shield = false;
+    stage = 1;
+    runStages = []; runStageXP = 0;
+    sparks = []; bannerQueue = [];
+    rushMeter = 0; rushing = 0; invincible = 0; runTime = 0;
+    ents = [];
+    spawnT = 1.1; powerT = 8;
+    lastSwitchAt = -10; perfectDone = false;
+    player.lane = 1; player.laneF = 1; player.jumpY = 0; player.vy = 0;
+    player.grounded = true; player.slideT = 0;
+    headPops = [];
+  }
+
+  function startGame(){
+    resetRun();
+    state = 'playing';
+    startOverlay.hidden = true;
+    overOverlay.hidden = true;
+    pauseOverlay.hidden = true;
+    setHudVisible(true);
+    updateHud();
+    unlock('first');
+    sfx.start();
+    startMusic();
+  }
+  function togglePause(){
+    if(state === 'playing'){
+      state = 'paused';
+      pauseOverlay.hidden = false;
+      setHudVisible(false);
+      sfx.click();
+    } else if(state === 'paused'){
+      state = 'playing';
+      pauseOverlay.hidden = true;
+      setHudVisible(true);
+      sfx.click();
+    }
+  }
+  function endRun(won){
+    state = won ? 'won' : 'over';
+    var isBest = dist > best;
+    if(isBest){ best = dist; saveProgress(); }
+    setHudVisible(false);
+    document.getElementById('overTitle').textContent = won ? 'You reached the moon! 🌕' : 'Game Over';
+    document.getElementById('overSub').textContent = won
+      ? 'Lofi slid all the way to the moon. What a rush!'
+      : 'Lofi ran out of hearts on the slope.';
+    document.getElementById('newBest').classList.toggle('show', isBest && dist >= 50);
+    document.getElementById('resDist').textContent = Math.floor(dist);
+    document.getElementById('resCoins').textContent = coinsRun;
+    document.getElementById('resBest').textContent = Math.floor(best);
+    if(runStages.length){
+      overStages.hidden = false;
+      overStages.textContent = 'Stages completed this run: ' + runStages.map(function(n){
+        return n === 10 ? 'Stage 10 · The moon' : 'Stage ' + n;
+      }).join(', ') + ' · +' + runStageXP + ' XP';
+    } else {
+      overStages.hidden = true;
+      overStages.textContent = '';
+    }
+    overOverlay.hidden = false;
+    if(won){ unlock('moon'); sfx.win(); }
+    else sfx.gameOver();
+    updateHud();
+  }
+
+  /* ---------- spawning ---------- */
+  function spawnWave(){
+    var r = Math.random();
+    if(powerT <= 0){
+      var kinds = ['star','shield','heart'];
+      var kind = kinds[Math.floor(Math.random()*kinds.length)];
+      if(kind === 'heart' && hearts >= 3) kind = 'star';
+      ents.push({ kind:kind, lane: Math.floor(Math.random()*3), z: -0.05, checked:false });
+      powerT = 11 + Math.random()*8;
+      return;
+    }
+    if(r < 0.34){
+      /* a line of coins in one lane */
+      var lane = Math.floor(Math.random()*3);
+      var n = 4 + Math.floor(Math.random()*3);
+      for(var i=0;i<n;i++) ents.push({ kind:'coin', lane:lane, z: -0.05 - i*0.085, checked:false });
+    } else if(r < 0.44){
+      /* coins zig-zag across two lanes */
+      var l0 = Math.floor(Math.random()*2);
+      for(var j=0;j<6;j++) ents.push({ kind:'coin', lane: l0 + (j>=3?1:0), z: -0.05 - j*0.085, checked:false });
+    } else {
+      /* obstacles: one lane early on, two lanes from stage 4
+         (900 m, the same distance the old map's stage 3 sat at).
+         The torii gates come in patterns, the way they stand in
+         Dogecat's Very Run: sometimes a single gate over one
+         lane, sometimes three side by side, one over each lane —
+         never one gate stretched across the whole road. And the
+         road itself carries things Lofi has to JUMP over: ice
+         blocks, log hurdles and snow barriers */
+      var types = ['block','arch','rock','log','barrier','snowmanP','snowmanR','snowrocks','signboard'];
+      var type = types[Math.floor(Math.random()*types.length)];
+      var ol = Math.floor(Math.random()*3);
+      if(type === 'arch'){
+        var triple = Math.random() < 0.5;
+        ents.push({ kind:'arch', lane:ol, lanes: triple ? [0,1,2] : [ol], z: -0.05, checked:false });
+        if(!triple && stage >= 4 && Math.random() < 0.4){
+          var gl2 = (ol + 1 + Math.floor(Math.random()*2)) % 3;
+          var gt2 = ['block','rock','log','barrier','snowmanP','snowmanR','snowrocks','signboard'][Math.floor(Math.random()*8)];
+          ents.push({ kind:gt2, lane:gl2, z: -0.05, checked:false });
+        }
+        /* a single gate leaves free lanes: sometimes a coin
+           line in one of them, as a hint */
+        if(!triple && Math.random() < 0.5){
+          var gfree = [0,1,2].filter(function(x){ return x !== ol; });
+          var gfl = gfree[Math.floor(Math.random()*gfree.length)];
+          for(var gk=0;gk<3;gk++) ents.push({ kind:'coin', lane:gfl, z: -0.28 - gk*0.085, checked:false });
+        }
+      } else {
+        ents.push({ kind:type, lane:ol, z: -0.05, checked:false });
+        if(stage >= 4 && Math.random() < 0.45){
+          var l2 = (ol + 1 + Math.floor(Math.random()*2)) % 3;
+          var t2 = types[Math.floor(Math.random()*types.length)];
+          if(t2 === 'arch') t2 = 'block';
+          ents.push({ kind:t2, lane:l2, z: -0.05, checked:false });
+        }
+        /* sometimes a coin line in the free lane, as a hint */
+        if(Math.random() < 0.5){
+          var free = [0,1,2].filter(function(x){ return x !== ol; });
+          var fl = free[Math.floor(Math.random()*free.length)];
+          for(var k=0;k<3;k++) ents.push({ kind:'coin', lane:fl, z: -0.28 - k*0.085, checked:false });
+        }
+      }
+    }
+  }
+
+  /* ---------- actions ---------- */
+  function doSwitch(dir){
+    if(state !== 'playing') return;
+    var nl = Math.max(0, Math.min(2, player.lane + dir));
+    if(nl !== player.lane){
+      player.lane = nl;
+      lastSwitchAt = runTime;
+      sfx.switchS();
+    }
+  }
+  function doJump(){
+    if(state !== 'playing') return;
+    if(player.grounded){
+      player.vy = 900;
+      player.grounded = false;
+      player.slideT = 0;
+      sfx.jump();
+    }
+  }
+  function doSlide(){
+    if(state !== 'playing') return;
+    if(!player.grounded){
+      player.vy = Math.min(player.vy, -1100); /* slam down into the slide */
+    }
+    if(player.slideT <= 0) sfx.slide();
+    player.slideT = 0.62;
+  }
+
+  function addRush(n){
+    if(rushing > 0) return;
+    rushMeter += n;
+    if(rushMeter >= 100){
+      rushMeter = 100;
+      rushing = 6;
+      sfx.rush();
+      if(tipsOn) spawnHeadPop('RUSH!');
+      toast('⚡ <b>RUSH mode!</b> Fast and untouchable for 6 seconds.');
+    }
+  }
+
+  function hitObstacle(ent){
+    if(rushing > 0){
+      /* smash straight through in RUSH mode */
+      coinsRun += 2;
+      if(tipsOn) spawnHeadPop('Smash!');
+      sfx.perfect();
+      return;
+    }
+    if(invincible > 0) return;
+    if(shield){
+      shield = false;
+      invincible = 1.2;
+      chain = 0;
+      sfx.shieldBreak();
+      if(tipsOn) spawnHeadPop('Shield gone!');
+      updateHud();
+      return;
+    }
+    hearts--;
+    chain = 0;
+    rushMeter = Math.floor(rushMeter/2);
+    invincible = 1.5;
+    sfx.crash();
+    updateHud();
+    if(hearts <= 0){ endRun(false); }
+  }
+
+  function collect(ent){
+    if(ent.kind === 'coin'){
+      coinsRun += (rushing > 0 ? 2 : 1);
+      chain++;
+      if(chain > bestChain) bestChain = chain;
+      addRush(4);
+      sfx.coin(chain);
+      if(chain === 10) unlock('chain');
+      if(chain > 0 && chain % 10 === 0 && tipsOn) spawnHeadPop(chain + ' chain!');
+    } else if(ent.kind === 'heart'){
+      if(hearts < 3){ hearts++; if(tipsOn) spawnHeadPop('+1 heart'); }
+      else coinsRun += 5;
+      sfx.power();
+    } else if(ent.kind === 'shield'){
+      shield = true;
+      if(tipsOn) spawnHeadPop('Shield!');
+      sfx.power();
+    } else if(ent.kind === 'star'){
+      addRush(34);
+      if(tipsOn) spawnHeadPop('+Rush!');
+      sfx.power();
+    }
+    updateHud();
+  }
+
+  function isObstacle(k){ return k === 'block' || k === 'arch' || k === 'rock' || k === 'log' || k === 'barrier' || k === 'snowmanP' || k === 'snowmanR' || k === 'snowrocks' || k === 'signboard'; }
+  function obstacleHits(ent){
+    if(ent.kind === 'block' || ent.kind === 'log' || ent.kind === 'barrier' || ent.kind === 'snowmanP' || ent.kind === 'snowmanR' || ent.kind === 'snowrocks' || ent.kind === 'signboard') return player.jumpY < 46;
+    if(ent.kind === 'arch') return player.slideT <= 0;
+    return true; /* rock: only a lane switch avoids it */
+  }
+
+  /* ---------- update ---------- */
+  function update(dt){
+    tickHeadPops(dt, true);
+    tickSparks(dt);
+    if(state !== 'playing') return;
+    runTime += dt;
+    var speedK = rushing > 0 ? 1.38 : 1;
+    /* difficulty ramps across the ten stages on the same curve
+       the old five-stage map used: each factor below reaches
+       exactly its old stage-5 value at stage 10 */
+    dist += (9.5 + (stage-1)*0.67) * speedK * dt;
+    scroll += dt * (0.32 + (stage-1)*0.016) * speedK;
+
+    var ns = stageFor(dist);
+    if(ns !== stage) stage = ns;
+    if(stage >= 3) unlock('stage3');
+    checkStageAwards();
+    if(dist >= MOON_DIST){ dist = MOON_DIST; updateHud(); endRun(true); return; }
+
+    if(rushing > 0){
+      rushing -= dt;
+      if(rushing <= 0){ rushing = 0; rushMeter = 0; }
+    }
+    if(invincible > 0) invincible -= dt;
+    powerT -= dt;
+
+    /* player motion */
+    player.laneF += (player.lane - player.laneF) * Math.min(1, dt*11);
+    if(Math.abs(player.lane - player.laneF) < 0.01) player.laneF = player.lane;
+    if(!player.grounded){
+      player.jumpY += player.vy * dt;
+      player.vy -= 2500 * dt;
+      if(player.jumpY <= 0){ player.jumpY = 0; player.grounded = true; player.vy = 0; }
+    }
+    if(player.slideT > 0) player.slideT -= dt;
+    player.runPhase += dt * (10 + stage);
+
+    /* spawns + entities */
+    spawnT -= dt;
+    if(spawnT <= 0){
+      spawnWave();
+      spawnT = Math.max(0.62, 1.15 - (stage-1)*0.049) + Math.random()*0.35;
+      if(rushing > 0) spawnT *= 0.8;
+    }
+    var zSpeed = (0.335 + (stage-1)*0.014) * speedK;
+    for(var i=ents.length-1;i>=0;i--){
+      var e = ents[i];
+      e.z += zSpeed * dt;
+      if(e.z > 1.28){ ents.splice(i,1); continue; }
+      if(!e.checked && e.z >= 0.93){
+        e.checked = true;
+        /* a gate row can cover one lane or all three: Lofi is
+           "in" the gate if his lane has a gate standing in it */
+        var sameLane = (e.kind === 'arch' && e.lanes)
+          ? e.lanes.some(function(gl){ return Math.abs(gl - player.laneF) < 0.5; })
+          : Math.abs(e.lane - player.laneF) < 0.5;
+        if(isObstacle(e.kind)){
+          if(sameLane){
+            if(obstacleHits(e)) hitObstacle(e);
+            /* cleared it in the same lane: no dodge credit */
+          } else {
+            /* dodged: a late lane switch makes it Perfect */
+            if(runTime - lastSwitchAt < 0.9){
+              addRush(12);
+              sfx.perfect();
+              if(tipsOn) spawnHeadPop('Perfect!');
+              if(!perfectDone){ perfectDone = true; unlock('perfect'); }
+            }
+          }
+        } else if(sameLane){
+          collect(e);
+          ents.splice(i,1);
+          continue;
+        }
+      }
+      if(state !== 'playing') return; /* a hit may have ended the run */
+    }
+    updateHud();
+  }
+
+  /* ---------- drawing ---------- */
+  var stars = [], snow = [];
+  function seedSky(){
+    stars = [];
+    /* each star carries a fixed direction (dx, dy) out of the
+       sky's vanishing point and a staggered cycle offset: the
+       stars travel FRONT-TO-FRONT, expanding radially away
+       from the vanishing point as the run advances, never
+       drifting sideways (see drawBackground) */
+    for(var si=0; si<70; si++){
+      var sdx = hash(si*3+1)*2 - 1, sdy = hash(si*7+2)*2 - 1;
+      if(Math.sqrt(sdx*sdx + sdy*sdy) < 0.3){ sdx = sdx < 0 ? -0.55 : 0.55; sdy = sdy < 0 ? -0.4 : 0.4; }
+      stars.push({ dx: sdx, dy: sdy, off: hash(si*23+4), r: 0.8 + hash(si*13)*1.4, ph: hash(si*17)*6.28 });
+    }
+    snow = [];
+    for(var fi=0; fi<36; fi++) snow.push({ x: hash(fi*3+40)*W, y: hash(fi*7+9)*H, r: 1 + hash(fi*5)*1.8, s: 14 + hash(fi*11)*26, ph: hash(fi*13)*6.28 });
+  }
+  seedSky();
+
+  function drawPine(x, y, s, tone){
+    ctx.fillStyle = tone;
+    ctx.beginPath();
+    ctx.moveTo(x, y - 64*s);
+    ctx.lineTo(x + 20*s, y - 26*s);
+    ctx.lineTo(x + 9*s, y - 26*s);
+    ctx.lineTo(x + 24*s, y);
+    ctx.lineTo(x - 24*s, y);
+    ctx.lineTo(x - 9*s, y - 26*s);
+    ctx.lineTo(x - 20*s, y - 26*s);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.beginPath();
+    ctx.moveTo(x, y - 64*s);
+    ctx.lineTo(x + 10*s, y - 44*s);
+    ctx.lineTo(x - 10*s, y - 44*s);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#5b4232';
+    ctx.fillRect(x - 2.5*s, y, 5*s, 7*s);
+  }
+
+  function drawBackground(t){
+    /* the sky is DRAWN IN CODE, in PIXEL ART style like the
+       pixel road below, composed the way the sky sits in
+       Dogecat's Very Run: one big, deliberate sky filling the
+       whole band above the horizon (which sits low, near
+       two-fifths of the frame) — but now built entirely from
+       hard-edged squares on one shared pixel grid: a STEPPED,
+       banded gradient (flat colour bands with a one-pixel
+       dither row at each seam, no smooth blending), pixel
+       stars, a blocky PIXEL MOON with square craters and a
+       stepped pixel halo, and BLOCKY PIXEL CLOUDS made of
+       stacked rectangles. The composition is unchanged: the
+       deep blue crown steps down through pale ice blue into
+       a warm dawn band resting right on the horizon, so the
+       sky, the moon, the mountains and the snowfield still
+       read as one picture through the mist below */
+    var skyH = HORIZON + 46;
+    var PX = Math.max(6, Math.round(7 * KX));
+    function snap(v){ return Math.round(v / PX) * PX; }
+    /* stepped / banded pixel gradient: flat bands, each an
+       exact number of pixels tall, with a checker dither row
+       at every seam so the step reads as pixel art */
+    /* day-night shift: every sky band blends smoothly from
+       its day colour to its night colour as nightK() rises
+       toward the moon, so the run slides from dawn into
+       dusk and night while the banded pixel steps stay */
+    var nk = nightK();
+    var dayBands = ['#2e56a3','#3d6fb8','#4d7fc2','#5f90cc','#79a9dd','#8db9e2','#a4c9ec','#b9d9f2','#cfe4f0','#e8ddc4','#f2d3ac','#f7d9b8'];
+    var nightBands = ['#04081f','#060f30','#081740','#0a1e4c','#0d2658','#122e63','#18376d','#1f4176','#2a4c7e','#3a587f','#485f80','#55647e'];
+    var bands = dayBands.map(function(c, bi2){ return lerpHex(c, nightBands[bi2], nk); });
+    var bandH = skyH / bands.length;
+    for(var bi=0; bi<bands.length; bi++){
+      var by = Math.floor(bi * bandH);
+      var bh = Math.ceil(bandH) + 1;
+      if(by >= skyH) break;
+      ctx.fillStyle = bands[bi];
+      ctx.fillRect(0, by, W, Math.min(bh, skyH - by));
+      if(bi + 1 < bands.length && by + bh < skyH){
+        ctx.fillStyle = bands[bi + 1];
+        for(var dx = (bi % 2) * PX; dx < W; dx += PX * 2){
+          ctx.fillRect(dx, by + bh - PX - 1, PX, PX);
+        }
+      }
+    }
+    /* pixel stars in the crown of the sky: single squares and
+       tiny plus shapes snapped to the grid, fading out as
+       they near the bright horizon band. FRONT-TO-FRONT SKY
+       MOTION: the stars do NOT drift sideways. Each star
+       rides the same pseudo-3D projection as the road
+       objects — it is born tiny at the sky's vanishing
+       point (the centre of the sky band, on the horizon's
+       vertical axis) and travels head-on toward the viewer
+       along its own fixed direction out of that point,
+       spreading outward and growing very slightly as its
+       cycle advances. The cycle is driven by dist, the
+       metres Lofi has actually run, at a tiny rate (the
+       stars are the farthest thing in the world, so their
+       head-on approach is by far the slowest), and it
+       freezes when the run pauses or ends. A star that
+       reaches the edge of its travel fades and respawns
+       tiny at the vanishing point */
+    var skyVX = W/2, skyVY = STAR_H * 0.52;
+    stars.forEach(function(st){
+      var zStar = st.off + dist * (reduced ? 0.00007 : 0.00022);
+      zStar = zStar - Math.floor(zStar);
+      var pStar = Math.pow(zStar, 1.7);
+      var sxRaw = skyVX + st.dx * pStar * W * 0.54;
+      var syRaw = skyVY + st.dy * pStar * STAR_H * 0.62;
+      if(sxRaw < -12 || sxRaw > W + 12 || syRaw < -12 || syRaw > STAR_H + 12) return;
+      var fade = 1 - Math.max(0, syRaw) / Math.max(1, STAR_H);
+      if(fade <= 0) return;
+      var fadeIn = Math.min(1, pStar * 7 + 0.12);
+      var tw = reduced ? 0.75 : 0.55 + 0.45 * Math.sin(t * 1.7 + st.ph);
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.62 * fade * fadeIn * tw * (0.5 + 0.8 * nk)).toFixed(3) + ')';
+      var sx = snap(sxRaw), sy = snap(syRaw), ss2 = Math.max(3, Math.round(PX * 0.55 * (0.65 + 0.6 * pStar)));
+      ctx.fillRect(sx, sy, ss2, ss2);
+      if(st.r > 1.55){
+        ctx.fillRect(sx - ss2, sy, ss2, ss2);
+        ctx.fillRect(sx + ss2, sy, ss2, ss2);
+        ctx.fillRect(sx, sy - ss2, ss2, ss2);
+        ctx.fillRect(sx, sy + ss2, ss2, ss2);
+      }
+    });
+    /* the PIXEL MOON: it grows as Lofi closes the 3,000 m,
+       drawn square by square on the pixel grid — a stepped
+       blocky disc, a two-step square halo instead of a smooth
+       glow, and blocky square craters */
+    var prog = Math.min(1, dist / MOON_DIST);
+    var mr = 30 + prog*30 + stageK()*7 + (state === 'won' ? 26 : 0);
+    var mx = snap(W/2), my = snap(MOON_Y - prog*14);
+    var MPX = Math.max(4, Math.round(PX * 0.8));
+    function pixelDisc(cx, cy, rad, step, col){
+      ctx.fillStyle = col;
+      for(var gy = cy - rad; gy < cy + rad; gy += step){
+        for(var gx = cx - rad; gx < cx + rad; gx += step){
+          var ddx = gx + step/2 - cx, ddy = gy + step/2 - cy;
+          if(ddx*ddx + ddy*ddy <= rad*rad) ctx.fillRect(gx, gy, step, step);
+        }
+      }
+    }
+    /* soft pre-rendered glow behind the moon (no shadowBlur) */
+    ctx.save(); ctx.globalAlpha = 0.55 + 0.35 * nk; drawGlowSprite(glowMoon, mx, my, mr * 4.6); ctx.restore();
+    /* the moon's halo strengthens as night falls, so the
+       moon reads brighter and brighter through the late stages */
+    pixelDisc(mx, my, mr * 2.05, MPX * 2, 'rgba(255,240,190,' + (0.10 + 0.16 * nk).toFixed(3) + ')');
+    pixelDisc(mx, my, mr * 1.5, MPX * 2, 'rgba(255,240,190,' + (0.14 + 0.18 * nk).toFixed(3) + ')');
+    pixelDisc(mx, my, mr, MPX, '#fdf3d0');
+    /* moon shading: blocky darker squares along the lower
+       right rim, and square craters */
+    (function(){
+      for(var gy2 = my - mr; gy2 < my + mr; gy2 += MPX){
+        for(var gx2 = mx - mr; gx2 < mx + mr; gx2 += MPX){
+          var ex = gx2 + MPX/2 - mx, ey = gy2 + MPX/2 - my;
+          var dd = Math.sqrt(ex*ex + ey*ey);
+          if(dd <= mr && dd > mr * 0.84 && ex + ey > mr * 0.35){
+            ctx.fillStyle = '#ecd9a0';
+            ctx.fillRect(gx2, gy2, MPX, MPX);
+          }
+        }
+      }
+      ctx.fillStyle = '#d6c08c';
+      [[-0.30,-0.20,2],[0.25,0.30,2],[0.05,-0.45,1],[-0.45,0.35,1],[0.38,-0.12,1]].forEach(function(c){
+        var cw = c[2] * MPX;
+        ctx.fillRect(snap(mx + c[0]*mr) - MPX, snap(my + c[1]*mr) - MPX, cw, cw);
+        ctx.fillRect(snap(mx + c[0]*mr) - MPX, snap(my + c[1]*mr), cw, MPX);
+      });
+    })();
+    /* BLOCKY PIXEL CLOUDS drawn in code: stacked hard-edged
+       rectangles on the pixel grid, their undersides tinted
+       with the dawn colour in a stepped pixel row so they
+       sit IN the sky instead of pasted on it. Each pattern
+       is a set of [dx, dy, w, h] blocks in pixel units.
+       FRONT-TO-FRONT SKY MOTION: the clouds do NOT drift
+       sideways across the sky. Each cloud rides the SAME
+       pseudo-3D projection as the road objects (persp(z) =
+       z^1.7, scale growing with the projection): it spawns
+       TINY at the horizon, at the sky's vanishing point in
+       the centre of the sky band, and comes head-on toward
+       the camera — growing steadily, and travelling down
+       and outward (or up and outward, for the clouds whose
+       fixed direction out of the vanishing point points
+       up) along its own fixed radial direction, exactly
+       the way the road objects below the horizon travel
+       down and outward from the same axis. The cycle is
+       driven by dist, the metres Lofi has actually run, so
+       the clouds only approach while he runs, approach
+       faster as his speed rises through the stages and in
+       RUSH, and freeze with him on pause; they move far
+       slower than the road (true parallax: the sky is far
+       away), each cloud at its own depth rate. A cloud
+       that reaches full size fades out and a new one
+       spawns tiny at the vanishing point in its place. A
+       whisper of ambient advance keeps the start screen's
+       sky from looking frozen; once the run starts the
+       distance-driven approach takes over */
+    var cloudPats = [
+      [[-5,0,10,2],[-4,-1,7,1],[-2,-2,4,1],[3,1,4,1],[-6,1,3,1]],
+      [[-4,0,9,2],[-3,-1,6,1],[-1,-2,3,1],[4,1,3,1]],
+      [[-6,0,11,2],[-5,-1,8,1],[-3,-2,5,1],[0,-3,3,1],[5,1,4,1],[-7,1,2,1]]
+    ];
+    var cloudVX = W/2, cloudVY = HORIZON * 0.48;
+    for(var ci=0; ci<6; ci++){
+      var cloudDepth = 0.7 + hash(ci*19+11) * 0.6;
+      var cdx = hash(ci*29+7)*2 - 1;
+      if(Math.abs(cdx) < 0.28) cdx = cdx < 0 ? -0.34 : 0.34;
+      var cdy = hash(ci*31+13) * 1.35 - 0.5;
+      if(Math.abs(cdy) < 0.18) cdy = cdy < 0 ? -0.22 : 0.22;
+      var zCloud = hash(ci*7+3) + dist * 0.0055 * cloudDepth * (reduced ? 0.35 : 1) + (reduced ? 0 : t * 0.0022 * cloudDepth);
+      zCloud = zCloud - Math.floor(zCloud);
+      var pCloud = Math.pow(zCloud, 1.7);
+      if(pCloud < 0.012) continue;
+      var cxx = snap(cloudVX + cdx * pCloud * W * 0.58);
+      var cyy = snap(cloudVY + cdy * pCloud * HORIZON * 0.58);
+      var CPX = Math.max(2, Math.round(PX * (0.5 + hash(ci*17+9)*0.5) * (0.3 + pCloud * 1.5)));
+      var pat = cloudPats[ci % cloudPats.length];
+      var cloudAlpha = Math.min(1, pCloud * 5) * (zCloud > 0.9 ? Math.max(0, (1 - zCloud) / 0.1) : 1) * (1 - 0.3 * nk);
+      ctx.save();
+      ctx.globalAlpha = cloudAlpha;
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      pat.forEach(function(p){
+        ctx.fillRect(cxx + p[0]*CPX, cyy + p[1]*CPX, p[2]*CPX, p[3]*CPX);
+      });
+      /* stepped dawn-tinted underside: one pixel row under
+         the cloud's base blocks, offset like pixel shading */
+      ctx.fillStyle = 'rgba(247,205,160,0.55)';
+      pat.forEach(function(p){
+        if(p[1] + p[3] === 2) ctx.fillRect(cxx + p[0]*CPX + CPX, cyy + 2*CPX, Math.max(CPX, p[2]*CPX - CPX*2), CPX);
+      });
+      /* a darker stepped top shade on the highest blocks */
+      ctx.fillStyle = 'rgba(169,199,232,0.55)';
+      pat.forEach(function(p){
+        if(p[1] <= -2) ctx.fillRect(cxx + p[0]*CPX, cyy + p[1]*CPX, p[2]*CPX, CPX);
+      });
+      ctx.restore();
+    }
+    /* snowfield */
+    var gnd = ctx.createLinearGradient(0,HORIZON,0,H);
+    gnd.addColorStop(0, lerpHex('#cfe4f7', '#7d97bd', nk * 0.85));
+    gnd.addColorStop(0.25, lerpHex('#dceefc', '#8ba3c2', nk * 0.85));
+    gnd.addColorStop(1, lerpHex('#eef7ff', '#9db1cb', nk * 0.85));
+    ctx.fillStyle = gnd; ctx.fillRect(0,HORIZON,W,H-HORIZON);
+    /* snow mountains cut from the same photo, standing along
+       BOTH sides of the road at the horizon */
+    drawMountainSide(mtnLPic, false);
+    drawMountainSide(mtnRPic, true);
+    /* a breath of mist along the horizon line, softening the
+       seam where the sky, the mountains and the snowfield meet,
+       so the whole top of the scene blends as one picture */
+    var mist = ctx.createLinearGradient(0, HORIZON - 30, 0, HORIZON + 34);
+    mist.addColorStop(0, 'rgba(255,255,255,0)');
+    mist.addColorStop(0.55, 'rgba(255,255,255,0.34)');
+    mist.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = mist;
+    ctx.fillRect(0, HORIZON - 30, W, 64);
+  }
+
+  function drawMountainSide(pic, right){
+    if(!pic.ready) return;
+    var iw = pic.img.naturalWidth, ih = pic.img.naturalHeight;
+    var h = HORIZON * (right ? 0.84 : 0.68);
+    var w = h * iw / ih;
+    if(w > W * 0.62){ w = W * 0.62; h = w * ih / iw; }
+    var x = right ? W - w + 8 : -8;
+    ctx.drawImage(pic.img, x, HORIZON + 12 - h, w, h);
+  }
+
+  function trackHalfAt(y){
+    return TRK_TOP + (TRK_BOT - TRK_TOP) * ((y - HORIZON) / Math.max(1, H - HORIZON));
+  }
+
+  /* a soft contact shadow lying flat on the ground under
+     whatever stands there: every element on the road and
+     beside it casts one, so nothing floats */
+  function groundShadow(x, y, w, a){
+    ctx.fillStyle = 'rgba(16,44,86,' + a + ')';
+    ctx.beginPath();
+    ctx.ellipse(x, y, w, Math.max(2, w*0.16), 0, 0, 6.29);
+    ctx.fill();
+  }
+
+  /* streaming SIDEWALK TILES on both sides of the road, the
+     strips that carry the continuous forward motion in Very
+     Run: grey-blue tiled strips whose longitudinal seams
+     converge to the vanishing point, and whose transverse seams
+     start as a thin line at the horizon, stream down toward the
+     camera, and get progressively farther apart and larger
+     until they exit off the bottom edge */
+  function drawSidewalks(){
+    var sideW = sideWalkW();
+    /* the depth where the ground line reaches the bottom edge */
+    var pBot = (H - HORIZON) / Math.max(1, TRACK_Y - HORIZON);
+    var zBot = Math.pow(pBot, 1/1.7);
+    [-1, 1].forEach(function(side){
+      function pt(z, f){
+        var y = depthY(z), p = persp(z);
+        return [W/2 + side * (trackHalfAt(y) + f * sideW * p), y];
+      }
+      function quad(z1, z2, f1, f2, col){
+        var a = pt(z1, f1), b = pt(z1, f2), c = pt(z2, f2), d = pt(z2, f1);
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+        ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]);
+        ctx.closePath(); ctx.fill();
+      }
+      /* tiled surface: transverse bounds streaming from the
+         horizon, alternating tile tint between seams */
+      var zs = [];
+      for(var k=0;k<7;k++) zs.push(streamZ(k, 7, 0));
+      zs.sort(function(a,b){ return a - b; });
+      var bounds = [0].concat(zs);
+      bounds.push(zs[0] + 1.3);
+      for(var m=0;m<bounds.length - 1;m++){
+        var z1 = bounds[m], z2 = Math.min(bounds[m+1], zBot);
+        if(z1 >= zBot) continue;
+        quad(z1, z2, 0, 1, m % 2 === 0 ? '#8ea6c2' : '#829cb9');
+      }
+      /* transverse seams: thin at the horizon, bolder as they
+         approach, exiting off the bottom edge */
+      ctx.strokeStyle = 'rgba(64,94,134,0.65)';
+      zs.forEach(function(z){
+        if(z >= zBot || z <= 0.01) return;
+        var a = pt(z, 0), b = pt(z, 1);
+        ctx.lineWidth = Math.max(1, 3.2 * persp(z));
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      });
+      /* longitudinal seams converging to the vanishing point */
+      ctx.strokeStyle = 'rgba(64,94,134,0.5)';
+      ctx.lineWidth = 2;
+      [0.35, 0.7].forEach(function(f){
+        var a = pt(0.02, f), b = pt(zBot, f);
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      });
+      /* the strip's outer edge */
+      ctx.strokeStyle = '#5f7b9c';
+      ctx.lineWidth = 3;
+      var oa = pt(0.02, 1), ob = pt(zBot, 1);
+      ctx.beginPath(); ctx.moveTo(oa[0], oa[1]); ctx.lineTo(ob[0], ob[1]); ctx.stroke();
+    });
+  }
+
+  function drawTrack(t){
+    /* the track's own soft shadow on the snowfield: the same
+       trapezoid dropped a few pixels down and to the side,
+       blurred into the snow, so the road sits IN the field
+       instead of floating over it */
+    ctx.beginPath();
+    ctx.moveTo(W/2 - TRK_TOP - 7, HORIZON + 8);
+    ctx.lineTo(W/2 + TRK_TOP + 7, HORIZON + 8);
+    ctx.lineTo(W/2 + TRK_BOT + 18, H);
+    ctx.lineTo(W/2 - TRK_BOT - 18, H);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(38,84,150,0.20)';
+    ctx.fill();
+    /* the streaming sidewalk tiles on both sides of the road */
+    drawSidewalks();
+    /* the ice track trapezoid */
+    ctx.beginPath();
+    ctx.moveTo(W/2 - TRK_TOP, HORIZON);
+    ctx.lineTo(W/2 + TRK_TOP, HORIZON);
+    ctx.lineTo(W/2 + TRK_BOT, H);
+    ctx.lineTo(W/2 - TRK_BOT, H);
+    ctx.closePath();
+    var tr = ctx.createLinearGradient(0,HORIZON,0,H);
+    var tnk = nightK();
+    tr.addColorStop(0, lerpHex('#9fc6ea', '#6488b8', tnk * 0.8));
+    tr.addColorStop(1, lerpHex('#cfe9fc', '#8fb0d4', tnk * 0.8));
+    ctx.fillStyle = tr; ctx.fill();
+    /* pixel-art road surface: chunky ice blocks in two tones
+       streaming toward the player — the road itself stays drawn
+       in code, pixel style, never a photo */
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(W/2 - TRK_TOP, HORIZON);
+    ctx.lineTo(W/2 + TRK_TOP, HORIZON);
+    ctx.lineTo(W/2 + TRK_BOT, H);
+    ctx.lineTo(W/2 - TRK_BOT, H);
+    ctx.closePath(); ctx.clip();
+    for(var pr=0; pr<9; pr++){
+      var pz = streamZ(pr, 9, 0);
+      var py = depthY(pz), ps = depthS(pz);
+      var pbh = Math.max(3, 16*ps), pbw = Math.max(7, 19*ps);
+      var phw = trackHalfAt(py);
+      var pOff = (pr % 2) * pbw * 0.5, pCol = 0;
+      for(var px = W/2 - phw - pOff; px < W/2 + phw; px += pbw, pCol++){
+        ctx.fillStyle = ((pCol + pr) % 2 === 0) ? 'rgba(255,255,255,0.10)' : 'rgba(38,96,168,0.09)';
+        ctx.fillRect(px, py, pbw - 1.5, pbh);
+      }
+    }
+    ctx.restore();
+    /* lane lines, streaming toward the player */
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    [-0.5, 0.5].forEach(function(off){
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(W/2 + off*LINE_TOP, HORIZON);
+      ctx.lineTo(W/2 + off*LINE_BOT, H);
+      ctx.stroke();
+    });
+    /* speed dashes down the middle of each lane */
+    ctx.fillStyle = 'rgba(70,140,210,0.35)';
+    for(var lane=0; lane<3; lane++){
+      for(var k=0;k<5;k++){
+        var z = streamZ(k, 5, lane*0.13);
+        var y = depthY(z), x = laneX(lane, z), s = depthS(z);
+        ctx.fillRect(x - 3*s, y, 6*s, 26*s);
+      }
+    }
+    /* track edges */
+    ctx.strokeStyle = '#5b93cc'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(W/2 - TRK_TOP, HORIZON); ctx.lineTo(W/2 - TRK_BOT, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W/2 + TRK_TOP, HORIZON); ctx.lineTo(W/2 + TRK_BOT, H); ctx.stroke();
+    /* snowy pines cut from Archer's photo, streaming past on the
+       snowfield BESIDE the track: each one is anchored outside
+       the track's edge at its own depth, so no tree ever stands
+       on the road itself */
+    for(var i=0;i<10;i++){
+      var zz = streamZ(i, 10, 0);
+      var yy = depthY(zz), ss = depthS(zz);
+      var side = i % 2 === 0 ? -1 : 1;
+      var pic = pinePics[i % pinePics.length];
+      var edge = trackHalfAt(yy);
+      if(pic.ready){
+        var tw = 104 * ss * (0.85 + hash(i*31)*0.35);
+        var th = tw * pic.img.naturalHeight / pic.img.naturalWidth;
+        var tx = W/2 + side * (edge + sideWalkW()*ss + tw*0.52 + 12*ss);
+        if(tx + tw/2 > -24 && tx - tw/2 < W + 24){
+          groundShadow(tx, yy + 10*ss, tw*0.42, 0.20);
+          ctx.drawImage(pic.img, tx - tw/2, yy + 10*ss - th, tw, th);
+        }
+      } else {
+        drawPine(W/2 + side * (edge + sideWalkW()*ss + 34*ss), yy + 6, ss*0.95, i%3===0 ? '#2e6b52' : '#35795c');
+      }
+    }
+    /* Archer's two lamps standing along the SIDES of the road,
+       streaming past with the pines on their own rhythm: the
+       wooden post with its warm hanging lantern, and the blue
+       glowing stone lantern, alternating down both sides. Like
+       the trees, each lamp is anchored outside the track's edge
+       at its own depth, so no lamp ever stands on the road */
+    for(var li=0; li<6; li++){
+      var lz = streamZ(li, 6, 0.37);
+      var ly = depthY(lz), ls = depthS(lz);
+      var lside = li % 2 === 0 ? -1 : 1;
+      var lpic = lampPics[(Math.floor(li/2) + (lside > 0 ? 1 : 0)) % lampPics.length];
+      if(!lpic.ready) continue;
+      var lh = (lpic === lampPics[0] ? 208 : 176) * ls;
+      var lw = lh * lpic.img.naturalWidth / lpic.img.naturalHeight;
+      var ledge = trackHalfAt(ly);
+      var lx = W/2 + lside * (ledge + Math.max(sideWalkW()*ls*0.55, lw*0.5 + 6*ls));
+      if(lx + lw/2 > -24 && lx - lw/2 < W + 24){
+        groundShadow(lx, ly + 10*ls, lw*0.44, 0.22);
+        ctx.drawImage(lpic.img, lx - lw/2, ly + 10*ls - lh, lw, lh);
+      }
+    }
+    /* stage gate near the horizon when a stage line is close */
+  }
+
+  function drawEnt(e, t){
+    if(e.z < 0.01) return; /* at the horizon the perspective scale is ~0: every entity grows in from the vanishing point */
+    var x = laneX(e.lane, e.z), y = depthY(e.z), s = depthS(e.z);
+    if(e.kind === 'coin'){
+      /* the coins are BIG now — fat golden discs you can spot
+         from the horizon, like the coins in Very Run */
+      var bob = reduced ? 0 : Math.sin(t*5 + e.z*20)*3*s;
+      groundShadow(x, y + 2, 17*s, 0.20);
+      drawGlowSprite(glowGold, x, y - 36*s + bob, 96*s);
+      ctx.save(); ctx.translate(x, y - 36*s + bob);
+      ctx.fillStyle = '#e8a812';
+      ctx.beginPath(); ctx.ellipse(0, 6*s, 24*s, 7*s, 0, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#ffc21f';
+      ctx.beginPath(); ctx.arc(0, 0, 22.5*s, 0, 6.29); ctx.fill();
+      ctx.lineWidth = 3.2*s; ctx.strokeStyle = '#b97e06'; ctx.stroke();
+      ctx.fillStyle = '#ffe9a3';
+      ctx.beginPath(); ctx.arc(0, 0, 13.5*s, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#b97e06';
+      ctx.font = '800 ' + Math.round(18.5*s) + 'px "Baloo 2", Arial, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('S', 0, 1);
+      ctx.restore();
+      return;
+    }
+    if(e.kind === 'heart' || e.kind === 'shield' || e.kind === 'star'){
+      var bob2 = reduced ? 0 : Math.sin(t*4 + e.lane)*4*s;
+      groundShadow(x, y + 2, 16*s, 0.20);
+      drawGlowSprite(glowCyan, x, y - 44*s + bob2, 92*s);
+      ctx.save(); ctx.translate(x, y - 44*s + bob2);
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.beginPath(); ctx.arc(0,0,21*s,0,6.29); ctx.fill();
+      ctx.lineWidth = 3*s; ctx.strokeStyle = '#002a7a'; ctx.stroke();
+      ctx.font = Math.round(24*s) + 'px -apple-system, Arial, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(e.kind === 'heart' ? '❤️' : (e.kind === 'shield' ? '🛡️' : '⭐'), 0, 2);
+      ctx.restore();
+      return;
+    }
+    if(e.kind === 'block'){
+      var w = 128*s, h = 60*s;
+      groundShadow(x, y + 2, 60*s, 0.26);
+      ctx.save(); ctx.translate(x, y);
+      var grd = ctx.createLinearGradient(0,-h,0,0);
+      grd.addColorStop(0,'#aee6ff'); grd.addColorStop(0.5,'#3ec1f7'); grd.addColorStop(1,'#0d8fe0');
+      ctx.fillStyle = grd;
+      roundRect(-w/2, -h, w, h, 8*s); ctx.fill();
+      ctx.lineWidth = 3.5*s; ctx.strokeStyle = '#002a7a'; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2*s;
+      ctx.beginPath();
+      ctx.moveTo(-w*0.3, -h*0.85); ctx.lineTo(-w*0.05, -h*0.4); ctx.lineTo(-w*0.22, -h*0.1);
+      ctx.moveTo(w*0.32, -h*0.9); ctx.lineTo(w*0.12, -h*0.45);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      roundRect(-w/2 + 4*s, -h, w - 8*s, 10*s, 5*s); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    if(e.kind === 'log'){
+      /* a fallen log lying across the lane on two stumps — one
+         of the things on the road Lofi has to JUMP over, the
+         way the carts and stalls block the road in Very Run */
+      var lw2 = 132*s, lh2 = 30*s, ltop = 52*s;
+      groundShadow(x, y + 2, 62*s, 0.26);
+      ctx.save(); ctx.translate(x, y);
+      ctx.fillStyle = '#6e4a26';
+      roundRect(-lw2*0.40, -ltop + lh2*0.4, 16*s, ltop - lh2*0.4, 3*s); ctx.fill();
+      roundRect(lw2*0.40 - 16*s, -ltop + lh2*0.4, 16*s, ltop - lh2*0.4, 3*s); ctx.fill();
+      var lg = ctx.createLinearGradient(0, -ltop, 0, -ltop + lh2);
+      lg.addColorStop(0, '#a4713a'); lg.addColorStop(0.55, '#8a5a2b'); lg.addColorStop(1, '#6e4520');
+      ctx.fillStyle = lg;
+      roundRect(-lw2/2, -ltop, lw2, lh2, lh2/2); ctx.fill();
+      ctx.lineWidth = 3*s; ctx.strokeStyle = '#4a2f14'; ctx.stroke();
+      ctx.fillStyle = '#d9b380';
+      ctx.beginPath(); ctx.ellipse(-lw2/2 + 5*s, -ltop + lh2/2, 5.5*s, lh2*0.36, 0, 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(lw2/2 - 5*s, -ltop + lh2/2, 5.5*s, lh2*0.36, 0, 0, 6.29); ctx.fill();
+      ctx.strokeStyle = '#8a5a2b'; ctx.lineWidth = 1.6*s;
+      ctx.beginPath(); ctx.ellipse(-lw2/2 + 5*s, -ltop + lh2/2, 2.6*s, lh2*0.18, 0, 0, 6.29); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(lw2/2 - 5*s, -ltop + lh2/2, 2.6*s, lh2*0.18, 0, 0, 6.29); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(0, -ltop + 3*s, lw2*0.42, 6*s, 0, 0, 6.29); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    if(e.kind === 'barrier'){
+      /* a striped snow barrier standing in the lane — jump it */
+      var bw2 = 126*s, bh2 = 56*s;
+      groundShadow(x, y + 2, 58*s, 0.26);
+      ctx.save(); ctx.translate(x, y);
+      ctx.fillStyle = '#7a4a21';
+      roundRect(-bw2*0.38, -bh2*0.34, 11*s, bh2*0.34, 3*s); ctx.fill();
+      roundRect(bw2*0.38 - 11*s, -bh2*0.34, 11*s, bh2*0.34, 3*s); ctx.fill();
+      ctx.fillStyle = '#f4f7fa';
+      roundRect(-bw2/2, -bh2, bw2, bh2*0.66, 6*s); ctx.fill();
+      ctx.save();
+      roundRect(-bw2/2, -bh2, bw2, bh2*0.66, 6*s); ctx.clip();
+      ctx.fillStyle = '#d63a2e';
+      for(var bs = -1; bs < 4; bs++){
+        var bx = -bw2/2 + bs*bw2*0.28;
+        ctx.beginPath();
+        ctx.moveTo(bx, -bh2*0.34); ctx.lineTo(bx + bw2*0.14, -bh2*0.34);
+        ctx.lineTo(bx + bw2*0.30, -bh2); ctx.lineTo(bx + bw2*0.16, -bh2);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+      ctx.lineWidth = 3*s; ctx.strokeStyle = '#5b3a17';
+      roundRect(-bw2/2, -bh2, bw2, bh2*0.66, 6*s); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      roundRect(-bw2/2 + 3*s, -bh2 - 2*s, bw2 - 6*s, 9*s, 4*s); ctx.fill();
+      ctx.restore();
+      return;
+    }
+    if(e.kind === 'arch'){
+      /* the torii gates, in the pattern of Dogecat's Very Run:
+         sometimes THREE side by side, one over each lane,
+         sometimes a SINGLE gate over one lane — never one gate
+         stretched across the whole road. Each gate is drawn in
+         code in the shape of Archer's photo (that photo carries
+         a watermark, so it is never embedded): vermilion pillars
+         and crossbeams under a black curved tile roof, with a
+         small dark plaque. Every gate is TALL for its width:
+         it rises from its lane far up into the sky band, so a
+         gate down the road stands against the sky and the moon
+         and is easy to see coming, and gates further down the
+         road recede toward the horizon. The low crossbeam stays
+         at the same duck-under height it has always been, so
+         Lofi still slides underneath it exactly as before */
+      var gateLanes = e.lanes || [e.lane];
+      for(var gi=0; gi<gateLanes.length; gi++){
+      var cx = laneX(gateLanes[gi], e.z);
+      var gw = LANE_OFF * s * 1.04; /* exactly one lane wide at this depth (the lane spread uses the same perspective factor); in a row of three the neighbours nearly touch */
+      var gh = Math.max(gw * 1.5, 430 * s);   /* tall: the roof rises into the sky */
+      var post = Math.max(6*s, gw * 0.075);   /* pillar thickness */
+      var duckH = 112*s;                      /* underside of the low beam */
+      var beamT = Math.max(4*s, gh * 0.038);  /* crossbeam thickness */
+      ctx.save(); ctx.translate(cx, y);
+      var red = ctx.createLinearGradient(0, -gh, 0, 0);
+      red.addColorStop(0, '#e8563f'); red.addColorStop(1, '#c03322');
+      var dark = '#26262c';
+      var pxL = -gw/2 + gw*0.012, pxR = gw/2 - post - gw*0.012;
+      var pilTop = gh * 0.90;
+      /* contact shadows pooled under both pillar feet, so the
+         gate stands ON the road instead of hovering over it */
+      groundShadow(pxL + post/2, 2, post*1.6, 0.30);
+      groundShadow(pxR + post/2, 2, post*1.6, 0.30);
+      /* pillars, standing on the road at its two edges */
+      ctx.fillStyle = red;
+      roundRect(pxL, -pilTop, post, pilTop, post*0.24); ctx.fill();
+      roundRect(pxR, -pilTop, post, pilTop, post*0.24); ctx.fill();
+      /* black pillar bases, and top caps with a gold stud */
+      ctx.fillStyle = dark;
+      roundRect(pxL - 2*s, -gh*0.10, post + 4*s, gh*0.10, 3*s); ctx.fill();
+      roundRect(pxR - 2*s, -gh*0.10, post + 4*s, gh*0.10, 3*s); ctx.fill();
+      roundRect(pxL - 3*s, -pilTop - gh*0.035, post + 6*s, gh*0.04, 3*s); ctx.fill();
+      roundRect(pxR - 3*s, -pilTop - gh*0.035, post + 6*s, gh*0.04, 3*s); ctx.fill();
+      ctx.fillStyle = '#d9a441';
+      ctx.beginPath(); ctx.arc(pxL + post/2, -pilTop - gh*0.016, Math.max(1.6*s, post*0.16), 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.arc(pxR + post/2, -pilTop - gh*0.016, Math.max(1.6*s, post*0.16), 0, 6.29); ctx.fill();
+      /* crossbeams, both with black end caps: the high beam
+         under the roof, and the low beam Lofi ducks under —
+         the low beam keeps its long-standing height above the
+         road even though the gate around it grew */
+      ctx.fillStyle = red;
+      roundRect(-gw*0.54, -gh*0.865, gw*1.08, beamT, 4*s); ctx.fill();
+      roundRect(-gw*0.53, -(duckH + beamT), gw*1.06, beamT, 4*s); ctx.fill();
+      ctx.fillStyle = dark;
+      var capW = Math.max(4*s, gw*0.03);
+      roundRect(-gw*0.54, -gh*0.865, capW, beamT, 3*s); ctx.fill();
+      roundRect(gw*0.54 - capW, -gh*0.865, capW, beamT, 3*s); ctx.fill();
+      roundRect(-gw*0.53, -(duckH + beamT), capW, beamT, 3*s); ctx.fill();
+      roundRect(gw*0.53 - capW, -(duckH + beamT), capW, beamT, 3*s); ctx.fill();
+      /* the small dark plaque hanging in the middle, under
+         the high beam */
+      var pw = Math.max(15*s, gw * 0.11), ph = pw * 1.12;
+      ctx.fillStyle = '#1d1d24';
+      roundRect(-pw/2, -gh*0.855 + beamT, pw, ph, 2*s); ctx.fill();
+      ctx.lineWidth = Math.max(1.2, 2*s); ctx.strokeStyle = '#d9a441';
+      roundRect(-pw/2, -gh*0.855 + beamT, pw, ph, 2*s); ctx.stroke();
+      ctx.strokeStyle = '#e8c877'; ctx.lineWidth = Math.max(1.2, 2.2*s); ctx.lineCap = 'round';
+      ctx.beginPath();
+      var plT = -gh*0.855 + beamT;
+      ctx.moveTo(-pw*0.20, plT + ph*0.24); ctx.lineTo(-pw*0.20, plT + ph*0.76);
+      ctx.moveTo(pw*0.20, plT + ph*0.24); ctx.lineTo(pw*0.20, plT + ph*0.76);
+      ctx.moveTo(-pw*0.20, plT + ph*0.50); ctx.lineTo(pw*0.20, plT + ph*0.50);
+      ctx.stroke();
+      /* the black curved tile roof, tips sweeping up into
+         the sky, overhanging the pillars on both sides */
+      ctx.fillStyle = dark;
+      ctx.beginPath();
+      var ru, rx, ry;
+      for(ru = -1; ru <= 1.001; ru += 0.1){
+        rx = ru * gw * 0.60; ry = -gh*0.885 - gh*0.115 * ru * ru;
+        if(ru === -1) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
+      }
+      for(ru = 1; ru >= -1.001; ru -= 0.1){
+        rx = ru * gw * 0.60; ry = -gh*0.885 - gh*0.115 * ru * ru + gh*0.08;
+        ctx.lineTo(rx, ry);
+      }
+      ctx.closePath(); ctx.fill();
+      /* tile ridges running down the roof */
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = Math.max(1, 2*s);
+      ctx.beginPath();
+      for(var tk = -5; tk <= 5; tk++){
+        var tu = tk / 5 * 0.92;
+        var tx2 = tu * gw * 0.60, ty2 = -gh*0.885 - gh*0.115 * tu * tu;
+        ctx.moveTo(tx2, ty2 + 2*s); ctx.lineTo(tx2, ty2 + gh*0.07);
+      }
+      ctx.stroke();
+      /* soft outline on the pillars, like the other obstacles */
+      ctx.strokeStyle = 'rgba(40,20,16,0.35)'; ctx.lineWidth = Math.max(1.2, 2.5*s);
+      roundRect(pxL, -pilTop, post, pilTop, post*0.24); ctx.stroke();
+      roundRect(pxR, -pilTop, post, pilTop, post*0.24); ctx.stroke();
+      ctx.restore();
+      }
+      return;
+    }
+    if(e.kind === 'snowmanP' || e.kind === 'snowmanR' || e.kind === 'snowrocks' || e.kind === 'signboard'){
+      /* Archer's four jump-over sprites standing ON the road:
+         the two snowmen, the snow-covered rocks and the wooden
+         sign board, each cut to transparency from his photos,
+         anchored by its base on the road line with a contact
+         shadow pooled underneath, so Lofi has to JUMP them */
+      var spic = e.kind === 'snowmanP' ? snowmanPPic
+               : e.kind === 'snowmanR' ? snowmanRPic
+               : e.kind === 'snowrocks' ? snowRocksPic : signBoardPic;
+      var shgt = (e.kind === 'snowmanP' ? 128 : e.kind === 'snowmanR' ? 140 : e.kind === 'snowrocks' ? 106 : 132) * s;
+      if(spic.ready){
+        var swd = shgt * spic.img.naturalWidth / spic.img.naturalHeight;
+        groundShadow(x, y + 2, swd*0.44, 0.26);
+        ctx.drawImage(spic.img, x - swd/2, y - shgt, swd, shgt);
+      } else {
+        groundShadow(x, y + 2, 56*s, 0.26);
+        ctx.fillStyle = '#eef7ff';
+        ctx.beginPath(); ctx.ellipse(x, y - shgt*0.32, shgt*0.34, shgt*0.32, 0, 0, 6.29); ctx.fill();
+      }
+      return;
+    }
+    if(e.kind === 'rock'){
+      var w3 = 118*s, h3 = 116*s;
+      groundShadow(x, y + 2, 54*s, 0.26);
+      ctx.save(); ctx.translate(x, y);
+      var grd3 = ctx.createLinearGradient(0,-h3,0,0);
+      grd3.addColorStop(0,'#7fdcff'); grd3.addColorStop(1,'#0f8fe8');
+      ctx.fillStyle = grd3;
+      ctx.beginPath();
+      ctx.moveTo(-w3/2, 0);
+      ctx.lineTo(-w3*0.38, -h3*0.55);
+      ctx.lineTo(-w3*0.12, -h3*0.92);
+      ctx.lineTo(w3*0.2, -h3);
+      ctx.lineTo(w3*0.44, -h3*0.6);
+      ctx.lineTo(w3/2, 0);
+      ctx.closePath(); ctx.fill();
+      ctx.lineWidth = 3.5*s; ctx.strokeStyle = '#002a7a'; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2*s;
+      ctx.beginPath();
+      ctx.moveTo(-w3*0.12, -h3*0.92); ctx.lineTo(-w3*0.02, -h3*0.4); ctx.lineTo(w3*0.3, -h3*0.2);
+      ctx.moveTo(-w3*0.02, -h3*0.4); ctx.lineTo(-w3*0.34, -h3*0.18);
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(0, -h3 + 6*s, w3*0.3, 8*s, 0, 0, 6.29); ctx.fill();
+      ctx.restore();
+      return;
+    }
+  }
+
+  function drawHeadPops(px, py){
+    if(!headPops.length) return;
+    headPops.forEach(function(p){
+      var pr = p.t / p.life;
+      var dx = p.dx0 - pr*p.travel;
+      var dy = p.dy0 - Math.sin(pr*Math.PI)*(reduced ? 4 : 14) - pr*6;
+      var x = px + dx, y = py + dy;
+      var alpha = 1;
+      if(pr > 0.62) alpha = Math.max(0, 1 - (pr - 0.62)/0.38);
+      var scale = pr < 0.14 ? 0.5 + (pr/0.14)*0.62 : 1.12 - Math.min(0.12, (pr - 0.14)*0.14);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(x, y);
+      if(!reduced) ctx.rotate(Math.sin(p.t*5 + p.ph)*0.07);
+      ctx.scale(scale, scale);
+      ctx.font = p.emoji ? '23px -apple-system, "Helvetica Neue", Arial, sans-serif'
+                         : '700 15px -apple-system, "Helvetica Neue", Arial, sans-serif';
+      var tw = ctx.measureText(p.text).width;
+      var bw = tw + 20, bh = p.emoji ? 36 : 30;
+      ctx.beginPath();
+      roundRect(-bw/2, -bh/2, bw, bh, bh/2);
+      ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#14304d'; ctx.stroke();
+      ctx.fillStyle = '#14304d';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.text, 0, 1);
+      ctx.restore();
+    });
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+
+  function drawLofi(t){
+    var x = laneX(player.laneF, 1);
+    var groundY = TRACK_Y + 26;
+    var sliding = player.slideT > 0;
+    /* shadow */
+    var airK = Math.min(1, player.jumpY/130);
+    ctx.fillStyle = 'rgba(16,44,86,' + (0.24 - airK*0.12) + ')';
+    ctx.beginPath();
+    ctx.ellipse(x, groundY + 6, 90*(1 - airK*0.3), 13*(1 - airK*0.3), 0, 0, 6.29);
+    ctx.fill();
+    /* RUSH aura */
+    if(rushing > 0){
+      var aura = ctx.createRadialGradient(x, groundY - 100, 8, x, groundY - 100, 148);
+      aura.addColorStop(0,'rgba(255,194,31,0.5)'); aura.addColorStop(1,'rgba(255,194,31,0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.arc(x, groundY - 100, 148, 0, 6.29); ctx.fill();
+      /* speed streaks */
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 3;
+      for(var sl=0; sl<4; sl++){
+        var sy = groundY - 18 - sl*30 - (reduced ? 0 : Math.sin(t*22 + sl*2)*3);
+        ctx.beginPath(); ctx.moveTo(x - 152 - ((t*340 + sl*47) % 44), sy); ctx.lineTo(x - 98 - ((t*340 + sl*47) % 44), sy); ctx.stroke();
+      }
+    }
+    var blink = invincible > 0 && rushing <= 0 && state === 'playing' && Math.floor(t*11) % 2 === 0;
+    ctx.save();
+    ctx.translate(x, groundY - player.jumpY);
+    ctx.rotate((player.laneF - player.lane) * -0.16);
+    if(blink) ctx.globalAlpha = 0.35;
+    var bob = (!reduced && player.grounded && !sliding && state === 'playing') ? Math.abs(Math.sin(player.runPhase))*4 : 0;
+    ctx.translate(0, -bob);
+    if(sliding){
+      /* low slide: the yeti tipped back, skimming the ice */
+      ctx.rotate(-0.5);
+      ctx.scale(1.08, 0.72);
+      if(yetiSticker.ready) drawSticker(yetiSticker, -93, -175, 186, 186);
+      else { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0,-92,82,0,6.29); ctx.fill(); }
+      /* spray */
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      for(var sp=0; sp<5; sp++){
+        ctx.beginPath();
+        ctx.arc(-74 - hash(sp*7 + Math.floor(t*9))*26, -4 - hash(sp*3)*10, 2.6, 0, 6.29);
+        ctx.fill();
+      }
+    } else {
+      /* Lofi drawn BIG: 198px across (up from 148), still
+         centred on his lane, feet on the same ground line, so
+         the hop, jump and slide grid is untouched */
+      if(yetiSticker.ready) drawSticker(yetiSticker, -99, -205, 198, 198);
+      else { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0,-104,86,0,6.29); ctx.fill(); }
+      /* sled board */
+      ctx.fillStyle = '#8a5a2b';
+      roundRect(-97, -10, 194, 11, 4); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#5b3a17'; ctx.stroke();
+      ctx.fillStyle = '#c33';
+      roundRect(-97, -10, 194, 3.5, 2); ctx.fill();
+    }
+    ctx.restore();
+    /* shield bubble */
+    if(shield){
+      ctx.save();
+      ctx.strokeStyle = 'rgba(89,216,255,0.95)'; ctx.lineWidth = 3;
+      ctx.fillStyle = 'rgba(89,216,255,0.13)';
+      ctx.beginPath(); ctx.arc(x, groundY - player.jumpY - 100, 122, 0, 6.29); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+    drawHeadPops(x + 10, groundY - player.jumpY - 205);
+  }
+
+  function draw(t){
+    ctx.clearRect(0, 0, W, H);
+    drawBackground(t);
+    drawTrack(t);
+    var sorted = ents.slice().sort(function(a,b){ return a.z - b.z; });
+    for(var i=0;i<sorted.length;i++) drawEnt(sorted[i], t);
+    drawLofi(t);
+    drawSparks();
+    if(!reduced){
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      snow.forEach(function(s){
+        var y = (s.y + t * s.s * (state === 'playing' ? 2.2 : 1)) % H;
+        var x = s.x + Math.sin(t * 0.6 + s.ph) * 8;
+        ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.29); ctx.fill();
+      });
+    }
+  }
+
+  /* ---------- stage size: phones (760px and under, matching the
+     stylesheet's breakpoints) get a tall PORTRAIT view, 960x1320
+     (8:11) — more tall and less wide, like the portrait stages on
+     Dogecat: in BOTH views the horizon now sits lower, near
+     two-fifths of the frame, so the sky is a tall, prominent
+     band (the adjusted sky: the moon and the star band stretch
+     through it, and the tall torii gates rise into it), and on
+     phones the track also runs much longer toward the player,
+     showing far more road ahead in the same three lanes. The desktop wide view is
+     1280x572 (2.24:1), where the track runs wider — the lanes
+     spread further apart, the trapezoid broadens and the
+     mountains, pines and snowfall stretch across the wider
+     frame — while the physics and the run itself stay exactly
+     the same in both. The switch only re-windows the world, it
+     never touches the run ---------- */
+  var mqNarrow = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
+  function applyStageSize(){
+    var m = (mqNarrow && mqNarrow.matches)
+      ? { w:960, h:1320, horizon:500, trackY:1252, laneOff:252, trkTop:74, trkBot:438, lineTop:29.6, lineBot:334, moonY:296, starH:452 }
+      : { w:1280, h:572, horizon:214, trackY:500, laneOff:336, trkTop:100, trkBot:584, lineTop:40, lineBot:445, moonY:116, starH:188 };
+    if(canvas.width !== m.w || canvas.height !== m.h){
+      canvas.width = m.w; canvas.height = m.h;
+    }
+    W = m.w; H = m.h; HORIZON = m.horizon; TRACK_Y = m.trackY;
+    LANE_OFF = m.laneOff; TRK_TOP = m.trkTop; TRK_BOT = m.trkBot;
+    LINE_TOP = m.lineTop; LINE_BOT = m.lineBot; KX = m.w / 960;
+    MOON_Y = m.moonY; STAR_H = m.starH;
+    seedSky();
+  }
+  applyStageSize();
+  if(mqNarrow){
+    if(mqNarrow.addEventListener) mqNarrow.addEventListener('change', applyStageSize);
+    else if(mqNarrow.addListener) mqNarrow.addListener(applyStageSize);
+  }
+
+  /* ---------- loop ---------- */
+  var last = 0, elapsed = 0;
+  function loop(ts){
+    var t = ts / 1000;
+    var dt = Math.min(0.033, last ? t - last : 0.016);
+    last = t;
+    elapsed = t;
+    update(dt);
+    draw(elapsed);
+    requestAnimationFrame(loop);
+  }
+  updateHud();
+  renderStages();
+  requestAnimationFrame(loop);
+
+  /* ---------- input ---------- */
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+  document.getElementById('resumeBtn').addEventListener('click', togglePause);
+  document.getElementById('pauseClose').addEventListener('click', togglePause);
+  document.getElementById('pauseBtn').addEventListener('click', function(){
+    if(state === 'playing' || state === 'paused') togglePause();
+  });
+  function bindBtn(id, fn){
+    document.getElementById(id).addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      fn();
+    });
+  }
+  bindBtn('leftBtn', function(){ doSwitch(-1); });
+  bindBtn('rightBtn', function(){ doSwitch(1); });
+  bindBtn('upBtn', doJump);
+  bindBtn('downBtn', doSlide);
+
+  document.addEventListener('keydown', function(e){
+    var code = e.code;
+    if(code === 'Escape' && settingsOverlay && !settingsOverlay.hidden){
+      e.preventDefault();
+      closeSettings();
+      return;
+    }
+    if(code === 'ArrowLeft' || code === 'KeyA'){
+      e.preventDefault(); doSwitch(-1);
+    } else if(code === 'ArrowRight' || code === 'KeyD'){
+      e.preventDefault(); doSwitch(1);
+    } else if(code === 'ArrowUp' || code === 'KeyW' || code === 'Space'){
+      e.preventDefault();
+      if(state === 'ready' || state === 'over' || state === 'won') startGame();
+      else doJump();
+    } else if(code === 'ArrowDown' || code === 'KeyS'){
+      e.preventDefault(); doSlide();
+    } else if(code === 'KeyP' || code === 'Escape'){
+      if(state === 'playing' || state === 'paused') togglePause();
+    } else if(code === 'KeyM'){
+      setMuted(!muted);
+      if(!muted) sfx.click();
+    } else if(code === 'Enter'){
+      if(state === 'over' || state === 'won' || state === 'ready') startGame();
+    }
+  });
+
+  /* touch on canvas: tap = jump, swipe = switch / jump / slide */
+  var tX = null, tY = null;
+  canvas.addEventListener('touchstart', function(e){
+    tX = e.changedTouches[0].clientX;
+    tY = e.changedTouches[0].clientY;
+  }, { passive: true });
+  canvas.addEventListener('touchend', function(e){
+    if(tX === null) return;
+    var dx = e.changedTouches[0].clientX - tX;
+    var dy = e.changedTouches[0].clientY - tY;
+    tX = null; tY = null;
+    if(state === 'ready' || state === 'over' || state === 'won') return;
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < 24){ doJump(); return; }
+    if(Math.abs(dx) > Math.abs(dy)) doSwitch(dx > 0 ? 1 : -1);
+    else if(dy < 0) doJump();
+    else doSlide();
+  }, { passive: true });
+
+  /* ---------- settings panel ---------- */
+  var settingsOverlay = document.getElementById('settingsOverlay');
+  var settingsBtn = document.getElementById('settingsBtn');
+  var musicVolEl = document.getElementById('musicVol');
+  var soundVolEl = document.getElementById('soundVol');
+  var tipsToggle = document.getElementById('tipsToggle');
+  var noticeBtn = document.getElementById('noticeBtn');
+  var noticeText = document.getElementById('noticeText');
+  var noticeBadge = document.getElementById('noticeBadge');
+  var connectBtn = document.getElementById('connectBtn');
+  var walletStatus = document.getElementById('walletStatus');
+
+  function paintRange(el){
+    var p = Number(el.value);
+    el.style.background = 'linear-gradient(90deg,#4aa8e8 ' + p + '%,#c3dcee ' + p + '%)';
+  }
+  function syncVolumes(){
+    soundVolVal = Number(soundVolEl.value) / 100;
+    musicVolVal = Number(musicVolEl.value) / 100;
+    applyVolumes();
+    paintRange(soundVolEl);
+    paintRange(musicVolEl);
+    saveProgress();
+  }
+  musicVolEl.addEventListener('input', function(){ syncVolumes(); startMusic(); });
+  soundVolEl.addEventListener('input', syncVolumes);
+  musicVolEl.value = Math.round(musicVolVal * 100);
+  soundVolEl.value = Math.round(soundVolVal * 100);
+  syncVolumes();
+
+  function openSettings(){
+    settingsOverlay.hidden = false;
+    if(state === 'playing') togglePause();
+    sfx.click();
+  }
+  function closeSettings(){
+    settingsOverlay.hidden = true;
+    sfx.click();
+  }
+  settingsBtn.addEventListener('click', openSettings);
+  document.getElementById('settingsOk').addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', function(e){
+    if(e.target === settingsOverlay) closeSettings();
+  });
+
+  tipsToggle.classList.toggle('on', tipsOn);
+  tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+  tipsToggle.addEventListener('click', function(){
+    tipsOn = !tipsOn;
+    tipsToggle.classList.toggle('on', tipsOn);
+    tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+    if(!tipsOn) headPops = [];
+    saveProgress();
+    sfx.click();
+  });
+  noticeBtn.addEventListener('click', function(){
+    var show = noticeText.hidden;
+    noticeText.hidden = !show;
+    if(show && noticeBadge) noticeBadge.style.display = 'none';
+    sfx.click();
+  });
+
+  /* ---------- SUI wallet: Wallet Standard discovery + connect ---------- */
+  var suiWallets = [], connectedWallet = null, connectedAddress = '';
+  var wsApi = { registerWallet: function(w){ if(w && suiWallets.indexOf(w) < 0) suiWallets.push(w); } };
+  try{
+    window.addEventListener('wallet-standard:register-wallet', function(e){
+      if(e.detail && typeof e.detail.register === 'function'){
+        try{ e.detail.register(wsApi); }catch(err){}
+      }
+    });
+    window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: wsApi }));
+  }catch(e){}
+  function shortAddr(a){ return a ? a.slice(0, 6) + '…' + a.slice(-4) : ''; }
+  connectBtn.addEventListener('click', function(){
+    if(connectedAddress){
+      if(connectedWallet && connectedWallet.features && connectedWallet.features['standard:disconnect']){
+        try{ connectedWallet.features['standard:disconnect'].disconnect(); }catch(e){}
+      }
+      connectedWallet = null; connectedAddress = '';
+      connectBtn.textContent = 'Connect';
+      connectBtn.classList.remove('connected');
+      walletStatus.textContent = 'Wallet disconnected.';
+      return;
+    }
+    var w = null;
+    for(var i = 0; i < suiWallets.length; i++){
+      var cand = suiWallets[i];
+      if(cand.features && cand.features['standard:connect'] &&
+         (cand.chains || []).some(function(c){ return String(c).indexOf('sui:') === 0; })){ w = cand; break; }
+    }
+    if(!w){
+      walletStatus.textContent = 'No SUI wallet found in this browser. Install a SUI wallet extension, then tap Connect again.';
+      return;
+    }
+    walletStatus.textContent = 'Connecting… approve it in your wallet.';
+    w.features['standard:connect'].connect().then(function(res){
+      var acc = res && res.accounts && res.accounts[0];
+      if(acc && acc.address){
+        connectedWallet = w; connectedAddress = acc.address;
+        connectBtn.textContent = shortAddr(acc.address);
+        connectBtn.classList.add('connected');
+        walletStatus.textContent = 'Connected with ' + (w.name || 'SUI wallet') + ' · ' + shortAddr(acc.address);
+        sfx.click();
+      } else {
+        walletStatus.textContent = 'The wallet returned no account.';
+      }
+    }).catch(function(){
+      walletStatus.textContent = 'Connection cancelled in the wallet.';
+    });
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden && state === 'playing') togglePause();
+  });
+
+  /* ---------- Firebase sync (Lofi Games project) ----------
+     Mirrors this game's local save to Firestore at
+     users/{uid}/games/lofi-rush while a Firebase user is
+     signed in. The hub owns the sign-in UI; Firebase Auth
+     state is shared on this origin, so signing in there (or
+     continuing as a guest) signs this page in too.
+     localStorage stays the offline fallback: every local
+     write above is unchanged, the local key is never
+     deleted, and a failed cloud write never blocks play —
+     it is retried on the next save or sign-in. The config
+     below is Firebase's public client config, not a secret;
+     access is controlled by the Firestore security rules.
+     No wallet address, seed phrase, private key or password
+     is ever written to Firestore. Achievement XP stays
+     derived in renderAch(); level and levelXP are stored
+     with the save so the hub can read the stage XP. */
+  var firebaseConfig = {
+    apiKey: "AIzaSyBQ5isDVE9nWFXO-3es3OmxVL047HmnE28",
+    authDomain: "winterplay.online",
+    projectId: "lofi-games",
+    storageBucket: "lofi-games.firebasestorage.app",
+    messagingSenderId: "885237508877",
+    appId: "1:885237508877:web:ac09a74ce6a82d8e5c1e44"
+  };
+  var fbAuth = null, fbDb = null, fbUser = null;
+  var fbEarnedAt = {};      /* last known cloud earnedAt map: Timestamp|null per achievement id */
+  var fbPendingStamps = {}; /* ids unlocked while signed in, not yet stamped in the cloud */
+  var fbStamped = {};       /* ids whose cloud earnedAt is a real timestamp not yet re-read */
+  var fbMigratedFromLocal = false;
+  var fbSaveTimer = null, fbUnlockTimer = null;
+
+  function fbServerTs(){
+    return firebase.firestore.FieldValue.serverTimestamp();
+  }
+  function fbDocRef(){
+    if(!fbDb || !fbUser) return null;
+    return fbDb.doc('users/' + fbUser.uid + '/games/lofi-rush');
+  }
+  /* Recency stamp for the local save, kept in its own key so
+     the game's save shape above stays exactly as it was; the
+     sign-in merge compares it with the cloud updatedAt to
+     decide whose settings are the most recently updated. */
+  function fbTouchLocal(){
+    try{ localStorage.setItem('lofi_rush_sync_meta_v1', JSON.stringify({ updatedAt: Date.now() })); }catch(e){}
+  }
+  function fbLocalMetaMs(){
+    try{
+      var m = JSON.parse(localStorage.getItem('lofi_rush_sync_meta_v1') || '{}') || {};
+      return (typeof m.updatedAt === 'number' && isFinite(m.updatedAt)) ? m.updatedAt : 0;
+    }catch(e){ return 0; }
+  }
+  /* Settings travel in this game's native scale: 0-100
+     integer volumes (defaults 80 / 55), exactly as the local
+     save stores them. No scale conversion anywhere. */
+  function fbNormSettings(s){
+    s = (s && typeof s === 'object') ? s : {};
+    return {
+      muted: s.muted === true,
+      soundVol: (typeof s.soundVol === 'number' && isFinite(s.soundVol)) ? Math.min(100, Math.max(0, Math.round(s.soundVol))) : 80,
+      musicVol: (typeof s.musicVol === 'number' && isFinite(s.musicVol)) ? Math.min(100, Math.max(0, Math.round(s.musicVol))) : 55,
+      tipsOn: s.tipsOn !== false
+    };
+  }
+  function fbReadLocal(){
+    var raw = {};
+    try{ raw = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; }catch(e){ raw = {}; }
+    var un = {}, k;
+    if(raw.unlocked && typeof raw.unlocked === 'object'){
+      for(k in raw.unlocked){ if(raw.unlocked[k]) un[k] = true; }
+    }
+    return {
+      best: (typeof raw.best === 'number' && isFinite(raw.best) && raw.best > 0) ? Math.floor(raw.best) : 0,
+      level: (typeof raw.level === 'number' && isFinite(raw.level) && raw.level > 0) ? Math.min(10, Math.floor(raw.level)) : 0,
+      levelXP: (typeof raw.levelXP === 'number' && isFinite(raw.levelXP) && raw.levelXP > 0) ? Math.floor(raw.levelXP) : 0,
+      unlocked: un,
+      settings: fbNormSettings(raw)
+    };
+  }
+  function fbCurrentSettings(){
+    var local = fbReadLocal().settings;
+    return fbNormSettings({
+      muted: (typeof muted === 'boolean') ? muted : local.muted,
+      soundVol: (typeof soundVolVal === 'number' && isFinite(soundVolVal)) ? Math.round(soundVolVal * 100) : local.soundVol,
+      musicVol: (typeof musicVolVal === 'number' && isFinite(musicVolVal)) ? Math.round(musicVolVal * 100) : local.musicVol,
+      tipsOn: (typeof tipsOn === 'boolean') ? tipsOn : local.tipsOn
+    });
+  }
+  function fbBuildEarnedAt(){
+    var ea = {}, id;
+    for(id in unlocked){
+      if(!unlocked[id]) continue;
+      if(fbPendingStamps[id]) ea[id] = fbServerTs();
+      else if(fbStamped[id]){ /* the server already holds the real date; a merge write leaves it untouched */ }
+      else if(Object.prototype.hasOwnProperty.call(fbEarnedAt, id)) ea[id] = fbEarnedAt[id];
+      else ea[id] = null; /* migrated from localStorage: date unknown, never invented */
+    }
+    return ea;
+  }
+  function fbBuildDoc(){
+    var un = {}, id;
+    for(id in unlocked){ if(unlocked[id]) un[id] = true; }
+    var data = {
+      best: (typeof best === 'number' && isFinite(best)) ? Math.floor(best) : fbReadLocal().best,
+      level: (typeof level === 'number' && isFinite(level)) ? Math.floor(level) : fbReadLocal().level,
+      levelXP: (typeof levelXP === 'number' && isFinite(levelXP)) ? Math.floor(levelXP) : fbReadLocal().levelXP,
+      unlocked: un,
+      earnedAt: fbBuildEarnedAt(),
+      settings: fbCurrentSettings(),
+      updatedAt: fbServerTs()
+    };
+    if(fbMigratedFromLocal) data.migratedFromLocal = true;
+    return data;
+  }
+  function fbMarkStamped(){
+    for(var id in fbPendingStamps) fbStamped[id] = true;
+    fbPendingStamps = {};
+  }
+  /* Full-doc write (best / settings changes, from
+     saveProgress): always sends the complete current state,
+     so a retry after a failed write is never a stale delta. */
+  function fbFlushSave(){
+    fbSaveTimer = null;
+    var ref = fbDocRef();
+    if(!ref) return;
+    ref.set(fbBuildDoc(), { merge: true }).then(function(){
+      fbMarkStamped();
+    }).catch(function(err){
+      /* Offline or a transient failure: the local save is
+         intact and the next save / unlock / sign-in retries
+         with the full current state. Play is never blocked,
+         but the failure is logged, never silent. */
+      console.error('[Lofi Rush] Cloud save failed; progress kept locally and retried on the next save.', err);
+    });
+  }
+  function fbScheduleSave(){
+    if(!fbUser || !fbDb) return;
+    if(fbSaveTimer) clearTimeout(fbSaveTimer);
+    fbSaveTimer = setTimeout(fbFlushSave, 500);
+  }
+  /* Unlock write (from unlock): stamps just the new
+     achievement with the server time, batched ~500 ms so
+     rapid unlocks land in one write. */
+  function fbFlushUnlocks(){
+    fbUnlockTimer = null;
+    var ref = fbDocRef();
+    if(!ref) return;
+    var ids = [], id;
+    for(id in fbPendingStamps){ if(fbPendingStamps[id]) ids.push(id); }
+    if(!ids.length) return;
+    var updates = { updatedAt: fbServerTs() };
+    ids.forEach(function(aid){
+      updates['unlocked.' + aid] = true;
+      updates['earnedAt.' + aid] = fbServerTs();
+    });
+    ref.update(updates).then(function(){
+      ids.forEach(function(aid){ delete fbPendingStamps[aid]; fbStamped[aid] = true; });
+    }).catch(function(err){
+      /* The doc may not exist yet (first unlock landing
+         before the sign-in merge write): fall back to the
+         full-doc write, which carries the pending stamps
+         too. Any other failure keeps the stamps pending
+         for the next retry. */
+      console.error('[Lofi Rush] Cloud unlock stamp failed; falling back to a full save.', err);
+      fbFlushSave();
+    });
+  }
+  function fbScheduleUnlock(id){
+    if(!fbUser || !fbDb) return;
+    fbPendingStamps[id] = true;
+    if(fbUnlockTimer) clearTimeout(fbUnlockTimer);
+    fbUnlockTimer = setTimeout(fbFlushUnlocks, 500);
+  }
+  /* Load a merged state into the game exactly the way the
+     local load at the top does: same variables, same
+     controls repainted, then persisted through the game's
+     own saveProgress(). */
+  function fbApplyMerged(mergedBest, mergedUnlocked, settings, mergedLevel, mergedLevelXP){
+    /* The merged set was frozen when the sign-in get()
+       resolved, but this runs only after the merged set()
+       resolves too: re-read the live local state now and
+       fold it back in, so an unlock or a new best earned
+       during that window survives. Applying is additive
+       only: ids are never removed from the live unlocked
+       set and best only ever rises, so the saveProgress()
+       below can never write stale progress back over the
+       newer local state (or, via the debounced flush, over
+       the cloud doc). */
+    var live = fbReadLocal();
+    var id;
+    for(id in live.unlocked){ if(live.unlocked[id]) mergedUnlocked[id] = true; }
+    for(id in unlocked){ if(unlocked[id]) mergedUnlocked[id] = true; }
+    best = Math.max(mergedBest, live.best,
+      (typeof best === 'number' && isFinite(best)) ? Math.floor(best) : 0);
+    for(id in mergedUnlocked){ if(mergedUnlocked[id]) unlocked[id] = true; }
+    /* level / levelXP merge by MAX, exactly like best: a
+       higher value from either side always wins and neither
+       is ever lowered or deleted */
+    level = Math.max(mergedLevel || 0, live.level || 0,
+      (typeof level === 'number' && isFinite(level)) ? Math.floor(level) : 0);
+    levelXP = Math.max(mergedLevelXP || 0, live.levelXP || 0,
+      (typeof levelXP === 'number' && isFinite(levelXP)) ? Math.floor(levelXP) : 0);
+    muted = settings.muted === true;
+    soundVolVal = settings.soundVol / 100;
+    musicVolVal = settings.musicVol / 100;
+    tipsOn = settings.tipsOn !== false;
+    soundBtn.classList.toggle('muted', muted);
+    soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+    musicVolEl.value = Math.round(musicVolVal * 100);
+    soundVolEl.value = Math.round(soundVolVal * 100);
+    paintRange(soundVolEl);
+    paintRange(musicVolEl);
+    tipsToggle.classList.toggle('on', tipsOn);
+    tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+    applyVolumes();
+    saveProgress();
+    renderAch();
+    renderStages();
+    updateHud();
+  }
+  /* Sign-in merge: best = max, unlocked = union, earnedAt
+     keeps cloud values and gains null for local-only ids,
+     settings prefer the most recently updated side. The
+     merged doc is written back with merge:true and
+     migratedFromLocal:true, then loaded into the game. */
+  function fbHandleSignIn(user){
+    var ref = fbDocRef();
+    if(!ref) return;
+    ref.get().then(function(snap){
+      if(!fbUser || fbUser.uid !== user.uid) return; /* signed out or switched meanwhile */
+      var cloud = (snap && snap.exists) ? (snap.data() || {}) : null;
+      var local = fbReadLocal();
+      var mergedBest = Math.max(local.best,
+        (cloud && typeof cloud.best === 'number' && isFinite(cloud.best)) ? Math.floor(cloud.best) : 0);
+      var mergedLevel = Math.max(local.level || 0,
+        (cloud && typeof cloud.level === 'number' && isFinite(cloud.level)) ? Math.floor(cloud.level) : 0);
+      var mergedLevelXP = Math.max(local.levelXP || 0,
+        (cloud && typeof cloud.levelXP === 'number' && isFinite(cloud.levelXP)) ? Math.floor(cloud.levelXP) : 0);
+      var mergedUnlocked = {}, id;
+      if(cloud && cloud.unlocked && typeof cloud.unlocked === 'object'){
+        for(id in cloud.unlocked){ if(cloud.unlocked[id]) mergedUnlocked[id] = true; }
+      }
+      for(id in local.unlocked){ if(local.unlocked[id]) mergedUnlocked[id] = true; }
+      var mergedEarned = {};
+      if(cloud && cloud.earnedAt && typeof cloud.earnedAt === 'object'){
+        for(id in cloud.earnedAt) mergedEarned[id] = cloud.earnedAt[id];
+      }
+      for(id in mergedUnlocked){
+        if(!Object.prototype.hasOwnProperty.call(mergedEarned, id)) mergedEarned[id] = null;
+      }
+      fbEarnedAt = mergedEarned;
+      /* fbPendingStamps is deliberately NOT cleared here:
+         those ids were unlocked while signed in and their
+         cloud earnedAt stamps are not confirmed until the
+         merged write below lands. Clearing them now would
+         strand a late unlock at earnedAt null and stop its
+         pending fbFlushUnlocks() stamp from ever running;
+         the flush / fbMarkStamped() retire them once the
+         write is confirmed. */
+      fbStamped = {};
+      var cloudMs = 0;
+      if(cloud && cloud.updatedAt && typeof cloud.updatedAt.toMillis === 'function'){
+        try{ cloudMs = cloud.updatedAt.toMillis(); }catch(e){ cloudMs = 0; }
+      }
+      var chosen = (cloud && cloud.settings && cloudMs > fbLocalMetaMs())
+        ? fbNormSettings(cloud.settings) : local.settings;
+      if(cloud && cloud.migratedFromLocal === true) fbMigratedFromLocal = true;
+      fbMigratedFromLocal = true;
+      var data = {
+        best: mergedBest,
+        level: mergedLevel,
+        levelXP: mergedLevelXP,
+        unlocked: mergedUnlocked,
+        earnedAt: mergedEarned,
+        settings: chosen,
+        migratedFromLocal: true,
+        updatedAt: fbServerTs()
+      };
+      ref.set(data, { merge: true }).then(function(){
+        if(!fbUser || fbUser.uid !== user.uid) return;
+        fbApplyMerged(mergedBest, mergedUnlocked, chosen, mergedLevel, mergedLevelXP);
+      }).catch(function(err){
+        /* The write failed (offline): still load the merged
+           state locally; the next save already carries the
+           full state back to Firestore. */
+        console.error('[Lofi Rush] Sign-in merge write failed; merged state loaded locally, full state retried on the next save.', err);
+        if(fbUser && fbUser.uid === user.uid) fbApplyMerged(mergedBest, mergedUnlocked, chosen, mergedLevel, mergedLevelXP);
+      });
+    }).catch(function(err){
+      /* Read failed (offline): the game keeps running on the
+         local save exactly as before; sync retries on the
+         next save or sign-in. */
+      console.error('[Lofi Rush] Sign-in cloud read failed; continuing on the local save.', err);
+    });
+  }
+  function fbHandleSignOut(){
+    fbUser = null;
+    if(fbSaveTimer){ clearTimeout(fbSaveTimer); fbSaveTimer = null; }
+    if(fbUnlockTimer){ clearTimeout(fbUnlockTimer); fbUnlockTimer = null; }
+    fbPendingStamps = {};
+    /* The game continues on localStorage only; nothing local
+       is wiped. */
+  }
+  /* ---------- site header auth pill: mirrors the hub header and
+     reads the same Firebase auth state. A signed-in player sees
+     the same username + avatar the hub shows (profile doc
+     users/<uid>, same presets); everyone else sees Sign in.
+     The pill starts hidden behind a Loading state so a signed-in
+     player never sees the signed-out pill flash on reload. ---- */
+  var pillPending = document.getElementById('navPending');
+  var pillSignin = document.getElementById('pillSignin');
+  var pillUser = document.getElementById('pillUser');
+  var pillAvatar = document.getElementById('pillAvatar');
+  var pillName = document.getElementById('pillName');
+  var SITE_AVATAR_SVG = {
+    snow: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17M12 2l-2.2 2.6M12 2l2.2 2.6M12 22l-2.2-2.6M12 22l2.2-2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.5l-5.9 3.1 1.2-6.5L2.5 9.5l6.6-.9 2.9-6z" fill="currentColor"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.4 14.2A8.5 8.5 0 1 1 9.8 3.6a7 7 0 1 0 10.6 10.6z" fill="currentColor"/></svg>',
+    pine: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l5.5 7h-3.4L19 15h-5.2v7h-3.6v-7H5l4.9-6H6.5L12 2z" fill="currentColor"/></svg>'
+  };
+  function siteAvatarHTML(id){
+    if(id && SITE_AVATAR_SVG[id]) return SITE_AVATAR_SVG[id];
+    return '<img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="">';
+  }
+  /* The signed-in user's Google profile photo, when they have
+     one. Read off the auth user (or the current auth user as a
+     fallback), guarded so a missing Firebase SDK or a user
+     object without the field never throws. */
+  function sitePhotoURL(user){
+    var url = null;
+    try{ url = (user && user.photoURL) || null; }catch(e){ url = null; }
+    if(!url){
+      try{ if(fbAuth && fbAuth.currentUser) url = fbAuth.currentUser.photoURL || null; }catch(e){ url = null; }
+    }
+    return (typeof url === 'string' && url) ? url : null;
+  }
+  function siteSetPhotoAvatar(url){
+    if(!pillAvatar) return;
+    pillAvatar.innerHTML = '';
+    var im = document.createElement('img');
+    im.src = url;
+    im.alt = '';
+    im.referrerPolicy = 'no-referrer';
+    pillAvatar.appendChild(im);
+  }
+  function siteAuthUI(user){
+    if(pillPending) pillPending.hidden = true;
+    if(!user){
+      if(pillUser) pillUser.hidden = true;
+      if(pillSignin) pillSignin.hidden = false;
+      return;
+    }
+    if(pillSignin) pillSignin.hidden = true;
+    if(pillUser) pillUser.hidden = false;
+    var fallback = user.displayName || (user.email ? user.email.split('@')[0] : '') || (user.isAnonymous ? 'Guest' : 'Player');
+    if(pillName) pillName.textContent = fallback;
+    var photo = sitePhotoURL(user);
+    if(photo) siteSetPhotoAvatar(photo);
+    else if(pillAvatar) pillAvatar.innerHTML = siteAvatarHTML('yeti');
+    if(fbDb){
+      fbDb.doc('users/' + user.uid).get().then(function(snap){
+        if(!fbUser || fbUser.uid !== user.uid) return; /* signed out or switched meanwhile */
+        var d = (snap && snap.exists) ? (snap.data() || {}) : null;
+        if(!d) return;
+        if(pillName && d.username) pillName.textContent = d.username;
+        /* A Google profile photo wins over the preset avatar;
+           the preset shows only when there is no photo. */
+        if(pillAvatar && d.avatar && !sitePhotoURL(user)) pillAvatar.innerHTML = siteAvatarHTML(d.avatar);
+      }).catch(function(){ /* profile doc unreadable: the pill keeps the auth fallback name */ });
+    }
+  }
+  if(pillSignin){
+    pillSignin.addEventListener('click', function(){
+      if(!fbAuth){ window.location.href = '/lofigame/'; return; }
+      var provider = new firebase.auth.GoogleAuthProvider();
+      fbAuth.signInWithPopup(provider).catch(function(err){
+        if(err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return;
+        toast('Sign-in did not work. You can also sign in on the Lofi Games home page.');
+      });
+    });
+  }
+  try{
+    if(window.firebase && typeof firebase.initializeApp === 'function' &&
+       typeof firebase.auth === 'function' && typeof firebase.firestore === 'function'){
+      if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      fbAuth = firebase.auth();
+      fbDb = firebase.firestore();
+      fbAuth.onAuthStateChanged(function(user){
+        if(user){ fbUser = user; siteAuthUI(user); fbHandleSignIn(user); }
+        else { siteAuthUI(null); fbHandleSignOut(); }
+      });
+    }
+  }catch(e){
+    /* Firebase unreachable (blocked CDN or offline): the game
+       runs on localStorage only, exactly as before. */
+    console.error('[Lofi Rush] Firebase failed to initialise; running on the local save only.', e);
+    fbAuth = null; fbDb = null; fbUser = null;
+  }
+  /* Firebase SDK missing entirely (blocked CDN): the header pill
+     settles on its signed-out state instead of Loading forever. */
+  if(!fbAuth) siteAuthUI(null);
+})();
+</script>
+</body>
+</html>

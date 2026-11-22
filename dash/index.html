@@ -1,0 +1,2811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/lofigame/assets/favicon.png" />
+<title>Lofi Dash</title>
+<style>
+  :root{
+    /* the logo's own stock: saturated ice blue, electric cyan, deep outline blue */
+    --blue:#0057ff;
+    --blue-deep:#003ecb;
+    --blue-dark:#002a7a;
+    --navy:#041e57;
+    --cyan:#00b7ff;
+    --ice:#59d8ff;
+    --ice-pale:#c9f1fc;
+    --ice-soft:#e8f6ff;
+    --ink:#0a2a5e;
+    --muted:#3d5a8a;
+    --gold:#ffc21f;
+    --gold-deep:#b97e06;
+    --pink:#ff5c8a;
+    --radius:16px;
+    /* chunky pixel facets laid over every ice button */
+    --facet:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 7px, rgba(255,255,255,0) 7px 14px),
+      repeating-linear-gradient(0deg, rgba(0,42,122,.08) 0 7px, rgba(0,42,122,0) 7px 14px);
+  }
+  html{ background:var(--navy); }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(760px 300px at 10% -60px, rgba(89,216,255,.5), transparent 70%),
+      radial-gradient(860px 340px at 92% -40px, rgba(0,183,255,.38), transparent 70%),
+      radial-gradient(600px 500px at 50% 115%, rgba(0,87,255,.5), transparent 70%),
+      linear-gradient(180deg,#031a4f 0%, #06389f 34%, #0057d9 62%, #0083e8 100%);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:992px; margin:0 auto; padding:20px 16px 44px; position:relative; }
+  /* vapour wisps */
+  .vapour{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .vapour span{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(190,235,255,.5), rgba(190,235,255,0));
+    filter:blur(6px);
+  }
+  .vapour span:nth-child(1){ width:420px;height:120px; left:-80px; top:16%; animation:drift 26s linear infinite; }
+  .vapour span:nth-child(2){ width:520px;height:140px; left:55%; top:52%; animation:drift 34s linear infinite reverse; }
+  .vapour span:nth-child(3){ width:340px;height:100px; left:30%; top:78%; animation:drift 30s linear infinite; }
+  @keyframes drift{ from{ transform:translateX(-30px);} to{ transform:translateX(70px);} }
+  @media (prefers-reduced-motion: reduce){
+    .vapour span{ animation:none !important; }
+  }
+  .head{ position:relative; z-index:1; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .head h1{ margin:0; line-height:0; }
+  /* The game's own logo art: icy bubble letters, transparency kept */
+  .logo{ width:min(350px,80vw); height:auto; display:block; filter:drop-shadow(0 4px 0 rgba(0,42,122,.45)) drop-shadow(0 12px 20px rgba(0,10,40,.4)); }
+  .head p{ margin:8px 0 0; color:#d6e9ff; font-size:16px; font-weight:600; line-height:1.45; max-width:560px; text-shadow:0 1px 3px rgba(0,20,70,.5); }
+  .head-actions{ flex:none; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  /* ---------- pixel-ice buttons: saturated ice gradient, chunky pixel
+     facets, a blocky bevel and a hard offset shadow in outline blue.
+     Shared by every button on the page so the whole UI is one family. */
+  .pix{
+    background:var(--facet), linear-gradient(180deg,#8fe8ff 0%,#29c5ff 48%,#0095f2 100%);
+    border:3px solid var(--blue-dark); color:#fff;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+    box-shadow:0 5px 0 var(--blue-dark),
+      inset 0 3px 0 rgba(255,255,255,.9),
+      inset 3px 0 0 rgba(255,255,255,.35),
+      inset -3px 0 0 rgba(0,42,122,.22),
+      inset 0 -7px 0 rgba(0,42,122,.28);
+  }
+  /* Sound: one small round frost icon button, no text pill */
+  .icon-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .icon-btn svg{ width:23px; height:23px; display:block; }
+  .icon-btn .slash{ display:none; }
+  .icon-btn.muted{ color:#dcefff; }
+  .icon-btn.muted .waves{ display:none; }
+  .icon-btn.muted .slash{ display:block; }
+  .icon-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .icon-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* header settings cube */
+  .cube-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .cube-btn svg{ width:23px; height:23px; display:block; }
+  .cube-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .cube-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* Stage wrap: holds the game, the snow-icicle borders on its frame
+     and the ice rocks at its bottom corners */
+  .stage-wrap{ position:relative; z-index:1; margin-top:112px; margin-bottom:62px; }
+  /* Peeking sticker: Lofi's whole head, face and raised paw show
+     above the game's top-right corner. The clipping box itself
+     NEVER moves: it is taller than the visible head, gives the
+     artwork clear headroom on the top and both sides (so the
+     white sticker outline is never sliced by the box edges), and
+     its bottom edge ends deep inside the SOLID band of the snow
+     ledge below, so the crop line across the fur stays hidden
+     behind solid snow at all times. Only the picture inside
+     bobs, sliding a few pixels within the still box: the yeti
+     rises and settles behind the ledge instead of the cut edge
+     sweeping up and down over the snow, which is what used to
+     flash the cut whenever the sticker moved. */
+  .peek{
+    position:absolute; right:17px; top:-114px; z-index:0;
+    width:110px; height:84px; overflow:hidden; pointer-events:none;
+  }
+  .peek img{
+    display:block; width:96px; height:auto; margin:6px 7px 0;
+    transform-origin:50% 100%;
+    animation:peekBob 3.4s ease-in-out infinite;
+    filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 -2px 0 #fff);
+  }
+  @keyframes peekBob{
+    0%,100%{ transform:translateY(4px) rotate(-3deg); }
+    50%{ transform:translateY(0) rotate(-3deg); }
+  }
+  /* snow-icicle borders off the supplied sheet, laid on the game frame */
+  .snow-edge{
+    position:absolute; left:-8px; right:-8px; z-index:3; pointer-events:none;
+    background-repeat:no-repeat; background-size:100% 100%;
+  }
+  .snow-edge-top{ top:-56px; height:58px; background-image:url(/lofigame/assets/snow-86cf839d.webp); }
+  .snow-edge-bottom{ bottom:-48px; height:58px; background-image:url(/lofigame/assets/snow-22495d8e.webp); }
+  /* ice rocks off the supplied sheet, piled at the frame's bottom corners */
+  .stage-rock{
+    position:absolute; bottom:-62px; z-index:3; pointer-events:none;
+    filter:drop-shadow(0 5px 7px rgba(2,20,70,.4));
+  }
+  .rock-bl{ left:-14px; width:138px; }
+  .rock-br{ right:-14px; width:106px; }
+  /* In-game HUD: score chips inside the display corners, like a real game */
+  .hud-in{
+    position:absolute; top:10px; left:10px; right:10px; z-index:4;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+    pointer-events:none;
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  /* Score / XP chips belong to the live run only: they are gone on the
+     start screen and on the Game Over screen, never floating over panels */
+  .hud-in.hud-hidden{ opacity:0; visibility:hidden; }
+  .hud-group{ display:flex; gap:6px; flex-wrap:wrap; }
+  .hud-group.right{ justify-content:flex-end; }
+  .chip{
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark); border-radius:10px;
+    box-shadow:0 3px 0 var(--blue-dark);
+    padding:5px 11px; font-size:14px; font-weight:800; line-height:1.15;
+    font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;
+  }
+  .chip .unit{ font-size:11px; font-weight:700; color:var(--muted); }
+  /* polish: soft glow on HUD chips */
+  .chip{ box-shadow:0 3px 0 var(--blue-dark), 0 0 10px rgba(89,216,255,.45), 0 0 18px rgba(0,183,255,.18); }
+  .hud-in .chip{ text-shadow:0 0 6px rgba(255,255,255,.55); }
+  /* Stage */
+  .stage{
+    position:relative; z-index:2;
+    border-radius:18px; overflow:hidden;
+    border:4px solid var(--blue-dark);
+    box-shadow:0 8px 0 var(--blue-dark), 0 26px 44px rgba(0,10,40,.45);
+    background:linear-gradient(180deg,#6aa9e8 0%, #a8d4f5 55%, #7cc48d 100%);
+  }
+  canvas{ display:block; width:100%; height:auto; aspect-ratio:16/9; touch-action:none; }
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    padding:18px; text-align:center;
+    background:rgba(190,228,255,.45);
+    backdrop-filter:blur(2px);
+  }
+  .overlay[hidden]{ display:none; }
+  .panel{
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:16px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.4);
+    padding:22px 24px; max-width:440px; width:100%;
+  }
+  .panel h2{ margin:0 0 6px; font-size:24px; font-weight:800; letter-spacing:-.01em; }
+  .panel p{ margin:0 0 14px; color:var(--muted); font-size:15px; line-height:1.5; }
+  /* snow-icicle strip laid across a panel's top edge */
+  .panel-snow{
+    position:absolute; top:-17px; left:-10px; right:-10px; height:38px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  /* primary button (Run again, Resume, …): pixel ice */
+  .btn{
+    appearance:none; cursor:pointer; position:relative;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    min-height:50px; padding:12px 28px; border-radius:12px;
+    font-weight:800; font-size:17px;
+  }
+  .btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* ---------- Game Over + Pause: one simple frost panel. Clean white
+     ice block, the run's numbers in three plain tiles, and the action
+     button flanked by ice rocks off the supplied sheet. ---------- */
+  #overOverlay{ background:rgba(3,22,70,.45); backdrop-filter:blur(3px); }
+  .ice-panel{ position:relative; text-align:center; }
+  .ice-panel h2{ color:var(--ink); }
+  .ice-sub{ margin:0 0 16px; color:var(--muted); font-size:14.5px; line-height:1.45; }
+  /* round pink close button, top-right of the pause panel */
+  .ice-x{
+    position:absolute; top:10px; right:10px; z-index:2;
+    width:34px; height:34px; border-radius:10px; cursor:pointer;
+    border:2.5px solid var(--blue-dark); color:#fff;
+    background:var(--facet), linear-gradient(180deg,#ff8fb8,#f43f7f);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6);
+    font-size:15px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .ice-x:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6); }
+  .ice-x:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .over-panel{ padding:30px 24px 22px; }
+  .over-avatar{
+    width:86px; height:86px; margin:4px auto 10px; border-radius:50%;
+    background:radial-gradient(circle at 50% 30%, #ffffff 0%, #c9f1fc 62%, #59d8ff 100%);
+    border:3px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 -8px 14px rgba(0,149,242,.45);
+    display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
+  }
+  .over-avatar img{ width:78px; height:auto; display:block; transform:translateY(6px); }
+  .over-panel h2{ margin:0 0 4px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .over-sub{ margin:0 0 16px; color:var(--muted); font-size:14px; line-height:1.45; }
+  .result-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:0 0 18px; }
+  .result-grid div{
+    background:var(--ice-soft); border:2px solid #8fd0ff; border-radius:12px; padding:12px 6px 10px;
+    box-shadow:inset 0 2px 0 #fff, inset 0 -6px 10px rgba(0,149,242,.14);
+  }
+  .result-grid small{ display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .result-grid strong{ display:block; font-size:22px; margin-top:3px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .result-grid strong .unit{ font-size:13px; font-weight:700; color:var(--muted); }
+  .newbest{ display:none; margin:0 auto 14px; font-weight:800; color:#7a5200; font-size:13px; }
+  .newbest.show{
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d); border:2px solid var(--gold-deep); border-radius:999px;
+    padding:6px 14px; box-shadow:0 2px 0 rgba(185,126,6,.8);
+  }
+  /* the action row: ice rocks piled on both sides of the button */
+  .over-actions{ display:flex; align-items:flex-end; justify-content:center; gap:8px; }
+  .mini-rock{ width:58px; height:auto; flex:none; pointer-events:none; filter:drop-shadow(0 3px 4px rgba(0,20,70,.3)); }
+  .mini-rock.flip{ transform:scaleX(-1); }
+  .over-hint{ margin:12px 0 0; font-size:12.5px; color:var(--muted); }
+  /* touch controls: three pixel-ice blocks under the game */
+  .touch{
+    position:relative; z-index:1;
+    display:flex; gap:10px; margin-top:12px;
+  }
+  .touch button{
+    flex:1; min-height:58px; border-radius:12px; cursor:pointer; position:relative; overflow:hidden;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    font-weight:800; font-size:17px; padding-top:9px;
+  }
+  /* snow cap with drips resting on each block's top edge */
+  .touch button::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:12px; pointer-events:none;
+    background:
+      radial-gradient(13px 8px at 14% 100%, #ffffff 98%, transparent),
+      radial-gradient(17px 10px at 40% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 63% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 10px at 88% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eaf7ff);
+  }
+  .touch button:active{ transform:translateY(3px); }
+  .touch .jump{ flex:1.4; }
+  /* How to play: one tidy guide under the game, So Fast style */
+  .guide{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 14px;
+  }
+  .guide::before, .ach::before{
+    content:""; position:absolute; top:-15px; left:12px; right:12px; height:26px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  .guide h2{ margin:0 0 4px; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .guide > p{ margin:0 0 14px; color:var(--muted); font-size:14px; }
+  .guide ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px 22px; }
+  .guide li{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #cdeaff; font-size:14px; }
+  .guide li .keys-inline{ flex:none; display:inline-flex; gap:4px; min-width:86px; }
+  .guide kbd{
+    font-family:inherit; background:var(--ice-soft); border:1.5px solid #8fd0ff; border-bottom-width:3px;
+    border-radius:6px; padding:2px 7px; font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .guide li span{ color:var(--ink); font-weight:600; }
+  @media (max-width:560px){
+    .guide ul{ grid-template-columns:1fr; }
+  }
+  /* achievements */
+  .ach{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 20px;
+  }
+  .ach-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .ach-head h2{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .ach ul{ list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .ach li{
+    display:flex; align-items:center; gap:12px;
+    border:2px solid #cdeaff; border-radius:12px; padding:12px 14px; min-height:52px;
+    background:rgba(255,255,255,.65);
+  }
+  .ach li .dot{
+    flex:none; width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); border:2px solid #8fd0ff; color:var(--muted); font-size:16px; font-weight:800;
+  }
+  .ach li.unlocked .dot{ background:#e7f8ef; border-color:#9adbb6; color:#149653; }
+  .ach li .txt{ flex:1; min-width:0; }
+  .ach li .txt strong{ display:block; font-size:15px; }
+  .ach li .txt span{ display:block; font-size:13px; color:var(--muted); margin-top:1px; }
+  .ach li .pts{ flex:none; font-weight:800; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .ach li.unlocked .pts{ color:var(--gold-deep); }
+  .ach li .state{ flex:none; font-size:12px; font-weight:700; color:var(--muted); }
+  .ach li.unlocked .state{ color:#149653; }
+  /* ---------- levels: panel states, HUD progress, level-up banner ---------- */
+  .levels-total{ font-weight:800; font-size:14px; color:var(--gold-deep); font-variant-numeric:tabular-nums; }
+  .ach li.current{ border-color:var(--gold); background:#fff6d8; box-shadow:inset 0 2px 0 #fff, 0 2px 0 rgba(185,126,6,.35); }
+  .ach li.current .dot{ background:#ffe9a3; border-color:var(--gold-deep); color:#7a5200; }
+  .ach li.current .state{ color:#7a5200; }
+  .ach li.locked{ opacity:.72; }
+  .hud-in{ flex-wrap:wrap; row-gap:6px; }
+  .level-banner{
+    position:absolute; top:54px; left:50%; z-index:6; pointer-events:none;
+    transform:translate(-50%, -8px); opacity:0;
+    background:var(--facet), linear-gradient(180deg,#ffe9a3,#ffd34d);
+    border:3px solid var(--blue-dark); border-radius:12px;
+    box-shadow:0 4px 0 var(--blue-dark), 0 14px 26px rgba(0,10,40,.35);
+    padding:10px 20px; white-space:nowrap;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:19px; color:#5b3d00;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .level-banner.show{ opacity:1; transform:translate(-50%, 0); }
+  .level-banner[hidden]{ display:none; }
+  .start-panel .start-level{
+    margin:14px 0 0; color:#fff;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15px;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+  }
+  .over-panel .over-levels{ margin:0 0 14px; font-size:13.5px; font-weight:800; color:#7a5200; line-height:1.45; }
+  .over-levels[hidden]{ display:none; }
+  @media (max-width:560px){
+    .level-banner{ top:46px; font-size:15px; padding:8px 14px; }
+    .start-panel .start-level{ font-size:13px; margin-top:10px; }
+    .over-panel .over-levels{ font-size:12px; margin-bottom:10px; }
+  }
+  @media (min-width:761px){
+    .over-panel .over-levels{ font-size:.95cqw; margin-bottom:1.2cqw; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .level-banner{ transition:none; }
+  }
+  /* toast */
+  .toast{
+    position:fixed; left:50%; bottom:22px; transform:translate(-50%, 90px);
+    z-index:20; background:var(--blue-dark); color:#fff; border:2.5px solid var(--ice); border-radius:12px;
+    box-shadow:0 5px 0 rgba(0,10,40,.6);
+    padding:13px 18px; font-size:14px; font-weight:600; max-width:min(92vw,440px); text-align:center;
+    transition:transform .3s ease; pointer-events:none;
+  }
+  .toast.show{ transform:translate(-50%, 0); }
+  .toast b{ color:#ffd34d; }
+  /* chunky game headings */
+  .panel h2, .guide h2, .ach-head h2{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.01em; }
+  /* ---------- start screen: the stacked logo over a big pixel-ice
+     PLAY block with a snow cap and icicles ---------- */
+  .panel.start-panel{
+    background:transparent; border:none; box-shadow:none; padding:4px;
+    max-width:520px;
+  }
+  .start-logo{
+    display:block; margin:0 auto; width:auto;
+    height:clamp(96px, 29vw, 168px);
+    filter:drop-shadow(0 5px 0 rgba(0,42,122,.4)) drop-shadow(0 12px 20px rgba(0,10,40,.35));
+  }
+  .play-pill{
+    position:relative; cursor:pointer; margin-top:16px;
+    min-width:min(240px,74vw); min-height:60px; padding:16px 42px 14px;
+    border-radius:14px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800;
+    font-size:27px; letter-spacing:.16em;
+    display:inline-flex; align-items:center; justify-content:center; gap:13px;
+  }
+  /* snow cap resting on the block, with little drips */
+  .play-pill::before{
+    content:""; position:absolute; top:-3px; left:10px; right:10px; height:15px; pointer-events:none;
+    background:
+      radial-gradient(13px 9px at 12% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 11px at 34% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 55% 100%, #ffffff 98%, transparent),
+      radial-gradient(19px 12px at 76% 100%, #ffffff 98%, transparent),
+      radial-gradient(14px 9px at 93% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eef8ff);
+    border-radius:14px 14px 0 0;
+  }
+  /* icicles hanging off the block's underside */
+  .play-pill::after{
+    content:""; position:absolute; left:22%; right:22%; bottom:-10px; height:11px; pointer-events:none;
+    background:linear-gradient(180deg,#29c5ff,#c9f1fc);
+    clip-path:polygon(0 0, 100% 0, 92% 70%, 84% 12%, 74% 100%, 64% 18%, 54% 78%, 45% 10%, 34% 92%, 25% 16%, 15% 66%, 7% 12%);
+  }
+  .play-pill:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .play-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:3px; }
+  .play-tri{
+    width:25px; height:25px; flex:none; background:#ffffff;
+    clip-path:polygon(24% 16%, 24% 84%, 86% 50%);
+    filter:drop-shadow(0 2px 0 rgba(0,42,122,.45));
+  }
+  /* ---------- settings panel: saturated ice frame, stitched white card ---------- */
+  .settings-overlay{
+    position:fixed; inset:0; z-index:30;
+    background:rgba(3,22,70,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    overflow-y:auto;
+  }
+  .settings-overlay[hidden]{ display:none !important; }
+  .settings-panel{
+    position:relative; width:min(94vw,404px); margin:auto;
+    background:var(--facet), linear-gradient(180deg,#2f9dff 0%,#0057ff 58%,#003ecb 100%);
+    border:3px solid var(--blue-dark); border-radius:20px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.5);
+    padding:16px 14px 14px;
+  }
+  /* snow resting on the panel's top edge */
+  .settings-panel::before{
+    content:""; position:absolute; top:-2px; left:14px; right:14px; height:14px;
+    background:
+      radial-gradient(18px 11px at 10% 0, #ffffff 98%, transparent),
+      radial-gradient(24px 13px at 36% 0, #ffffff 98%, transparent),
+      radial-gradient(20px 12px at 63% 0, #ffffff 98%, transparent),
+      radial-gradient(26px 13px at 90% 0, #ffffff 98%, transparent);
+    pointer-events:none;
+  }
+  .settings-panel h2{
+    margin:2px 0 12px; text-align:center;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-size:30px; font-weight:800; letter-spacing:.06em;
+    color:var(--gold);
+    text-shadow:0 2px 0 #b97e06, 0 4px 0 rgba(0,42,122,.6), 2px 0 0 rgba(0,42,122,.4), -2px 0 0 rgba(0,42,122,.4);
+  }
+  .set-inner{
+    background:#f4fbff; border:2px dashed #7fb2f0; border-radius:14px;
+    padding:18px 16px 16px;
+  }
+  .set-row{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .set-row.split{ justify-content:space-between; gap:8px; flex-wrap:wrap; row-gap:6px; }
+  .set-ico{ flex:none; width:30px; display:flex; align-items:center; justify-content:center; color:var(--blue); }
+  .set-ico svg{ width:26px; height:26px; display:block; }
+  .set-label{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue); }
+  .tips-wrap{ display:inline-flex; align-items:center; gap:9px; }
+  /* icy volume sliders with a chunky ice knob */
+  input[type=range].vol{
+    -webkit-appearance:none; appearance:none; flex:1; min-width:0; height:18px;
+    border-radius:8px; border:2.5px solid var(--blue-dark); background:#bcd9f7; outline:none; cursor:pointer;
+  }
+  input[type=range].vol::-webkit-slider-runnable-track{ background:transparent; }
+  input[type=range].vol::-webkit-slider-thumb{
+    -webkit-appearance:none; width:32px; height:32px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  input[type=range].vol::-moz-range-track{ height:18px; border-radius:8px; background:#bcd9f7; }
+  input[type=range].vol::-moz-range-progress{ height:18px; border-radius:8px; background:var(--cyan); }
+  input[type=range].vol::-moz-range-thumb{
+    width:28px; height:28px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  /* game-tips switch: a chunky ice block with a green check when on */
+  .switch{
+    flex:none; width:42px; height:42px; border-radius:11px; cursor:pointer;
+    color:transparent;
+    background:linear-gradient(180deg,#eef6fb,#c9deee);
+    border:2.5px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    font-size:21px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .switch.on{ color:#149653; background:var(--facet), linear-gradient(180deg,#ffffff,#b8f4d2); }
+  .switch:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 #fff; }
+  .notice-btn{
+    position:relative; cursor:pointer; border:none; background:none; padding:6px 28px 6px 6px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue);
+  }
+  .nbadge{
+    position:absolute; top:-7px; right:2px; min-width:19px; height:19px; padding:0 4px;
+    border-radius:999px; background:#e23c3c; color:#fff; border:1.5px solid #fff;
+    font-size:11px; font-weight:800; line-height:17px; text-align:center;
+  }
+  .notice-text{
+    margin:0 0 14px; background:#fff8e1; border:1px solid #f0d48a; border-radius:12px;
+    padding:10px 12px; font-size:13.5px; line-height:1.5; color:#6b5310;
+  }
+  .wallet-status{ margin:0 0 12px; font-size:13px; line-height:1.5; color:var(--muted); min-height:0; }
+  .wallet-status:empty{ display:none; }
+  .set-actions{ display:flex; gap:12px; }
+  .set-connect, .set-ok{
+    flex:1; min-height:52px; border-radius:12px; cursor:pointer;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:18px; letter-spacing:.02em;
+  }
+  .set-connect{
+    background:var(--facet), linear-gradient(180deg,#ff9a86,#f2604c); color:#fff;
+    border:3px solid #8f2d1d; box-shadow:0 4px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55);
+    text-shadow:0 1px 2px rgba(143,45,29,.45);
+  }
+  .set-connect.connected{ font-size:14.5px; letter-spacing:0; }
+  .set-ok{
+    background:var(--facet), linear-gradient(180deg,#ffd964,#f5b81d); color:#5b3d00;
+    border:3px solid #8a5f04; box-shadow:0 4px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6);
+  }
+  .set-connect:active, .set-ok:active{ transform:translateY(2px); }
+  .set-connect:active{ box-shadow:0 2px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55); }
+  .set-ok:active{ box-shadow:0 2px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6); }
+  @media (max-width:560px){
+    .stage-wrap{ margin-top:80px; margin-bottom:52px; }
+    .peek{ right:8px; top:-85px; width:88px; height:66px; }
+    .peek img{ width:76px; margin:5px 6px 0; }
+    .snow-edge-top{ top:-40px; height:46px; }
+    .snow-edge-bottom{ bottom:-38px; height:46px; }
+    .stage-rock{ bottom:-50px; }
+    .rock-bl{ left:-8px; width:96px; }
+    .rock-br{ right:-8px; width:76px; }
+    .hud-in{ top:7px; left:7px; right:7px; }
+    .chip{ font-size:12px; padding:4px 8px; gap:4px; }
+    .chip.speed{ display:none; }
+    .overlay{ padding:8px; }
+    .panel{ padding:12px 14px; border-radius:14px; }
+    .panel h2{ font-size:18px; margin-bottom:4px; }
+    .panel p{ font-size:13px; line-height:1.4; margin-bottom:8px; }
+    .btn{ min-height:44px; padding:8px 22px; font-size:15px; }
+    .result-grid{ margin-bottom:10px; }
+    .result-grid div{ padding:7px 4px; }
+    .result-grid strong{ font-size:16px; }
+    .over-panel{ padding:20px 14px 14px; }
+    .over-panel h2{ font-size:24px; }
+    .over-avatar{ width:64px; height:64px; margin-bottom:6px; }
+    .over-avatar img{ width:58px; }
+    .over-sub{ font-size:12.5px; margin-bottom:10px; }
+    .over-hint{ display:none; }
+    .mini-rock{ width:42px; }
+    .panel-snow{ height:30px; top:-13px; }
+    /* Start screen on phones: the 16:9 frame is short, so the stacked
+       logo and the PLAY block shrink until both sit fully inside the
+       frame, clear of the snow border and the corner rocks */
+    #startOverlay{ padding:6px; }
+    .panel.start-panel{ padding:0; }
+    .start-logo{ height:clamp(62px, 20.5vw, 96px); }
+    .play-pill{
+      margin-top:10px; min-width:0; min-height:50px;
+      padding:12px 30px 11px; font-size:21px; letter-spacing:.13em; gap:10px;
+    }
+    .play-tri{ width:20px; height:20px; }
+  }
+  /* ---------- Game Over on phones: the whole panel has to live inside
+     the 16:9 stage, so at narrow widths it sheds the avatar medallion
+     and tightens every row until the title, the three result tiles and
+     the Run again button all sit inside the frame, clear of the ice
+     rocks piled at the frame's bottom corners. When the New best badge
+     shows, the flavour line under the title steps aside for it. */
+  @media (max-width:760px){
+    #overOverlay{ padding:6px; }
+    .over-panel{ padding:11px 16px 10px; }
+    .over-avatar{ display:none; }
+    .over-panel h2{ font-size:22px; margin-bottom:2px; }
+    .over-sub{ font-size:12.5px; margin-bottom:6px; }
+    .over-panel:has(.newbest.show) .over-sub{ display:none; }
+    .newbest{ margin-bottom:6px; padding:5px 12px; font-size:12px; }
+    .result-grid{ gap:6px; margin-bottom:8px; }
+    .result-grid div{ padding:6px 4px 5px; }
+    .result-grid small{ font-size:9.5px; }
+    .result-grid strong{ font-size:15px; margin-top:2px; }
+    .over-actions .btn{ min-height:40px; padding:8px 20px; font-size:15px; }
+    .mini-rock{ width:34px; }
+    .over-hint{ display:none; }
+  }
+  @media (max-width:400px){
+    #overOverlay{ padding:4px; }
+    .over-panel{ padding:10px 12px 8px; }
+    .over-panel h2{ font-size:19px; }
+    .over-sub{ font-size:11.5px; margin-bottom:6px; }
+    .newbest{ margin-bottom:6px; padding:3px 10px; font-size:11.5px; }
+    .result-grid{ margin-bottom:8px; }
+    .result-grid div{ padding:5px 3px 4px; }
+    .result-grid small{ font-size:9px; }
+    .result-grid strong{ font-size:14px; }
+    .over-actions .btn{ min-height:36px; padding:6px 16px; font-size:14px; }
+    .mini-rock{ width:27px; }
+    .panel-snow{ height:24px; top:-10px; }
+  }
+  /* ---------- Desktop / PC sizing: the game sits in a centered card
+     no wider than its native 960px canvas, with the page background
+     breathing on both sides, and it shrinks to fit the window height
+     so the header above and the touch controls below stay on screen.
+     The header, guide and achievements share the same 960px column.
+     Phones (760px and under) keep the full-width stage untouched. */
+  @media (min-width:761px){
+    .stage-wrap{
+      width:min(960px, max(480px, calc((100vh - 430px) * 16 / 9)));
+      width:min(960px, max(480px, calc((100dvh - 430px) * 16 / 9)));
+      margin-left:auto; margin-right:auto;
+    }
+    .touch{
+      width:min(960px, max(480px, calc((100vh - 430px) * 16 / 9)));
+      width:min(960px, max(480px, calc((100dvh - 430px) * 16 / 9)));
+      margin-left:auto; margin-right:auto;
+    }
+    /* overlay furniture scales with the stage, not the viewport */
+    .stage{ container-type:inline-size; }
+    .start-logo{ height:clamp(84px, 17.5cqw, 168px); }
+  }
+  /* Short PC windows: the Game Over panel tightens the same way it
+     does on phones, so it always lives inside the shortened stage */
+  @media (min-width:761px) and (max-height:840px){
+    .over-avatar{ display:none; }
+    .over-panel{ padding:18px 22px 14px; }
+    .over-panel h2{ font-size:24px; }
+    .over-sub{ margin-bottom:10px; }
+    .result-grid{ margin-bottom:12px; }
+    .result-grid strong{ font-size:18px; }
+    .over-hint{ display:none; }
+    .panel-snow{ height:30px; top:-13px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .toast{ transition:none; }
+    .btn:active{ transform:none; }
+    .peek img{ animation:none; }
+  }
+  /* ---------- FINAL desktop sizing, matched to the wide frame the
+     user marked out (about three quarters of the screen wide, like
+     Dogecat's So Fast stage at 1280x572, a 2.24:1 ratio): a compact
+     header (logo ~210px wide, whole block under 130px) and a WIDE,
+     short stage in the 1280/572 ratio, capped near 74% of the
+     viewport width and sized from the viewport height so header +
+     stage + touch controls fit on ONE screen. The snow ledge and
+     peeking yeti above the stage are tightened to match. These rules
+     sit LAST in the stylesheet so they win the cascade over every
+     earlier desktop rule. Phones (760px and under) keep their
+     existing layout untouched. ---------- */
+  @media (min-width:761px){
+    .wrap{ max-width:1456px; padding-top:12px; }
+    .head{ margin-bottom:8px; }
+    .logo{ width:210px; }
+    .head p{ margin-top:4px; font-size:14px; }
+    .stage-wrap{
+      width:min(1420px, 74vw, 100%, calc((100vh - 328px) * 1280 / 572));
+      width:min(1420px, 74vw, 100%, calc((100dvh - 328px) * 1280 / 572));
+      margin:82px auto 56px;
+    }
+    /* the wide view itself: on desktop the canvas shows the world at
+       1280x572 (2.24:1); phones keep the original 16:9 frame */
+    canvas{ aspect-ratio:1280/572; }
+    .touch{
+      width:min(1420px, 74vw, 100%, calc((100vh - 328px) * 1280 / 572));
+      width:min(1420px, 74vw, 100%, calc((100dvh - 328px) * 1280 / 572));
+      margin-left:auto; margin-right:auto;
+    }
+    .peek{ width:98px; height:67px; top:-84px; right:21px; }
+    .peek img{ width:84px; margin:6px 7px 0; }
+    /* the top ledge sits ON the frame: flush with its sides and
+       overlapping its top edge by 6px, icicle tips resting on the
+       frame's border instead of floating above it */
+    .snow-edge-top{ top:-36px; height:42px; left:0; right:0; }
+    .snow-edge-bottom{ bottom:-36px; height:44px; }
+    .stage-rock{ bottom:-52px; }
+    .rock-bl{ width:110px; }
+    .rock-br{ width:86px; }
+  }
+  /* ---------- Panel fit fix (desktop): the Game Over and Pause
+     panels scale with the stage itself, in container units (the
+     stage is a container and its height is a fixed 572/1280 of its
+     width), so the whole panel — title, subtitle, New best badge,
+     the three result tiles and the action button — always sits
+     inside the frame with clear air on every side, at any window
+     size or zoom. The frame's snow strips rest on the frame's
+     edge, overlapping only its border, and never lie over a
+     panel, and the Game Over panel is capped narrow enough
+     that it never reaches the ice rocks piled at the bottom
+     corners. Phones (760px and under) keep their layout untouched. */
+  @media (min-width:761px){
+    .snow-edge-top{ top:-36px; }
+    .snow-edge-bottom{ bottom:-44px; }
+    #overOverlay, #pauseOverlay{ padding:3cqw 18px 4cqw; }
+    .ice-panel .panel-snow{ height:2.85cqw; top:-1.3cqw; }
+    .over-panel{
+      max-width:min(440px, 60cqw);
+      padding:2.2cqw 1.8cqw 1.6cqw;
+    }
+    .over-avatar{ width:6.4cqw; height:6.4cqw; margin:.3cqw auto .75cqw; }
+    .over-avatar img{ width:5.8cqw; }
+    .over-panel h2{ font-size:2.25cqw; margin-bottom:.3cqw; }
+    .over-sub{ font-size:1.05cqw; margin-bottom:1.2cqw; }
+    .newbest{ font-size:1cqw; padding:.45cqw 1.05cqw; margin-bottom:1.05cqw; }
+    .result-grid{ gap:.6cqw; margin-bottom:1.35cqw; }
+    .result-grid div{ padding:.9cqw .45cqw .75cqw; }
+    .result-grid small{ font-size:.8cqw; }
+    .result-grid strong{ font-size:1.65cqw; }
+    .result-grid strong .unit{ font-size:1cqw; }
+    .mini-rock{ width:4.3cqw; }
+    .over-hint{ margin-top:.9cqw; font-size:.95cqw; }
+    #pauseOverlay .panel{ padding:1.9cqw 1.8cqw; }
+    #pauseOverlay .panel h2{ font-size:1.8cqw; margin-bottom:.45cqw; }
+    .ice-sub{ font-size:1cqw; margin-bottom:1.1cqw; }
+    #overOverlay .btn, #pauseOverlay .btn{
+      min-height:3.7cqw; font-size:1.3cqw; padding:.9cqw 2.1cqw;
+    }
+  }
+  /* ---------- Site chrome: a compact header bar (Back button, brand,
+     profile / sign-in pill) and a slim footer, matching the Lofi Games
+     hub. Both sit outside the game stage; the canvas, gameplay and
+     controls are untouched. ---------- */
+  .site-bar{
+    position:relative; z-index:2;
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:18px;
+  }
+  .back-btn{
+    flex:none; display:inline-flex; align-items:center; gap:7px;
+    min-height:42px; padding:8px 16px 8px 12px; border-radius:11px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15.5px;
+    text-decoration:none;
+  }
+  .back-btn svg{ width:17px; height:17px; display:block; }
+  .back-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .back-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .site-brand{
+    display:inline-flex; align-items:center; gap:9px; text-decoration:none;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800;
+    font-size:19px; letter-spacing:.02em; color:#fff;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+  }
+  .site-brand img{
+    width:34px; height:34px; border-radius:50%; object-fit:cover;
+    background:#fff; border:2px solid var(--blue-dark); box-shadow:0 2px 0 var(--blue-dark);
+  }
+  .site-brand:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; border-radius:999px; }
+  .site-bar .spacer{ flex:1; }
+  .profile-pill{
+    flex:none; display:inline-flex; align-items:center; gap:8px;
+    max-width:48vw; min-height:42px; padding:5px 15px 5px 6px; border-radius:999px;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark);
+    color:var(--ink); text-decoration:none;
+    font-size:14px; font-weight:800;
+  }
+  .profile-pill img{ width:30px; height:30px; border-radius:50%; object-fit:cover; flex:none; background:var(--ice-soft); }
+  .profile-pill .pill-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .profile-pill:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark); }
+  .profile-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .site-foot{
+    position:relative; z-index:1;
+    max-width:992px; margin:0 auto; padding:2px 16px 30px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px 18px; flex-wrap:wrap;
+    color:#cfe6ff; font-size:13.5px; font-weight:600;
+  }
+  .site-foot .foot-name{
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15px;
+    color:#fff; text-shadow:0 1px 0 rgba(0,42,122,.5);
+  }
+  .site-foot nav{ display:flex; gap:20px; flex-wrap:wrap; }
+  .site-foot a{ color:#cfe6ff; text-decoration:none; }
+  .site-foot a:hover, .site-foot a:focus-visible{ color:#fff; text-decoration:underline; }
+  @media (min-width:761px){ .site-foot{ max-width:1456px; } }
+  /* ---- polish: cute hover lifts + micro-animations ---- */
+  @media (hover:hover) and (prefers-reduced-motion: no-preference){
+    .pix,.btn,.icon-btn,.cube-btn,.back-btn,.profile-pill,.touch button,.set-connect,.set-ok,.switch,.play-pill{ transition:transform .16s ease, box-shadow .16s ease, filter .16s ease; }
+    .pix:hover,.btn:hover{ transform:translateY(-2px); filter:brightness(1.06); box-shadow:0 7px 0 var(--blue-dark), 0 0 16px rgba(89,216,255,.55), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+    .icon-btn:hover,.cube-btn:hover{ transform:translateY(-2px) rotate(-2deg); box-shadow:0 7px 0 var(--blue-dark), 0 0 14px rgba(89,216,255,.6), inset 0 3px 0 rgba(255,255,255,.9); }
+    .back-btn:hover{ transform:translateY(-2px); }
+    .profile-pill:hover{ transform:translateY(-1px); box-shadow:0 4px 0 var(--blue-dark), 0 0 14px rgba(89,216,255,.45); }
+    .touch button:hover{ transform:translateY(-2px); }
+    .play-pill:hover{ transform:translateY(-3px) scale(1.02); }
+    .guide,.ach{ transition:transform .18s ease, box-shadow .18s ease; }
+    .guide:hover,.ach:hover{ transform:translateY(-2px); box-shadow:0 8px 0 var(--blue-dark), 0 0 20px rgba(89,216,255,.22); }
+    .ach li{ transition:transform .15s ease, box-shadow .15s ease; }
+    .ach li:hover{ transform:translateY(-1px) translateX(2px); box-shadow:0 2px 8px rgba(0,87,255,.14); }
+    .settings-panel{ animation:settingsPop .22s ease; }
+    @keyframes settingsPop{ from{ transform:scale(.97) translateY(6px); opacity:.6; } to{ transform:scale(1) translateY(0); opacity:1; } }
+    .set-connect:hover,.set-ok:hover{ transform:translateY(-2px); filter:brightness(1.05); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .settings-panel{ animation:none !important; }
+  }
+  @media (max-width:560px){
+    .site-bar{ gap:9px; margin-bottom:14px; }
+    .site-brand{ font-size:16px; }
+    .site-brand img{ width:30px; height:30px; }
+    .back-btn{ min-height:38px; padding:7px 13px 7px 10px; font-size:14.5px; }
+    .profile-pill{ min-height:38px; font-size:13px; padding-right:12px; }
+    .profile-pill img{ width:27px; height:27px; }
+  }
+</style>
+<style>/* Light entrance animation (repo-only patch, re-applied after each re-export) */
+@keyframes lofi-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body{animation:lofi-fade-in .45s ease-out both}
+@media (prefers-reduced-motion:reduce){body{animation:none}}
+</style>
+</head>
+<body>
+<div class="vapour" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<main class="wrap">
+  <header class="site-bar">
+    <a class="back-btn pix" href="/lofigame/" aria-label="Back to all Lofi games">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 4.5 7 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <a class="site-brand" href="/lofigame/"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /><span>Lofi Games</span></a>
+    <span class="spacer" aria-hidden="true"></span>
+    <a class="profile-pill" id="profilePill" href="/lofigame/" aria-label="Sign in on Lofi Games">
+      <img id="pillAvatar" src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" referrerpolicy="no-referrer" />
+      <span class="pill-name" id="pillName">Sign in</span>
+    </a>
+  </header>
+
+  <div class="head">
+    <div>
+      <h1><img class="logo" src="/lofigame/assets/logo-89908ca7.webp" alt="Lofi Dash" /></h1>
+      <p>Jump the stickers. Grab the coins. Go far.</p>
+    </div>
+    <div class="head-actions">
+      <button class="cube-btn pix" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+          </g>
+          <g fill="#ffffff" stroke="currentColor" stroke-width="1.7">
+            <circle cx="9" cy="7" r="2.4"/><circle cx="15" cy="12" r="2.4"/><circle cx="8" cy="17" r="2.4"/>
+          </g>
+        </svg>
+      </button>
+      <button class="icon-btn pix" id="soundBtn" type="button" aria-pressed="false" aria-label="Sound on. Tap to mute." title="Sound on / off (M)">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+          <g class="waves" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/>
+            <path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+          </g>
+          <line class="slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke="#d64545" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+  <div class="peek" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+  <div class="snow-edge snow-edge-top" aria-hidden="true"></div>
+  <div class="stage">
+    <canvas id="game" width="1280" height="572" aria-label="Lofi Dash game. Lofi the yeti runs along a pixel-brick road. Control with all four arrow keys or with W A D Z: up or W to jump, right or D to move forward and dash in the air, left or A to move back, down or Z to duck. Jump over the big sticker blockers on the road."></canvas>
+
+    <div class="hud-in hud-hidden" id="hudIn" aria-label="Run stats">
+      <div class="hud-group">
+        <span class="chip">🏃 <span id="hudDist">0</span><span class="unit">m</span></span>
+        <span class="chip">🪙 <span id="hudCoins">0</span></span>
+        <span class="chip">🏅 <span id="hudLevel">Level 1 · 0 / 500 m</span></span>
+      </div>
+      <div class="hud-group right">
+        <span class="chip">⭐ <span id="xpTotal">0</span><span class="unit">XP</span></span>
+        <span class="chip">🏆 <span id="hudBest">0</span><span class="unit">m</span></span>
+        <span class="chip speed">⚡ <span id="hudSpeed">1.0</span><span class="unit">×</span></span>
+      </div>
+    </div>
+
+    <div class="level-banner" id="levelBanner" hidden role="status"></div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="panel start-panel">
+        <img class="start-logo" src="/lofigame/assets/start-logo-1bbb7cb1.webp" alt="Lofi Dash" />
+        <button class="play-pill pix" id="startBtn" type="button" aria-label="Start run"><span class="play-tri" aria-hidden="true"></span>PLAY</button>
+        <p class="start-level" id="startLevel"></p>
+      </div>
+    </div>
+
+    <div class="overlay" id="pauseOverlay" hidden>
+      <div class="panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <button class="ice-x" id="pauseClose" type="button" aria-label="Close and resume">✕</button>
+        <h2>Paused</h2>
+        <p class="ice-sub">Taking a breather in the snow.</p>
+        <button class="btn pix" id="resumeBtn" type="button">Resume</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="overOverlay" hidden>
+      <div class="panel over-panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <div class="over-avatar" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+        <h2>Game Over</h2>
+        <p class="over-sub">Lofi took a tumble in the snow.</p>
+        <p class="newbest" id="newBest">🏆 New best run!</p>
+        <div class="result-grid">
+          <div><small>Distance</small><strong><span id="resDist">0</span> <span class="unit">m</span></strong></div>
+          <div><small>Coins</small><strong id="resCoins">0</strong></div>
+          <div><small>Best</small><strong><span id="resBest">0</span> <span class="unit">m</span></strong></div>
+        </div>
+        <p class="over-levels" id="overLevels" hidden></p>
+        <div class="over-actions">
+          <img class="mini-rock" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+          <button class="btn pix" id="restartBtn" type="button">↻ Run again</button>
+          <img class="mini-rock flip" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+        </div>
+        <p class="over-hint">or press Enter</p>
+      </div>
+    </div>
+  </div>
+  <div class="snow-edge snow-edge-bottom" aria-hidden="true"></div>
+  <img class="stage-rock rock-bl" src="/lofigame/assets/rock-39b343c2.webp" alt="" aria-hidden="true" />
+  <img class="stage-rock rock-br" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+  </div>
+
+  <div class="touch" aria-label="Touch controls">
+    <button type="button" class="pix" id="duckBtn">↓ Duck</button>
+    <button type="button" class="jump pix" id="jumpBtn">Jump · Dash</button>
+    <button type="button" class="pix" id="pauseBtn">Pause</button>
+  </div>
+
+  <section class="guide" aria-label="How to play">
+    <h2>How to play</h2>
+    <p class="goal">Jump over the road stickers, duck when you need to, and collect 🪙 coins. One hit ends the run. The world changes as you clear each level.</p>
+    <ul>
+      <li><span class="keys-inline"><kbd>↑</kbd><kbd>W</kbd></span><span>Jump · press again in the air to dash</span></li>
+      <li><span class="keys-inline"><kbd>→</kbd><kbd>D</kbd></span><span>Move forward</span></li>
+      <li><span class="keys-inline"><kbd>←</kbd><kbd>A</kbd></span><span>Move back</span></li>
+      <li><span class="keys-inline"><kbd>↓</kbd><kbd>Z</kbd></span><span>Duck</span></li>
+      <li><span class="keys-inline"><kbd>Space</kbd></span><span>Jump · again in the air to dash</span></li>
+      <li><span class="keys-inline"><kbd>P</kbd><kbd>M</kbd></span><span>Pause · Sound on / off</span></li>
+      <li><span class="keys-inline"><kbd>Touch</kbd></span><span>Tap to jump, tap again to dash, swipe down to duck</span></li>
+      <li><span class="keys-inline"><kbd>Enter</kbd></span><span>Start · Run again</span></li>
+    </ul>
+  </section>
+
+  <section class="ach levels" aria-label="Levels">
+    <div class="ach-head">
+      <h2>🏅 Levels</h2>
+      <span class="levels-total" id="levelsTotal">0 XP from levels</span>
+    </div>
+    <ul id="levelList"></ul>
+  </section>
+
+  <section class="ach" aria-label="Achievements">
+    <div class="ach-head">
+      <h2>🏆 Achievements</h2>
+    </div>
+    <ul id="achList"></ul>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <span class="foot-name">Lofi Games</span>
+  <nav aria-label="Footer">
+    <a href="/lofigame/">All games</a>
+    <a href="/lofigame/#/settings">Profile</a>
+  </nav>
+</footer>
+
+<div class="settings-overlay" id="settingsOverlay" hidden>
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle">SETTINGS</h2>
+    <div class="set-inner">
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V6l10-2v11.5"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="16.5" cy="15.5" r="2.6"/>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="musicVol" min="0" max="100" value="55" aria-label="Music volume" />
+      </div>
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+            <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/><path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+            </g>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="soundVol" min="0" max="100" value="80" aria-label="Sound volume" />
+      </div>
+      <div class="set-row split">
+        <span class="tips-wrap">
+          <span class="set-label" id="tipsLabel">Game tips</span>
+          <button class="switch on" id="tipsToggle" type="button" role="switch" aria-checked="true" aria-labelledby="tipsLabel">✓</button>
+        </span>
+        <button class="notice-btn" id="noticeBtn" type="button">Notice<span class="nbadge" id="noticeBadge">1</span></button>
+      </div>
+      <p class="notice-text" id="noticeText" hidden>Three worlds rotate every 500 m, and the road stickers got bigger. Connect a SUI wallet here and your address shows on the Connect button.</p>
+      <p class="wallet-status" id="walletStatus" role="status"></p>
+      <div class="set-actions">
+        <button class="set-connect" id="connectBtn" type="button">Connect</button>
+        <button class="set-ok" id="settingsOk" type="button">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  /* Two stage sizes, one game: phones keep the original 960x540
+     (16:9) view; desktop runs the wide 1280x572 (2.24:1) view, where
+     the camera simply shows more of the world to the right. Every
+     gameplay number is measured from GROUND, so a run plays exactly
+     the same in both. applyStageSize() below keeps them in sync. */
+  var W = 1280, H = 572, GROUND = 526;
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var hudDist = document.getElementById('hudDist');
+  var hudCoins = document.getElementById('hudCoins');
+  var hudBest = document.getElementById('hudBest');
+  var hudSpeed = document.getElementById('hudSpeed');
+  var hudIn = document.getElementById('hudIn');
+  /* ---------- header profile pill: mirrors the hub header. It reads
+     the same Firebase auth state (wired in initFirebaseSync below):
+     signed in shows the player's avatar + name, signed out shows the
+     yeti icon + "Sign in". The pill links back to the hub either way. */
+  var profilePill = document.getElementById('profilePill');
+  var pillAvatar = document.getElementById('pillAvatar');
+  var pillName = document.getElementById('pillName');
+  function updateProfilePill(user){
+    if(!profilePill || !pillName || !pillAvatar) return;
+    if(user){
+      var name = user.displayName || (user.email ? user.email.split('@')[0] : 'Player');
+      pillName.textContent = name;
+      /* Google profile photo, matching the hub: the signed-in user's
+         photoURL (firebase.auth().currentUser.photoURL) is the pill
+         avatar when one exists; otherwise the preset avatar, exactly
+         as before. */
+      var photo = null;
+      try{
+        if(typeof firebase !== 'undefined' && firebase.auth){
+          var cu = firebase.auth().currentUser;
+          if(cu && cu.photoURL) photo = cu.photoURL;
+        }
+      }catch(e){}
+      if(!photo && user.photoURL) photo = user.photoURL;
+      pillAvatar.referrerPolicy = 'no-referrer';
+      pillAvatar.src = photo || '/lofigame/assets/lofi-face-a1b88584.webp';
+      profilePill.setAttribute('aria-label', 'Signed in as ' + name + '. Go to Lofi Games.');
+    }else{
+      pillName.textContent = 'Sign in';
+      pillAvatar.referrerPolicy = 'no-referrer';
+      pillAvatar.src = '/lofigame/assets/lofi-face-a1b88584.webp';
+      profilePill.setAttribute('aria-label', 'Sign in on Lofi Games');
+    }
+  }
+  var startOverlay = document.getElementById('startOverlay');
+  var pauseOverlay = document.getElementById('pauseOverlay');
+  var overOverlay = document.getElementById('overOverlay');
+  var toastEl = document.getElementById('toast');
+
+  /* ---------- achievements ---------- */
+  var ACH = [
+    { id:'first',  name:'First run',               desc:'Start your first run',              xp:10  },
+    { id:'clean',  name:'500 m without a scratch', desc:'Reach 500 m in one run',            xp:25  },
+    { id:'coins',  name:'50 coins in one run',     desc:'Collect 50 coins in a single run',  xp:25  },
+    { id:'long',   name:'1,500 m in one run',      desc:'Run 1,500 m in a single run',       xp:50  },
+    { id:'ultra',  name:'3,000 m in one run',      desc:'Run 3,000 m in a single run',       xp:100 }
+  ];
+  var unlocked = {};
+  /* ---------- saved progress: best run, achievements and settings
+     persist on this device only, under this game's own key. Nothing
+     leaves the browser; a reload no longer wipes a player's record. */
+  var SAVE_KEY = 'lofi_dash_save_v1';
+  var savedData = null;
+  try{
+    var rawSave = window.localStorage ? window.localStorage.getItem(SAVE_KEY) : null;
+    if(rawSave) savedData = JSON.parse(rawSave);
+  }catch(e){ savedData = null; }
+  if(savedData && savedData.unlocked && typeof savedData.unlocked === 'object'){
+    ACH.forEach(function(a){ if(savedData.unlocked[a.id]) unlocked[a.id] = true; });
+  }
+  /* ---------- levels: 10 consecutive single-run distance stretches.
+     Level n ends at LEVELS_END[n-1] metres from the start of a run and
+     pays 10 x n XP the first time it is completed. A save written
+     before levels existed simply has no level fields: level 0, 0 XP. */
+  var LEVELS_LEN = [500, 700, 800, 1000, 1200, 1500, 1800, 2200, 2600, 3000];
+  var LEVELS_END = [];
+  (function(){ var acc = 0; LEVELS_LEN.forEach(function(l){ acc += l; LEVELS_END.push(acc); }); })();
+  var level = 0, levelXP = 0;
+  if(savedData){
+    if(typeof savedData.level === 'number' && isFinite(savedData.level)) level = Math.min(10, Math.max(0, Math.floor(savedData.level)));
+    if(typeof savedData.levelXP === 'number' && isFinite(savedData.levelXP)) levelXP = Math.max(0, Math.floor(savedData.levelXP));
+  }
+  function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function saveSave(){
+    try{
+      if(window.localStorage){
+        window.localStorage.setItem(SAVE_KEY, JSON.stringify({
+          v: 1,
+          best: (typeof best === 'number' && isFinite(best)) ? best : 0,
+          unlocked: unlocked,
+          level: (typeof level === 'number' && isFinite(level)) ? level : 0,
+          levelXP: (typeof levelXP === 'number' && isFinite(levelXP)) ? levelXP : 0,
+          muted: !!muted,
+          soundVol: (typeof soundVolVal === 'number') ? soundVolVal : 0.8,
+          musicVol: (typeof musicVolVal === 'number') ? musicVolVal : 0.55,
+          tipsOn: !!tipsOn
+        }));
+      }
+    }catch(e){}
+    /* Firebase sync: after the existing localStorage write, queue a
+       debounced full-doc write to Firestore (best/settings changes). */
+    if(!fbSuppressSync) queueFirestoreSync(null);
+  }
+  /* ---------- Firebase sync (Lofi Games, lofi-games) ----------
+     Public client config — not a secret. localStorage stays the
+     offline fallback; Firestore is a mirror at
+     users/{uid}/games/lofi-dash. Never store a wallet address,
+     seed phrase, private key, or password in Firestore. */
+  var firebaseConfig = {
+    apiKey: "AIzaSyBQ5isDVE9nWFXO-3es3OmxVL047HmnE28",
+    authDomain: "winterplay.online",
+    projectId: "lofi-games",
+    storageBucket: "lofi-games.firebasestorage.app",
+    messagingSenderId: "885237508877",
+    appId: "1:885237508877:web:ac09a74ce6a82d8e5c1e44"
+  };
+  var fbUser = null;
+  var fbDb = null;
+  var fbAuth = null;
+  var fbSyncTimer = null;
+  var fbPendingUnlocks = {};
+  var fbSuppressSync = false;
+  function fbGameDocRef(){
+    if(!fbUser || !fbDb) return null;
+    return fbDb.collection('users').doc(fbUser.uid).collection('games').doc('lofi-dash');
+  }
+  function fbCurrentSettings(){
+    return {
+      muted: !!muted,
+      soundVol: (typeof soundVolVal === 'number' && isFinite(soundVolVal)) ? Math.min(1, Math.max(0, soundVolVal)) : 0.8,
+      musicVol: (typeof musicVolVal === 'number' && isFinite(musicVolVal)) ? Math.min(1, Math.max(0, musicVolVal)) : 0.55,
+      tipsOn: !!tipsOn
+    };
+  }
+  function fbCurrentUnlocked(){
+    var out = {};
+    Object.keys(unlocked).forEach(function(k){ if(unlocked[k]) out[k] = true; });
+    return out;
+  }
+  function queueFirestoreSync(unlockId){
+    if(unlockId) fbPendingUnlocks[unlockId] = true;
+    if(!fbUser || !fbDb) return;
+    if(typeof firebase === 'undefined') return;
+    if(fbSyncTimer) clearTimeout(fbSyncTimer);
+    fbSyncTimer = setTimeout(flushFirestoreSync, 500);
+  }
+  function flushFirestoreSync(){
+    fbSyncTimer = null;
+    if(!fbUser || !fbDb){ fbPendingUnlocks = {}; return; }
+    if(typeof firebase === 'undefined' || !firebase.firestore || !firebase.firestore.FieldValue) return;
+    var ref = fbGameDocRef();
+    if(!ref) return;
+    var pending = fbPendingUnlocks;
+    fbPendingUnlocks = {};
+    try{
+      var data = {
+        best: (typeof best === 'number' && isFinite(best)) ? best : 0,
+        unlocked: fbCurrentUnlocked(),
+        level: (typeof level === 'number' && isFinite(level)) ? level : 0,
+        levelXP: (typeof levelXP === 'number' && isFinite(levelXP)) ? levelXP : 0,
+        settings: fbCurrentSettings(),
+        migratedFromLocal: true,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if(Object.keys(pending).length){
+        data.earnedAt = {};
+        Object.keys(pending).forEach(function(id){
+          data.earnedAt[id] = firebase.firestore.FieldValue.serverTimestamp();
+        });
+      }
+      /* Offline / failure: keep the local save; the next save or
+         sign-in retries with the full current state. Never block,
+         but never fail silently either — log the write failure. */
+      var p = ref.set(data, { merge: true });
+      if(p && typeof p.catch === 'function') p.catch(function(err){ if(window.console && console.warn) console.warn('[Lofi Dash] Firestore sync write failed; local save kept.', err); });
+    }catch(e){ if(window.console && console.warn) console.warn('[Lofi Dash] Firestore sync write failed; local save kept.', e); }
+  }
+  function handleSignInMerge(user){
+    if(typeof firebase === 'undefined' || !firebase.firestore || !firebase.firestore.FieldValue) return;
+    var ref = fbGameDocRef();
+    if(!ref) return;
+    /* Do NOT snapshot local state here. ref.get() is async, and a run
+       can unlock an achievement while the read is in flight; a snapshot
+       taken at entry would be stale by merge time and its write-back
+       would erase the in-flight unlock locally and in the cloud. The
+       live local state is re-read inside the .then() callback below,
+       at merge time. */
+    ref.get().then(function(snap){
+      /* Re-read the LIVE local state at merge time: the current
+         in-memory best/unlocked/settings, anything queued in
+         fbPendingUnlocks, and the freshest localStorage save —
+         unioned together, never replacing the live unlocked set. */
+      var localBest = (typeof best === 'number' && isFinite(best)) ? best : 0;
+      var localUnlocked = fbCurrentUnlocked();
+      Object.keys(fbPendingUnlocks).forEach(function(k){ if(fbPendingUnlocks[k]) localUnlocked[k] = true; });
+      var localSettings = fbCurrentSettings();
+      var localLevel = (typeof level === 'number' && isFinite(level)) ? level : 0;
+      var localLevelXP = (typeof levelXP === 'number' && isFinite(levelXP)) ? levelXP : 0;
+      var hasLocalSave = !!savedData;
+      try{
+        if(window.localStorage){
+          var rawNow = window.localStorage.getItem(SAVE_KEY);
+          if(rawNow){
+            var parsedNow = JSON.parse(rawNow);
+            if(parsedNow){
+              hasLocalSave = true;
+              if(typeof parsedNow.best === 'number' && isFinite(parsedNow.best)) localBest = Math.max(localBest, Math.floor(parsedNow.best));
+              if(parsedNow.unlocked && typeof parsedNow.unlocked === 'object'){
+                Object.keys(parsedNow.unlocked).forEach(function(k){ if(parsedNow.unlocked[k]) localUnlocked[k] = true; });
+              }
+              if(typeof parsedNow.level === 'number' && isFinite(parsedNow.level)) localLevel = Math.max(localLevel, Math.floor(parsedNow.level));
+              if(typeof parsedNow.levelXP === 'number' && isFinite(parsedNow.levelXP)) localLevelXP = Math.max(localLevelXP, Math.floor(parsedNow.levelXP));
+            }
+          }
+        }
+      }catch(e){}
+      var cloud = (snap && snap.exists) ? (snap.data() || {}) : null;
+      var cloudBest = (cloud && typeof cloud.best === 'number' && isFinite(cloud.best)) ? cloud.best : 0;
+      var cloudUnlocked = (cloud && cloud.unlocked && typeof cloud.unlocked === 'object') ? cloud.unlocked : {};
+      var cloudEarnedAt = (cloud && cloud.earnedAt && typeof cloud.earnedAt === 'object') ? cloud.earnedAt : {};
+      var cloudSettings = (cloud && cloud.settings && typeof cloud.settings === 'object') ? cloud.settings : null;
+      /* Levels merge like best: MAX of local and cloud, never down. */
+      var cloudLevel = (cloud && typeof cloud.level === 'number' && isFinite(cloud.level)) ? Math.floor(cloud.level) : 0;
+      var cloudLevelXP = (cloud && typeof cloud.levelXP === 'number' && isFinite(cloud.levelXP)) ? Math.floor(cloud.levelXP) : 0;
+      var mergedLevel = Math.min(10, Math.max(localLevel, cloudLevel));
+      var mergedLevelXP = Math.max(localLevelXP, cloudLevelXP);
+      /* MERGE: best = max; unlocked = union. */
+      var mergedBest = Math.max(localBest, cloudBest);
+      var mergedUnlocked = {};
+      Object.keys(localUnlocked).forEach(function(k){ if(localUnlocked[k]) mergedUnlocked[k] = true; });
+      Object.keys(cloudUnlocked).forEach(function(k){ if(cloudUnlocked[k]) mergedUnlocked[k] = true; });
+      /* Re-union anything unlocked while the read was in flight:
+         the live unlocked object and fbPendingUnlocks may have gained
+         entries since localUnlocked was read at the top of this
+         callback, and those must survive the merge. */
+      Object.keys(unlocked).forEach(function(k){ if(unlocked[k]) mergedUnlocked[k] = true; });
+      Object.keys(fbPendingUnlocks).forEach(function(k){ if(fbPendingUnlocks[k]) mergedUnlocked[k] = true; });
+      if(typeof best === 'number' && isFinite(best)) mergedBest = Math.max(mergedBest, best);
+      /* earnedAt: keep cloud values; add null for locally-unlocked
+         IDs missing from cloud (never invent unlock dates). Only the
+         null additions are written — merge:true preserves cloud's. */
+      var earnedAtAdd = {};
+      Object.keys(mergedUnlocked).forEach(function(id){
+        if(!(id in cloudEarnedAt) && (localUnlocked[id] || unlocked[id] || fbPendingUnlocks[id])) earnedAtAdd[id] = null;
+      });
+      /* Settings: prefer the most recently updated. The local save
+         carries no timestamp, so when in doubt keep local; use cloud
+         settings only when there is no local save to prefer. */
+      var mergedSettings = localSettings;
+      if(cloudSettings && !hasLocalSave){
+        mergedSettings = {
+          muted: typeof cloudSettings.muted === 'boolean' ? cloudSettings.muted : localSettings.muted,
+          soundVol: (typeof cloudSettings.soundVol === 'number' && isFinite(cloudSettings.soundVol)) ? Math.min(1, Math.max(0, cloudSettings.soundVol)) : localSettings.soundVol,
+          musicVol: (typeof cloudSettings.musicVol === 'number' && isFinite(cloudSettings.musicVol)) ? Math.min(1, Math.max(0, cloudSettings.musicVol)) : localSettings.musicVol,
+          tipsOn: typeof cloudSettings.tipsOn === 'boolean' ? cloudSettings.tipsOn : localSettings.tipsOn
+        };
+      }
+      /* Write the merged doc back to Firestore. */
+      try{
+        var mergedDoc = {
+          best: mergedBest,
+          unlocked: mergedUnlocked,
+          level: mergedLevel,
+          levelXP: mergedLevelXP,
+          settings: mergedSettings,
+          migratedFromLocal: true,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if(Object.keys(earnedAtAdd).length) mergedDoc.earnedAt = earnedAtAdd;
+        var wp = ref.set(mergedDoc, { merge: true });
+        if(wp && typeof wp.catch === 'function') wp.catch(function(err){ if(window.console && console.warn) console.warn('[Lofi Dash] Firestore merge write failed; local save kept.', err); });
+      }catch(e){ if(window.console && console.warn) console.warn('[Lofi Dash] Firestore merge write failed; local save kept.', e); }
+      /* Final re-union right before overwriting live state, so an
+         unlock earned at any point during the merge survives being
+         loaded back into the game and persisted to localStorage. */
+      Object.keys(unlocked).forEach(function(k){ if(unlocked[k]) mergedUnlocked[k] = true; });
+      Object.keys(fbPendingUnlocks).forEach(function(k){ if(fbPendingUnlocks[k]) mergedUnlocked[k] = true; });
+      if(typeof best === 'number' && isFinite(best) && best > mergedBest) mergedBest = best;
+      /* Load the merged state into the game, exactly as the local
+         load does: best, unlocked, and settings into live state. */
+      best = mergedBest;
+      level = mergedLevel;
+      levelXP = mergedLevelXP;
+      Object.keys(unlocked).forEach(function(k){ delete unlocked[k]; });
+      Object.keys(mergedUnlocked).forEach(function(k){ unlocked[k] = true; });
+      muted = !!mergedSettings.muted;
+      soundVolVal = mergedSettings.soundVol;
+      musicVolVal = mergedSettings.musicVol;
+      tipsOn = !!mergedSettings.tipsOn;
+      savedData = {
+        v: 1, best: mergedBest, unlocked: mergedUnlocked,
+        level: mergedLevel, levelXP: mergedLevelXP,
+        muted: muted, soundVol: soundVolVal, musicVol: musicVolVal, tipsOn: tipsOn
+      };
+      /* Persist merged state locally without re-queueing a sync
+         (the merged Firestore write above already carries it). */
+      fbSuppressSync = true;
+      try{ saveSave(); }catch(e){}
+      fbSuppressSync = false;
+      try{
+        if(hudBest) hudBest.textContent = best;
+        if(typeof soundBtn !== 'undefined' && soundBtn){
+          soundBtn.classList.toggle('muted', muted);
+          soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+          soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+        }
+        if(typeof musicVolEl !== 'undefined' && musicVolEl) musicVolEl.value = Math.round(musicVolVal * 100);
+        if(typeof soundVolEl !== 'undefined' && soundVolEl) soundVolEl.value = Math.round(soundVolVal * 100);
+        if(typeof paintRange === 'function'){
+          if(typeof musicVolEl !== 'undefined' && musicVolEl) paintRange(musicVolEl);
+          if(typeof soundVolEl !== 'undefined' && soundVolEl) paintRange(soundVolEl);
+        }
+        if(typeof tipsToggle !== 'undefined' && tipsToggle){
+          tipsToggle.classList.toggle('on', tipsOn);
+          tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+        }
+        if(typeof applyVolumes === 'function') applyVolumes();
+        if(typeof updateHud === 'function') updateHud();
+      }catch(e){}
+      renderAch();
+      if(typeof renderLevels === 'function') renderLevels();
+    }).catch(function(err){
+      /* Offline / read failure: keep playing on the local save;
+         the merge retries on the next sign-in. Log it so a failed
+         merge is never silent. */
+      if(window.console && console.warn) console.warn('[Lofi Dash] Firestore sign-in merge read failed; local save kept.', err);
+    });
+  }
+  function initFirebaseSync(){
+    if(typeof firebase === 'undefined') return;
+    try{
+      if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      fbAuth = firebase.auth();
+      fbDb = firebase.firestore();
+      fbAuth.onAuthStateChanged(function(user){
+        updateProfilePill(user || null);
+        if(user){
+          fbUser = user;
+          handleSignInMerge(user);
+        }else{
+          /* Sign-out: stop Firestore writes; game continues on
+             localStorage only. Local data is never wiped. */
+          fbUser = null;
+          if(fbSyncTimer){ clearTimeout(fbSyncTimer); fbSyncTimer = null; }
+          fbPendingUnlocks = {};
+        }
+      });
+    }catch(e){}
+  }
+  var achList = document.getElementById('achList');
+  var xpTotal = document.getElementById('xpTotal');
+  var levelListEl = document.getElementById('levelList');
+  var levelsTotalEl = document.getElementById('levelsTotal');
+  var startLevelEl = document.getElementById('startLevel');
+  var hudLevelEl = document.getElementById('hudLevel');
+  var levelBannerEl = document.getElementById('levelBanner');
+  var overLevelsEl = document.getElementById('overLevels');
+
+  function renderAch(){
+    achList.innerHTML = '';
+    var total = 0;
+    ACH.forEach(function(a){
+      var on = !!unlocked[a.id];
+      if(on) total += a.xp;
+      var li = document.createElement('li');
+      if(on) li.className = 'unlocked';
+      li.innerHTML =
+        '<span class="dot" aria-hidden="true">' + (on ? '✓' : '·') + '</span>' +
+        '<span class="txt"><strong></strong><span></span></span>' +
+        '<span class="pts">' + a.xp + ' XP</span>' +
+        '<span class="state">' + (on ? 'Unlocked' : 'Locked') + '</span>';
+      li.querySelector('.txt strong').textContent = a.name;
+      li.querySelector('.txt span').textContent = a.desc;
+      achList.appendChild(li);
+    });
+    /* total XP is uncapped: achievement XP plus level XP, no "/ 210" */
+    xpTotal.textContent = total + levelXP;
+  }
+
+  function renderLevels(){
+    if(levelListEl){
+      levelListEl.innerHTML = '';
+      LEVELS_LEN.forEach(function(len, i){
+        var n = i + 1;
+        var xp = n * 10;
+        var st = n <= level ? 'done' : (n === level + 1 ? 'current' : 'locked');
+        var li = document.createElement('li');
+        li.className = st === 'done' ? 'unlocked' : st;
+        li.innerHTML =
+          '<span class="dot" aria-hidden="true">' + (st === 'done' ? '✓' : n) + '</span>' +
+          '<span class="txt"><strong></strong><span></span></span>' +
+          '<span class="pts">+' + xp + ' XP</span>' +
+          '<span class="state">' + (st === 'done' ? 'Completed' : (st === 'current' ? 'Current' : 'Locked')) + '</span>';
+        li.querySelector('.txt strong').textContent = 'Level ' + n + ' · ' + fmt(len) + ' m';
+        li.querySelector('.txt span').textContent = 'Ends at ' + fmt(LEVELS_END[i]) + ' m in one run';
+        levelListEl.appendChild(li);
+      });
+    }
+    if(levelsTotalEl) levelsTotalEl.textContent = fmt(levelXP) + ' XP from levels';
+    if(startLevelEl){
+      startLevelEl.textContent = level >= 10
+        ? 'All 10 levels complete · ' + fmt(levelXP) + ' level XP'
+        : 'Next: Level ' + (level + 1) + ' · reach ' + fmt(LEVELS_END[level]) + ' m · +' + ((level + 1) * 10) + ' XP';
+    }
+  }
+
+  var toastTimer = null;
+  function toast(html){
+    toastEl.innerHTML = html;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+  function unlock(id){
+    if(unlocked[id]) return;
+    unlocked[id] = true;
+    saveSave();
+    renderAch();
+    var a = ACH.filter(function(x){ return x.id===id; })[0];
+    if(a) toast('Achievement unlocked: <b>' + a.name + '</b> · +' + a.xp + ' XP');
+    try{ if(typeof sfx !== 'undefined' && sfx){ if(sfx.chime) sfx.chime(); else if(sfx.unlock) sfx.unlock(); } }catch(e){ try{ sfx.unlock(); }catch(e2){} }
+    try{ spawnAchievementBurst(); }catch(e){}
+    /* Firebase sync: after the existing local flow, write
+       unlocked[id]=true, earnedAt[id]=serverTimestamp(),
+       updatedAt=serverTimestamp() to Firestore (debounced ~500 ms
+       via queueFirestoreSync / flushFirestoreSync). */
+    queueFirestoreSync(id);
+  }
+  renderAch();
+  renderLevels();
+
+  /* ---------- game state ---------- */
+  var state = 'ready'; // ready | playing | paused | over
+  var distPx = 0, coinsRun = 0, best = 0;
+  var runLevels = []; // levels first-completed during the current run
+  var sparks = [];    // level-up confetti burst particles
+  if(savedData && typeof savedData.best === 'number' && isFinite(savedData.best) && savedData.best > 0){
+    best = Math.floor(savedData.best);
+    hudBest.textContent = best;
+  }
+  var speed = 215, baseSpeed = 215;
+  var obstacles = [], coinsArr = [];
+  var spawnT = 1.0, coinT = 1.6;
+  var timeAlive = 0;
+  var stepSign = 1;
+
+  var inputLeft = false, inputRight = false;
+  var player = {
+    x: 100, w: 64, hStand: 104, hDuck: 56,
+    y: 0, vy: 0, onGround: true, ducking: false, duckHeld: false, runPhase: 0,
+    dashOffset: 0, dashTimer: 0, canDash: true, dashUsed: false, manualX: 0
+  };
+  function playerX(){ return player.x + player.dashOffset + player.manualX; }
+  function playerH(){ return player.ducking ? player.hDuck : player.hStand; }
+
+  /* ---------- happy pops by Lofi's head ----------
+     Every few seconds a little cheer, word or emoji pops up beside
+     Lofi's head, bobs there happily, then drifts left and slips
+     away behind his head. They are drawn before Lofi, so the yeti
+     himself covers them as they pass behind him. */
+  var headPops = [];
+  var tipsOn = true;
+  var popTimer = 1.1;
+  var POP_ITEMS = [
+    { t:'Yay!', e:false }, { t:'Wheee!', e:false }, { t:'Go go!', e:false },
+    { t:'Brrr!', e:false }, { t:'Woohoo!', e:false }, { t:'Hehe!', e:false },
+    { t:'So fast!', e:false }, { t:'Zoom!', e:false },
+    { t:'😊', e:true }, { t:'😄', e:true }, { t:'😆', e:true },
+    { t:'⭐', e:true }, { t:'✨', e:true }, { t:'❄️', e:true },
+    { t:'🎉', e:true }, { t:'💨', e:true }, { t:'🌟', e:true }
+  ];
+  var lastPopIdx = -1;
+  function spawnHeadPop(){
+    var idx = Math.floor(Math.random()*POP_ITEMS.length);
+    if(idx === lastPopIdx) idx = (idx + 1) % POP_ITEMS.length;
+    lastPopIdx = idx;
+    var item = POP_ITEMS[idx];
+    headPops.push({
+      text: item.t, emoji: item.e,
+      t: 0, life: 2.4,
+      dx0: 76 + Math.random()*22,
+      travel: reduced ? 46 : 102,
+      dy0: -14 + Math.random()*16,
+      ph: Math.random()*6.28
+    });
+  }
+  function tickHeadPops(dt, allowSpawn){
+    for(var i=headPops.length-1;i>=0;i--){
+      headPops[i].t += dt;
+      if(headPops[i].t >= headPops[i].life) headPops.splice(i,1);
+    }
+    if(allowSpawn && tipsOn && state !== 'over'){
+      popTimer -= dt;
+      if(popTimer <= 0){
+        spawnHeadPop();
+        popTimer = 2.6 + Math.random()*2.8;
+      }
+    }
+  }
+  function drawHeadPops(){
+    if(!headPops.length) return;
+    var cx = playerX() + player.w/2;
+    var bottom = GROUND + player.y;
+    var headY = bottom - (player.ducking ? 46 : 98);
+    headPops.forEach(function(p){
+      var pr = p.t / p.life;
+      var dx = p.dx0 - pr*p.travel;
+      var dy = p.dy0 - Math.sin(pr*Math.PI)*(reduced ? 4 : 16) - pr*6;
+      var x = cx + dx, y = headY + dy;
+      var alpha = 1;
+      if(pr > 0.62) alpha = Math.max(0, 1 - (pr - 0.62)/0.38);
+      var scale = pr < 0.14 ? 0.5 + (pr/0.14)*0.62 : 1.12 - Math.min(0.12, (pr - 0.14)*0.14);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(x, y);
+      if(!reduced) ctx.rotate(Math.sin(p.t*5 + p.ph)*0.07);
+      ctx.scale(scale, scale);
+      ctx.font = p.emoji ? '23px -apple-system, "Helvetica Neue", Arial, sans-serif'
+                         : '700 15px -apple-system, "Helvetica Neue", Arial, sans-serif';
+      var tw = ctx.measureText(p.text).width;
+      var bw = tw + 20, bh = p.emoji ? 36 : 30;
+      ctx.beginPath();
+      roundRect(-bw/2, -bh/2, bw, bh, bh/2);
+      ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#14304d'; ctx.stroke();
+      ctx.fillStyle = '#14304d';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.text, 0, 1);
+      ctx.restore();
+    });
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+
+  /* ---------- sticker art ----------
+     Every picture is drawn as a flat sticker in its original shape:
+     a dark edge, a thick white border, then the artwork itself.
+     Silhouettes are pre-rendered once each image loads. */
+  function makeSilhouette(img, color){
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    var g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = color;
+    g.fillRect(0, 0, c.width, c.height);
+    return c;
+  }
+  function loadSticker(src){
+    var o = { img: new Image(), ready: false, silWhite: null, silDark: null };
+    o.img.onload = function(){
+      o.silWhite = makeSilhouette(o.img, '#ffffff');
+      o.silDark = makeSilhouette(o.img, '#14304d');
+      o.ready = true;
+    };
+    o.img.src = src;
+    return o;
+  }
+  function drawSticker(o, x, y, w, h){
+    if(!o.ready) return;
+    var d, k, dirs = [[1,0],[-1,0],[0,1],[0,-1],[0.7,0.7],[-0.7,0.7],[0.7,-0.7],[-0.7,-0.7]];
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silDark, x + d[0]*5.5, y + d[1]*5.5, w, h); }
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silWhite, x + d[0]*3.5, y + d[1]*3.5, w, h); }
+    ctx.drawImage(o.img, x, y, w, h);
+  }
+
+  /* Lofi: the user's own yeti art, kept whole in its original shape */
+  var yetiSticker = loadSticker('/lofigame/assets/yeti-ca776e9d.webp');
+  /* pre-rendered soft glow for coins (no per-frame shadowBlur) */
+  var coinGlowCanvas = (function(){
+    var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+    var g = c.getContext('2d');
+    var grad = g.createRadialGradient(32,32,2,32,32,30);
+    grad.addColorStop(0,'rgba(255,220,90,0.55)');
+    grad.addColorStop(0.45,'rgba(255,195,40,0.26)');
+    grad.addColorStop(1,'rgba(255,195,40,0)');
+    g.fillStyle = grad; g.fillRect(0,0,64,64);
+    return c;
+  })();
+
+  /* road blockers: the user's own pictures, shrunk into small stickers
+     that sit flat on the road surface and must be jumped over */
+  var blockerArt = [
+    loadSticker('/lofigame/assets/blocker-9ee138bf.webp'),
+    loadSticker('/lofigame/assets/blocker-67795ea2.webp'),
+    loadSticker('/lofigame/assets/blocker-92dd01de.webp'),
+    loadSticker('/lofigame/assets/blocker-f86e25fc.webp')
+  ];
+
+  /* ---------- sound effects (synthesised, no audio files) ---------- */
+  var AC = null, muted = false, sfxGain = null, musicGain = null;
+  var soundVolVal = 0.8, musicVolVal = 0.55;
+  if(savedData){
+    if(typeof savedData.soundVol === 'number' && isFinite(savedData.soundVol)) soundVolVal = Math.min(1, Math.max(0, savedData.soundVol));
+    if(typeof savedData.musicVol === 'number' && isFinite(savedData.musicVol)) musicVolVal = Math.min(1, Math.max(0, savedData.musicVol));
+    if(typeof savedData.muted === 'boolean') muted = savedData.muted;
+    if(typeof savedData.tipsOn === 'boolean') tipsOn = savedData.tipsOn;
+  }
+  function applyVolumes(){
+    if(!AC || !sfxGain || !musicGain) return;
+    var s = muted ? 0 : soundVolVal, m = muted ? 0 : musicVolVal;
+    sfxGain.gain.value = s*s*0.9;
+    musicGain.gain.value = m*m*0.45;
+  }
+  function audio(){
+    if(!AC){
+      try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ AC = null; }
+      if(AC){
+        sfxGain = AC.createGain(); sfxGain.connect(AC.destination);
+        musicGain = AC.createGain(); musicGain.connect(AC.destination);
+        applyVolumes();
+      }
+    }
+    if(AC && AC.state === 'suspended') AC.resume();
+    return AC;
+  }
+  function tone(f0, f1, dur, type, vol, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(sfxGain || ac.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noiseHit(dur, vol, freq, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var len = Math.max(1, Math.floor(ac.sampleRate * dur));
+    var buf = ac.createBuffer(1, len, ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var n=0;n<len;n++) d[n] = (Math.random()*2 - 1) * (1 - n/len);
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq;
+    var g = ac.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(sfxGain || ac.destination);
+    src.start(t0);
+  }
+  var sfx = {
+    click:  function(){ tone(620, 520, 0.07, 'triangle', 0.12); },
+    start:  function(){ tone(440, 440, 0.09, 'triangle', 0.14); tone(660, 660, 0.09, 'triangle', 0.14, 0.09); tone(880, 880, 0.14, 'triangle', 0.15, 0.18); },
+    jump:   function(){ tone(280, 640, 0.16, 'sine', 0.16); noiseHit(0.1, 0.05, 2400); },
+    dash:   function(){ tone(340, 920, 0.18, 'sine', 0.15); noiseHit(0.22, 0.14, 3200); tone(520, 1180, 0.14, 'triangle', 0.08, 0.03); },
+    duck:   function(){ tone(500, 220, 0.12, 'sine', 0.1); },
+    step:   function(){ noiseHit(0.045, 0.035, 900); },
+    coin:   function(){ tone(990, 990, 0.07, 'sine', 0.14); tone(1320, 1320, 0.12, 'sine', 0.14, 0.06); },
+    crash:  function(){ noiseHit(0.28, 0.3, 700); tone(160, 42, 0.32, 'sine', 0.28); },
+    /* game over: the thud of the fall, then a soft descending jingle
+       that settles on a low note as the frost panel appears */
+    gameOver: function(){
+      noiseHit(0.26, 0.28, 700); tone(160, 46, 0.3, 'sine', 0.24);
+      tone(392, 392, 0.17, 'triangle', 0.15, 0.14);
+      tone(330, 330, 0.17, 'triangle', 0.15, 0.32);
+      tone(262, 262, 0.2, 'triangle', 0.15, 0.5);
+      tone(196, 165, 0.46, 'sine', 0.17, 0.7);
+    },
+    unlock: function(){ tone(660, 660, 0.1, 'triangle', 0.14); tone(880, 880, 0.1, 'triangle', 0.14, 0.09); tone(1100, 1100, 0.18, 'triangle', 0.15, 0.18); },
+    chime: function(){ tone(880, 880, 0.09, 'sine', 0.12); tone(1174, 1174, 0.1, 'sine', 0.12, 0.07); tone(1568, 1568, 0.16, 'triangle', 0.11, 0.14); }
+  };
+  var soundBtn = document.getElementById('soundBtn');
+  function setMuted(m){
+    muted = m;
+    applyVolumes();
+    soundBtn.classList.toggle('muted', muted);
+    soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+    saveSave();
+  }
+  if(muted) setMuted(true);
+  soundBtn.addEventListener('click', function(){
+    setMuted(!muted);
+    if(!muted) sfx.click();
+  });
+
+  /* ---------- background music: a small cheerful loop, synthesised live.
+     An eighth-note sequencer at ~116 BPM: a bouncy triangle lead over a
+     soft sine bass, routed through its own gain so the Settings music
+     slider (and the mute button) control it separately from effects. */
+  var musicTimer = null, musicStep = 0, musicNext = 0, musicStarted = false;
+  var LEAD = [72,0,76,0,79,0,76,0, 81,0,79,0,76,0,72,0, 74,0,76,0,79,0,81,0, 79,0,76,0,74,0,71,0];
+  var BASS = [48,53,55,48];
+  function midiHz(m){ return 440*Math.pow(2,(m-69)/12); }
+  function musicNote(midi, t0, dur, type, vol){
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = midiHz(midi);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(musicGain);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function scheduleMusic(){
+    if(!AC || !musicGain) return;
+    while(musicNext < AC.currentTime + 0.24){
+      var step = musicStep, t0 = musicNext;
+      var lead = LEAD[step % LEAD.length];
+      if(lead) musicNote(lead, t0, 0.26, 'triangle', 0.16);
+      if(step % 8 === 0) musicNote(BASS[Math.floor(step/8) % 4], t0, 0.5, 'sine', 0.15);
+      if(step % 8 === 4) musicNote(BASS[Math.floor(step/8) % 4] + 7, t0, 0.3, 'sine', 0.07);
+      musicStep++;
+      musicNext += 0.2586;
+    }
+  }
+  function startMusic(){
+    if(musicStarted) return;
+    var ac = audio(); if(!ac || !musicGain) return;
+    musicStarted = true;
+    musicStep = 0;
+    musicNext = ac.currentTime + 0.08;
+    musicTimer = setInterval(scheduleMusic, 84);
+  }
+
+  /* light snowfall only: fewer, smaller, slower flakes */
+  var snow = [];
+  var fgTufts = [];
+  function seedSnow(){
+    snow = [];
+    for(var i=0;i<38;i++){
+      snow.push({ x: Math.random()*W, y: Math.random()*H, r: 0.8+Math.random()*1.6, s: 10+Math.random()*18, ph: Math.random()*6.28 });
+    }
+  }
+  function seedTufts(){
+    fgTufts = [];
+    var n = Math.round((W + 184)/52);
+    for(var i=0;i<n;i++){
+      fgTufts.push({ x: i*52 + ((i*41)%26), type: i%3 });
+    }
+  }
+
+  function reset(){
+    distPx = 0; coinsRun = 0; speed = baseSpeed; timeAlive = 0;
+    runLevels = []; sparks = [];
+    obstacles = []; coinsArr = [];
+    spawnT = 0.9; coinT = 1.4;
+    player.y = 0; player.vy = 0; player.onGround = true; player.ducking = false;
+    player.dashOffset = 0; player.dashTimer = 0; player.canDash = true; player.dashUsed = false;
+    player.manualX = 0; inputLeft = false; inputRight = false;
+    headPops = []; popTimer = 1.1;
+  }
+
+  var statusBadge = document.getElementById('statusBadge');
+  function setStatus(s){ if(statusBadge) statusBadge.textContent = s; }
+
+  function startRun(){
+    reset();
+    state = 'playing';
+    setStatus('Now playing');
+    hudIn.classList.remove('hud-hidden');
+    startOverlay.hidden = true;
+    overOverlay.hidden = true;
+    pauseOverlay.hidden = true;
+    sfx.start();
+    startMusic();
+    unlock('first');
+  }
+  function endRun(){
+    state = 'over';
+    setStatus('Run over');
+    var d = Math.floor(distPx/50);
+    var isBest = d > best;
+    if(isBest){ best = d; saveSave(); }
+    document.getElementById('resDist').textContent = d;
+    document.getElementById('resCoins').textContent = coinsRun;
+    document.getElementById('resBest').textContent = best;
+    document.getElementById('newBest').className = 'newbest' + (isBest && d>0 ? ' show' : '');
+    if(overLevelsEl){
+      if(runLevels.length){
+        var lvlTotal = 0;
+        var lvlParts = runLevels.map(function(r){ lvlTotal += r.xp; return 'Level ' + r.n + ' (+' + r.xp + ' XP)'; });
+        overLevelsEl.textContent = '🏅 ' + lvlParts.join(' · ') + ' — +' + lvlTotal + ' XP this run';
+        overLevelsEl.hidden = false;
+      } else {
+        overLevelsEl.hidden = true;
+      }
+    }
+    /* the run is finished: the live score / XP chips leave the screen
+       with it, so the Game Over panel stands on its own */
+    hudIn.classList.add('hud-hidden');
+    sfx.gameOver();
+    overOverlay.hidden = false;
+    updateHud();
+  }
+  function togglePause(){
+    if(state === 'playing'){
+      state = 'paused'; pauseOverlay.hidden = false; setStatus('Paused'); sfx.click();
+    } else if(state === 'paused'){
+      state = 'playing'; pauseOverlay.hidden = true; setStatus('Now playing'); sfx.click();
+    }
+  }
+
+  function dashForward(){
+    if(player.onGround || !player.canDash) return false;
+    player.canDash = false;
+    player.dashUsed = true;
+    player.dashTimer = 0.30;
+    /* hold height briefly so the lunge reads as a forward pull, not a fall */
+    if(player.vy > 120) player.vy = 120;
+    sfx.dash();
+    return true;
+  }
+  function jump(){
+    if(state === 'ready'){ startRun(); return; }
+    if(state === 'over'){ return; }
+    if(state === 'paused'){ togglePause(); return; }
+    if(player.onGround){
+      player.vy = -1010;
+      player.onGround = false;
+      player.ducking = false;
+      player.canDash = true;
+      player.dashUsed = false;
+      sfx.jump();
+    } else {
+      /* second press / click / tap while airborne: dash forward */
+      dashForward();
+    }
+  }
+  function duckStart(){
+    if(state !== 'playing') return;
+    if(!player.duckHeld && player.onGround) sfx.duck();
+    player.duckHeld = true;
+    if(!player.onGround){ player.vy = Math.max(player.vy, 900); }
+  }
+  function duckEnd(){ player.duckHeld = false; }
+  /* Left / Right arrows and A / D: hold to shift Lofi back or forward.
+     A press of Right / D while airborne also triggers the forward dash,
+     and Left / A while dashing cancels the dash pull. */
+  function forwardStart(){
+    inputRight = true;
+    if(state === 'playing' && !player.onGround) dashForward();
+  }
+  function forwardEnd(){ inputRight = false; }
+  function backStart(){
+    inputLeft = true;
+    if(state === 'playing' && !player.onGround && player.dashTimer > 0) player.dashTimer = 0;
+  }
+  function backEnd(){ inputLeft = false; }
+
+  /* ---------- spawning ---------- */
+  function spawnObstacle(){
+    /* one of the four supplied pictures, bigger now: 78-96 px tall, sized
+       from its own aspect so the sticker keeps its original shape.
+       Never spawn one whose art has not loaded: it would be invisible. */
+    var readyArt = blockerArt.filter(function(a){ return a.ready; });
+    if(!readyArt.length){ spawnT = 0.3; return; }
+    var art = readyArt[Math.floor(Math.random()*readyArt.length)];
+    var h = 78 + Math.random()*18;
+    var ar = art.img.naturalWidth && art.img.naturalHeight
+      ? art.img.naturalWidth / art.img.naturalHeight : 0.8;
+    /* keep wide stickers jumpable at the gentlest speed: cap the width
+       by shrinking the height, so the shape itself never distorts */
+    if(h*ar > 84) h = Math.round(84/ar);
+    obstacles.push({ kind:'sticker', art: art, x: W+30, w: Math.round(h*ar), h: h });
+  }
+  function spawnCoins(){
+    var n = 4 + Math.floor(Math.random()*3);
+    var arc = Math.random() < 0.5;
+    var baseY = GROUND - 34;
+    for(var k=0;k<n;k++){
+      var y = arc ? baseY - Math.sin((k/(n-1))*Math.PI)*64 : baseY - (Math.random()<0.3 ? 70 : 0);
+      coinsArr.push({ x: W+40 + k*44, y: y, r: 14, taken:false, ph: Math.random()*6.28 });
+    }
+  }
+
+  /* ---------- update ---------- */
+  function update(dt){
+    if(state !== 'playing') return;
+    timeAlive += dt;
+    tickHeadPops(dt, true);
+    speed = Math.min(430, baseSpeed + timeAlive*3.0);
+    /* dash: while the dash timer runs the world rushes past faster,
+       so Lofi genuinely travels further forward, not just visually */
+    if(player.dashTimer > 0) player.dashTimer = Math.max(0, player.dashTimer - dt);
+    var moveSpeed = speed * (player.dashTimer > 0 ? 1.9 : 1);
+    distPx += moveSpeed*dt;
+    var distM = distPx/50;
+
+    /* forward offset: lunges out fast on a dash, eases back after landing */
+    var dashTarget = (!player.onGround && player.dashUsed) ? 118 : 0;
+    var dashRate = dashTarget > player.dashOffset ? 14 : 5.5;
+    player.dashOffset += (dashTarget - player.dashOffset) * Math.min(1, dashRate*dt);
+    if(Math.abs(player.dashOffset - dashTarget) < 0.6) player.dashOffset = dashTarget;
+
+    /* steering with Left/Right arrows or A/D: hold to shift on the road */
+    if(inputRight) player.manualX += 380*dt;
+    if(inputLeft) player.manualX -= 380*dt;
+    if(!inputLeft && !inputRight){
+      if(player.manualX > 0) player.manualX = Math.max(0, player.manualX - 55*dt);
+      else if(player.manualX < 0) player.manualX = Math.min(0, player.manualX + 55*dt);
+    }
+    if(player.manualX > 160) player.manualX = 160;
+    if(player.manualX < -70) player.manualX = -70;
+
+    /* player physics */
+    player.ducking = player.duckHeld && player.onGround;
+    if(!player.onGround){
+      /* slightly softer gravity at the very start of a dash so it pulls forward */
+      player.vy += (player.dashTimer > 0.12 ? 1750 : 2600)*dt;
+      player.y += player.vy*dt;
+      if(player.y >= 0){
+        player.y = 0; player.vy = 0; player.onGround = true;
+        player.canDash = true; player.dashUsed = false; player.dashTimer = 0;
+      }
+    }
+    player.runPhase += dt * (speed/24);
+    /* soft footstep tap each time the stride swaps feet */
+    if(player.onGround && !reduced){
+      var sg = Math.sin(player.runPhase) >= 0 ? 1 : -1;
+      if(sg !== stepSign){ stepSign = sg; sfx.step(); }
+    }
+
+    /* spawns */
+    spawnT -= dt;
+    if(spawnT <= 0){
+      spawnObstacle();
+      var gap = (580 + Math.random()*380) / speed;
+      spawnT = Math.max(0.95, gap);
+    }
+    coinT -= dt;
+    if(coinT <= 0){ spawnCoins(); coinT = 2.2 + Math.random()*2.6; }
+
+    /* obstacles */
+    var ph = playerH();
+    var pBox = { x: playerX()+6, y: GROUND + player.y - ph + 4, w: player.w-10, h: ph-6 };
+    for(var j=obstacles.length-1;j>=0;j--){
+      var o = obstacles[j];
+      o.x -= moveSpeed*dt;
+      if(o.x + o.w < -40){ obstacles.splice(j,1); continue; }
+      /* sticker blocker: the whole big picture can hit you — jump or dash over it */
+      var oBox = { x:o.x+6, y: GROUND - o.h + 4, w:o.w-12, h:o.h-4 };
+      if(pBox.x < oBox.x+oBox.w && pBox.x+pBox.w > oBox.x && pBox.y < oBox.y+oBox.h && pBox.y+pBox.h > oBox.y){
+        endRun(); return;
+      }
+    }
+    /* coins */
+    var pcx = playerX() + player.w/2, pcy = GROUND + player.y - ph/2;
+    for(var c=coinsArr.length-1;c>=0;c--){
+      var cn = coinsArr[c];
+      cn.x -= moveSpeed*dt;
+      if(cn.x < -30){ coinsArr.splice(c,1); continue; }
+      var dx = cn.x - pcx, dy = cn.y - pcy;
+      if(dx*dx + dy*dy < 50*50){
+        coinsArr.splice(c,1);
+        coinsRun++;
+        sfx.coin();
+        if(coinsRun >= 50) unlock('coins');
+      }
+    }
+
+    if(distM >= 500) unlock('clean');
+    if(distM >= 1500) unlock('long');
+    if(distM >= 3000) unlock('ultra');
+
+    checkLevels(distM);
+    tickSparks(dt);
+
+    updateHud();
+  }
+
+  function updateHud(){
+    hudDist.textContent = Math.floor(distPx/50);
+    hudCoins.textContent = coinsRun;
+    hudBest.textContent = best;
+    hudSpeed.textContent = (speed/baseSpeed).toFixed(1);
+    if(hudLevelEl){
+      hudLevelEl.textContent = level >= 10
+        ? 'All levels complete'
+        : 'Level ' + (level + 1) + ' · ' + fmt(Math.floor(distPx/50)) + ' / ' + fmt(LEVELS_END[level]) + ' m';
+    }
+  }
+
+  /* ---------- level completion: banner queue, chime, spark burst ---------- */
+  var bannerQueue = [], bannerBusy = false;
+  function showLevelBanner(n, xp){
+    bannerQueue.push({ n: n, xp: xp });
+    pumpBanner();
+  }
+  function pumpBanner(){
+    if(bannerBusy || !bannerQueue.length || !levelBannerEl) return;
+    bannerBusy = true;
+    var b = bannerQueue.shift();
+    levelBannerEl.textContent = 'Level ' + b.n + ' complete! +' + b.xp + ' XP';
+    levelBannerEl.hidden = false;
+    levelBannerEl.classList.remove('show');
+    void levelBannerEl.offsetWidth;
+    levelBannerEl.classList.add('show');
+    setTimeout(function(){
+      levelBannerEl.classList.remove('show');
+      levelBannerEl.hidden = true;
+      bannerBusy = false;
+      pumpBanner();
+    }, 2100);
+  }
+  var SPARK_COLORS = ['#ffc21f', '#00b7ff', '#ff5c8a', '#59d8ff', '#ffffff'];
+  var CONFETTI_COLORS = ['#ffc21f', '#ff5c8a', '#00b7ff', '#7ccb85', '#ff8fb8', '#59d8ff'];
+  function spawnSparks(){
+    var cx = playerX() + player.w/2;
+    var cy = GROUND + player.y - playerH()/2;
+    var count = reduced ? 10 : 26;
+    for(var i=0;i<count;i++){
+      sparks.push({
+        type:'spark',
+        x: cx, y: cy,
+        vx: (Math.random() - 0.5) * 430,
+        vy: -Math.random() * 380 - 60,
+        t: 0, life: 0.7 + Math.random() * 0.5,
+        c: SPARK_COLORS[i % SPARK_COLORS.length],
+        s: 3 + Math.random() * 4,
+        rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 12
+      });
+    }
+  }
+  function spawnSnowBurst(){
+    var cx = playerX() + player.w/2;
+    var cy = GROUND + player.y - playerH() - 6;
+    var count = reduced ? 6 : 16;
+    for(var i=0;i<count;i++){
+      sparks.push({
+        type:'snow',
+        x: cx + (Math.random()-0.5)*90, y: cy + (Math.random()-0.5)*30,
+        vx: (Math.random()-0.5)*90, vy: -20 - Math.random()*50,
+        t:0, life:0.9 + Math.random()*0.6,
+        c:'#ffffff', s:2 + Math.random()*3.2,
+        rot:0, vr:0
+      });
+    }
+  }
+  function spawnConfettiBurst(){
+    var cx = playerX() + player.w/2;
+    var cy = GROUND + player.y - playerH()/2;
+    var count = reduced ? 6 : 14;
+    for(var i=0;i<count;i++){
+      sparks.push({
+        type:'confetti',
+        x: cx, y: cy,
+        vx: (Math.random()-0.5)*360, vy: -Math.random()*320 - 80,
+        t:0, life:0.8 + Math.random()*0.5,
+        c: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+        s:4 + Math.random()*4,
+        rot: Math.random()*6.28, vr:(Math.random()-0.5)*16
+      });
+    }
+  }
+  function spawnAchievementBurst(){
+    /* small spark burst at Lofi when an achievement unlocks; reuses sparks */
+    if(typeof sparks === 'undefined' || typeof playerX !== 'function') return;
+    var cx, cy;
+    try{ cx = playerX() + player.w/2; cy = GROUND + player.y - playerH() - 4; }catch(e){ cx = 160; cy = GROUND - 110; }
+    var count = reduced ? 6 : 14;
+    for(var i=0;i<count;i++){
+      var ang = (i / count) * 6.283 + Math.random()*0.4;
+      var sp = 90 + Math.random()*130;
+      sparks.push({
+        type:'spark',
+        x: cx, y: cy,
+        vx: Math.cos(ang)*sp, vy: Math.sin(ang)*sp - 60,
+        t:0, life:0.55 + Math.random()*0.35,
+        c: SPARK_COLORS[i % SPARK_COLORS.length],
+        s:2.6 + Math.random()*3,
+        rot: Math.random()*6.28, vr:(Math.random()-0.5)*10
+      });
+    }
+  }
+  function tickSparks(dt){
+    for(var i=sparks.length-1;i>=0;i--){
+      var p = sparks[i];
+      p.t += dt;
+      if(p.t >= p.life){ sparks.splice(i,1); continue; }
+      if(p.type === 'snow'){ p.vy += 55 * dt; p.vx *= (1 - 0.6*dt); }
+      else if(p.type === 'confetti'){ p.vy += 760 * dt; p.vx *= (1 - 0.8*dt); }
+      else { p.vy += 900 * dt; }
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.rot += (p.vr || 0) * dt;
+    }
+  }
+  function drawSparks(){
+    sparks.forEach(function(p){
+      var a = Math.max(0, 1 - p.t / p.life);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(p.x, p.y);
+      if(p.type === 'snow'){
+        ctx.fillStyle = p.c;
+        ctx.beginPath(); ctx.arc(0,0,p.s,0,6.29); ctx.fill();
+        ctx.globalAlpha = a * 0.55;
+        ctx.beginPath(); ctx.arc(0,0,p.s*1.9,0,6.29); ctx.fillStyle='rgba(180,230,255,0.5)'; ctx.fill();
+      } else {
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.c;
+        if(p.type === 'confetti') ctx.fillRect(-p.s/2, -p.s*0.28, p.s, p.s*0.56);
+        else ctx.fillRect(-p.s/2, -p.s/2, p.s, p.s * 0.7);
+      }
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+  }
+  /* A level completes the moment the run's distance crosses its
+     cumulative end, in order; XP is paid once, on first completion. */
+  function checkLevels(distM){
+    while(level < 10 && distM >= LEVELS_END[level]){
+      var n = level + 1;
+      var xp = n * 10;
+      level = n;
+      levelXP += xp;
+      runLevels.push({ n: n, xp: xp });
+      saveSave();
+      renderAch();
+      renderLevels();
+      showLevelBanner(n, xp);
+      if(sfx.chime) sfx.chime(); else sfx.unlock();
+      spawnSparks();
+      spawnSnowBurst();
+      spawnConfettiBurst();
+    }
+  }
+
+  /* ---------- drawing ---------- */
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function wrapX(base, factor, span){
+    return (((base - distPx*factor) % span) + span) % span;
+  }
+
+  function drawCloud(x, y, s){
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#9db8d6'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, 20*s, Math.PI*0.9, Math.PI*1.9);
+    ctx.arc(x + 24*s, y - 10*s, 26*s, Math.PI, Math.PI*2);
+    ctx.arc(x + 52*s, y, 18*s, Math.PI*1.1, Math.PI*0.1);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    /* little swirl, So Fast style */
+    ctx.strokeStyle = '#b9cfe6'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x + 26*s, y - 6*s, 7*s, 0.4, 4.6); ctx.stroke();
+  }
+
+  function drawMountain(){
+    var mx = (W + 300) - (distPx*0.05 % (W + 740));
+    var base = GROUND - 58, peakY = 118, half = 300;
+    /* main cone */
+    ctx.fillStyle = '#5b7fb8';
+    ctx.beginPath();
+    ctx.moveTo(mx - half, base);
+    ctx.lineTo(mx, peakY);
+    ctx.lineTo(mx + half, base);
+    ctx.closePath(); ctx.fill();
+    /* shading fold */
+    ctx.fillStyle = '#4c6ea6';
+    ctx.beginPath();
+    ctx.moveTo(mx, peakY);
+    ctx.lineTo(mx + half, base);
+    ctx.lineTo(mx + 60, base);
+    ctx.closePath(); ctx.fill();
+    /* snow cap */
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(mx - 62, peakY + 52);
+    ctx.lineTo(mx, peakY);
+    ctx.lineTo(mx + 62, peakY + 52);
+    ctx.lineTo(mx + 30, peakY + 40);
+    ctx.lineTo(mx + 4, peakY + 56);
+    ctx.lineTo(mx - 28, peakY + 42);
+    ctx.closePath(); ctx.fill();
+  }
+
+  /* ---------- rotating background themes ----------
+     Three looks inspired by the pictures shared for this game, all drawn
+     fresh in code (no copied artwork, no stock images): a pixel-cloud
+     meadow, green cartoon hills, and a snowy sunset. The road is built
+     from pixel bricks and changes with the theme. */
+  /* The theme follows the current level instead of raw distance:
+     theme index = (current level - 1) mod 3, crossfading into the
+     next theme over the last stretch of the level. */
+  function themeInfo(){
+    var m = distPx/50;
+    var cur = Math.min(10, Math.max(1, level + 1));
+    var idx = (cur - 1) % 3;
+    var prevEnd = cur > 1 ? LEVELS_END[cur - 2] : 0;
+    var len = LEVELS_END[cur - 1] - prevEnd;
+    var frac = len > 0 ? (m - prevEnd) / len : 0;
+    if(frac < 0) frac = 0;
+    if(frac >= 1) frac = frac % 1;
+    var blend = frac > 0.94 ? (frac - 0.94)/0.06 : 0;
+    return { idx: idx, next: (idx + 1) % 3, blend: blend };
+  }
+
+  function drawPixelCloud(x, y, s){
+    /* blocky pixel-art cloud built from stepped rectangles */
+    var u = 6*s;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y + 3*u, 16*u, 3*u);
+    ctx.fillRect(x + 2*u, y + 2*u, 5*u, u);
+    ctx.fillRect(x + 8*u, y + u, 5*u, 2*u);
+    ctx.fillRect(x + 10*u, y, 3*u, u);
+    ctx.fillStyle = '#dcefff';
+    ctx.fillRect(x, y + 5*u, 16*u, u);
+    ctx.fillRect(x + 3*u, y + 4*u, 2*u, u);
+    ctx.fillRect(x + 11*u, y + 4*u, 2*u, u);
+  }
+
+  function brickShade(row, col, shades){
+    var h = Math.sin(col*127.1 + row*311.7) * 43758.5453;
+    var f = h - Math.floor(h);
+    return shades[f < 0.34 ? 0 : (f < 0.72 ? 1 : 2)];
+  }
+
+  function drawPixelRoad(theme){
+    var topH = 10;
+    var r, bx, ci, off, colBase;
+    if(theme === 2){
+      /* icy road: pale pixel blocks under a smooth snow cap */
+      ctx.fillStyle = '#bcd6ec';
+      ctx.fillRect(0, GROUND, W, H - GROUND);
+      var bw2 = 56, bh2 = 20;
+      var rows2 = Math.ceil((H - GROUND - topH)/bh2);
+      for(r=0; r<rows2; r++){
+        off = -((distPx + (r%2)*bw2/2) % bw2);
+        colBase = Math.floor((distPx + (r%2)*bw2/2)/bw2);
+        for(bx = off, ci = 0; bx < W; bx += bw2, ci++){
+          ctx.fillStyle = brickShade(r, colBase + ci, ['#dcebf7','#d2e4f3','#e6f1fa']);
+          ctx.fillRect(bx + 2, GROUND + topH + r*bh2 + 2, bw2 - 4, bh2 - 4);
+        }
+      }
+      /* snow cap with pixel shading and sparkles */
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, GROUND, W, topH);
+      ctx.fillStyle = '#d9edfc';
+      var soff = -(distPx % 28);
+      for(var sx = soff; sx < W; sx += 28) ctx.fillRect(sx, GROUND + topH - 4, 12, 4);
+      ctx.fillStyle = '#ffffff';
+      var spN = Math.ceil((W + 170)/113);
+      for(var sp=0; sp<spN; sp++){
+        var spx = wrapX(sp*113 + 30, 1, W + 170) - 40;
+        ctx.fillRect(spx, GROUND + 16 + (sp%3)*9, 3, 3);
+      }
+      return;
+    }
+    var pal = theme === 0
+      ? { mortar:'#7c4f2a', shades:['#b07a45','#a06c3c','#bd8550'], grass:'#58b368', dark:'#3f9e57', light:'#7ccb85' }
+      : { mortar:'#8f3f24', shades:['#c96a42','#bb5c36','#d4764e'], grass:'#4fae62', dark:'#37934e', light:'#74c786' };
+    ctx.fillStyle = pal.mortar;
+    ctx.fillRect(0, GROUND, W, H - GROUND);
+    var bw = 52, bh = 18;
+    var rows = Math.ceil((H - GROUND - topH)/bh);
+    for(r=0; r<rows; r++){
+      off = -((distPx + (r%2)*bw/2) % bw);
+      colBase = Math.floor((distPx + (r%2)*bw/2)/bw);
+      for(bx = off, ci = 0; bx < W; bx += bw, ci++){
+        ctx.fillStyle = brickShade(r, colBase + ci, pal.shades);
+        ctx.fillRect(bx + 2, GROUND + topH + r*bh + 2, bw - 4, bh - 4);
+      }
+    }
+    /* pixel grass lip: blocky tufts overhanging the bricks */
+    ctx.fillStyle = pal.grass;
+    ctx.fillRect(0, GROUND, W, topH);
+    ctx.fillStyle = pal.dark;
+    var goff = -(distPx % 18);
+    for(var gx = goff; gx < W; gx += 18){
+      ctx.fillRect(gx, GROUND + topH, 8, 4);
+      ctx.fillRect(gx + 4, GROUND + topH + 4, 4, 3);
+    }
+    ctx.fillStyle = pal.light;
+    var loff = -((distPx + 9) % 36);
+    for(var lx = loff; lx < W; lx += 36) ctx.fillRect(lx, GROUND + 2, 10, 3);
+  }
+
+  function drawScene(t, theme){
+    /* sky */
+    var sky = ctx.createLinearGradient(0,0,0,GROUND);
+    if(theme === 0){ sky.addColorStop(0,'#2b74d6'); sky.addColorStop(0.6,'#6db3ee'); sky.addColorStop(1,'#c4e6fb'); }
+    else if(theme === 1){ sky.addColorStop(0,'#4f97dd'); sky.addColorStop(0.55,'#8ec3ef'); sky.addColorStop(1,'#cfeafb'); }
+    else { sky.addColorStop(0,'#a9bfd2'); sky.addColorStop(0.55,'#e9cdb0'); sky.addColorStop(1,'#ffdfae'); }
+    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+
+    /* sun: high in the meadow and hills, low and large at the snowy sunset */
+    if(theme === 2){
+      ctx.fillStyle = 'rgba(255,226,170,0.5)';
+      ctx.beginPath(); ctx.arc(W*0.42, GROUND - 92, 76, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#fff3d0';
+      ctx.beginPath(); ctx.arc(W*0.42, GROUND - 92, 52, 0, 6.29); ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(255,240,170,0.45)';
+      ctx.beginPath(); ctx.arc(W-110, 74, 44, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#fff3b0';
+      ctx.beginPath(); ctx.arc(W-110, 74, 30, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#ffe066';
+      ctx.beginPath(); ctx.arc(W-110, 74, 22, 0, 6.29); ctx.fill();
+    }
+
+    if(theme === 0){
+      /* pixel-cloud meadow: big blocky clouds low over a flat green horizon */
+      var cs = 1500;
+      drawPixelCloud(wrapX(60, 0.05, cs) - 170, 168, 1.5);
+      drawPixelCloud(wrapX(620, 0.05, cs) - 170, 58, 1.0);
+      drawPixelCloud(wrapX(1080, 0.05, cs) - 170, 200, 1.9);
+      drawPixelCloud(wrapX(330, 0.08, cs) - 170, 100, 0.7);
+      /* stepped pale hills on the horizon */
+      ctx.fillStyle = '#a8d8b9';
+      var hillSpan = Math.ceil((W + 170)/215)*215;
+      for(var hh=0; hh*215 < hillSpan; hh++){
+        var hx = wrapX(hh*215 + 30, 0.12, hillSpan) - 170;
+        ctx.fillRect(hx, GROUND - 34, 150, 34);
+        ctx.fillRect(hx + 18, GROUND - 44, 114, 10);
+        ctx.fillRect(hx + 40, GROUND - 52, 70, 8);
+      }
+      ctx.fillStyle = '#6fbf7f';
+      ctx.fillRect(0, GROUND - 16, W, 16);
+      ctx.fillStyle = '#57a866';
+      var boff = -(distPx*0.4 % 46);
+      for(var bb = boff; bb < W; bb += 46) ctx.fillRect(bb, GROUND - 22, 20, 6);
+    } else if(theme === 1){
+      /* green cartoon hills: soft clouds, one big mountain, open grass */
+      var cloudSpan = W + 280;
+      drawCloud(wrapX(120, 0.06, cloudSpan) - 140 + (reduced ? 0 : (t*4 % 30)), 66, 1.0);
+      drawCloud(wrapX(560, 0.06, cloudSpan) - 140, 120, 0.7);
+      drawCloud(wrapX(980, 0.06, cloudSpan) - 140 + (reduced ? 0 : (t*3 % 24)), 52, 1.25);
+      drawMountain();
+      /* far rolling hills: fresh green, not white */
+      ctx.fillStyle = '#93cf9e';
+      ctx.beginPath();
+      ctx.moveTo(0, GROUND);
+      for(var fx=0; fx<=W; fx+=16){
+        var fy = GROUND - 74 - Math.sin((fx + distPx*0.15)*0.006)*26 - Math.sin((fx + distPx*0.15)*0.017)*8;
+        ctx.lineTo(fx, fy);
+      }
+      ctx.lineTo(W, GROUND); ctx.closePath(); ctx.fill();
+      /* mid hill band: deeper green, kept clear of trees */
+      ctx.fillStyle = '#63b878';
+      ctx.beginPath();
+      ctx.moveTo(0, GROUND);
+      for(var mx2=0; mx2<=W; mx2+=16){
+        var my = GROUND - 30 - Math.sin((mx2 + distPx*0.4)*0.008)*14;
+        ctx.lineTo(mx2, my);
+      }
+      ctx.lineTo(W, GROUND); ctx.closePath(); ctx.fill();
+    } else {
+      /* snowy sunset: open snow hills and the low sun, no trees */
+      ctx.fillStyle = '#c8dcee';
+      ctx.beginPath();
+      ctx.moveTo(0, GROUND);
+      for(var fx3=0; fx3<=W; fx3+=16){
+        ctx.lineTo(fx3, GROUND - 84 - Math.sin((fx3 + distPx*0.12)*0.005)*22);
+      }
+      ctx.lineTo(W, GROUND); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#eef6fd';
+      ctx.beginPath();
+      ctx.moveTo(0, GROUND);
+      for(var mx3=0; mx3<=W; mx3+=16){
+        ctx.lineTo(mx3, GROUND - 30 - Math.sin((mx3 + distPx*0.35)*0.008)*12);
+      }
+      ctx.lineTo(W, GROUND); ctx.closePath(); ctx.fill();
+    }
+
+    drawPixelRoad(theme);
+
+    /* foreground grass tufts and tiny flowers on the grass lip */
+    if(theme !== 2){
+      var tuftSpan = W + 184;
+      fgTufts.forEach(function(tf){
+        var gx2 = wrapX(tf.x, 1, tuftSpan) - 60;
+        if(tf.type === 2){
+          ctx.fillStyle = '#ffd34d';
+          ctx.beginPath(); ctx.arc(gx2, GROUND + 9, 3, 0, 6.29); ctx.fill();
+          ctx.strokeStyle = '#3f9e63'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(gx2, GROUND + 16); ctx.lineTo(gx2, GROUND + 11); ctx.stroke();
+        } else {
+          ctx.strokeStyle = '#2f8f4e'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(gx2, GROUND + 14); ctx.lineTo(gx2 - 4, GROUND + 4);
+          ctx.moveTo(gx2 + 4, GROUND + 14); ctx.lineTo(gx2 + 4, GROUND + 3);
+          ctx.moveTo(gx2 + 8, GROUND + 14); ctx.lineTo(gx2 + 12, GROUND + 5);
+          ctx.stroke();
+        }
+      });
+    }
+
+    /* light snowfall over everything */
+    if(!reduced){
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      snow.forEach(function(s){
+        var y = (s.y + t*s.s) % H;
+        var x = s.x + Math.sin(t*0.6 + s.ph)*8;
+        ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.29); ctx.fill();
+      });
+    }
+  }
+
+  function drawCoin(cn, t){
+    var bob = reduced ? 0 : Math.sin(t*3 + cn.ph)*2;
+    var y = cn.y + bob;
+    /* soft pre-rendered glow under the coin */
+    ctx.drawImage(coinGlowCanvas, cn.x - cn.r*1.9, y - cn.r*1.9, cn.r*3.8, cn.r*3.8);
+    ctx.beginPath(); ctx.arc(cn.x, y, cn.r, 0, 6.29);
+    ctx.fillStyle = '#ffc93c'; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = '#e09c00'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cn.x, y, cn.r-5, 0, 6.29);
+    ctx.lineWidth = 1.6; ctx.strokeStyle = '#e8ac12'; ctx.stroke();
+    ctx.fillStyle = '#fff3c4';
+    ctx.beginPath(); ctx.arc(cn.x-3.5, y-3.5, 2.6, 0, 6.29); ctx.fill();
+  }
+
+  function drawObstacle(o){
+    /* big sticker blocker sitting flat on the road: its base is flush
+       with the road surface, no mound and nothing lifting it above it */
+    ctx.fillStyle = 'rgba(60,45,20,0.20)';
+    ctx.beginPath();
+    ctx.ellipse(o.x + o.w/2, GROUND + 3, o.w*0.44, 3.5, 0, 0, 6.29);
+    ctx.fill();
+    drawSticker(o.art, o.x, GROUND - o.h, o.w, o.h);
+  }
+
+  function drawLofi(){
+    var bottom = GROUND + player.y;
+    var cx = playerX() + player.w/2;
+    var duck = player.ducking;
+    var airborne = !player.onGround;
+    var dashing = airborne && player.dashOffset > 18;
+    var running = player.onGround && !reduced && state !== 'over';
+    var ph = player.runPhase;
+
+    /* soft shadow on the path, shrinks as Lofi rises */
+    var airK = Math.max(0, Math.min(1, -player.y/170));
+    ctx.fillStyle = 'rgba(90,70,30,' + (0.28 - airK*0.16) + ')';
+    ctx.beginPath();
+    ctx.ellipse(cx, GROUND + 10, (duck ? 58 : 46) * (1 - airK*0.3), 7 * (1 - airK*0.3), 0, 0, 6.29);
+    ctx.fill();
+
+    /* dash streaks trailing behind while Lofi lunges forward */
+    if(dashing && !reduced){
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 3; ctx.lineCap = 'round';
+      var streakK = Math.min(1, player.dashOffset/118);
+      for(var si=0; si<3; si++){
+        var sy = bottom - 78 + si*22;
+        var sx0 = cx - 62 - streakK*26;
+        ctx.beginPath();
+        ctx.moveTo(sx0, sy);
+        ctx.lineTo(sx0 + 26 + streakK*22, sy);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(126,195,236,0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx - 88, bottom - 42); ctx.lineTo(cx - 44, bottom - 42); ctx.stroke();
+    }
+
+    if(!yetiSticker.ready){
+      /* fallback puff while the sticker loads */
+      var fh = playerH();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx, bottom - fh/2, fh/2, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#4aa3e0';
+      ctx.beginPath(); ctx.arc(cx - 8, bottom - fh/2 - 4, 3.4, 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 8, bottom - fh/2 - 4, 3.4, 0, 6.29); ctx.fill();
+      return;
+    }
+
+    /* The yeti stays whole, in its original shape, as one sticker.
+       Running bobs and squashes it a little; ducking squashes it wide;
+       jumping changes its shape altogether: tall, narrow and stretched,
+       easing back to normal as it lands. Dashing leans it forward,
+       wide and low, like it is being pulled ahead. */
+    var w = 118, h = 118, rot = 0;
+    if(duck){
+      w = 138; h = 68;
+    } else if(airborne){
+      var stretch = Math.max(0, Math.min(1, -player.y/110));
+      h = 118 + 28*stretch;
+      w = 118 - 24*stretch;
+      rot = -0.07*stretch;
+      if(dashing){
+        /* forward lunge pose: wider, a touch lower, nose tipped ahead */
+        w += 22; h -= 10; rot = 0.16;
+      }
+    } else if(running){
+      var sq = Math.sin(ph);
+      h = 118 - Math.abs(sq)*5;
+      w = 118 + Math.abs(sq)*4;
+      rot = sq * 0.02;
+    }
+    /* steering lean: tip forward holding Right/D, back holding Left/A */
+    if(state === 'playing'){
+      if(inputRight) rot += 0.06;
+      if(inputLeft) rot -= 0.05;
+    }
+    var bobY = (running && !duck) ? Math.abs(Math.sin(ph)) * 3 : 0;
+    ctx.save();
+    ctx.translate(cx, bottom - bobY);
+    ctx.rotate(rot);
+    drawSticker(yetiSticker, -w/2, -h, w, h);
+    ctx.restore();
+  }
+
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    var th = themeInfo();
+    drawScene(t, th.idx);
+    if(th.blend > 0){
+      /* crossfade into the next theme over the last 30 m of a stretch */
+      ctx.save();
+      ctx.globalAlpha = th.blend;
+      drawScene(t, th.next);
+      ctx.restore();
+    }
+    /* polish: smooth per-level hue shift + very subtle day-night drift.
+       Hue moves continuously with distance (so per level it shifts
+       smoothly, never jumps); dusk overlay peaks at only 7% so
+       readability is never hurt. Applied once, above sky/hills only. */
+    (function(){
+      var hue = ((distPx/50) * 0.04) % 360;
+      ctx.fillStyle = 'hsla(' + hue.toFixed(1) + ',85%,62%,0.05)';
+      ctx.fillRect(0,0,W,GROUND);
+      var cyc = ((distPx/50) % 2400) / 2400;
+      var duskA = (Math.sin(cyc * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5) * 0.07;
+      if(duskA > 0.004){
+        ctx.fillStyle = 'rgba(24,28,82,' + duskA.toFixed(3) + ')';
+        ctx.fillRect(0,0,W,GROUND);
+      }
+    })();
+    coinsArr.forEach(function(cn){ drawCoin(cn, t); });
+    obstacles.forEach(drawObstacle);
+    drawHeadPops();
+    drawLofi();
+    drawSparks();
+
+    if(state === 'ready'){
+      ctx.fillStyle = 'rgba(15,42,68,0.55)';
+      ctx.font = '700 15px -apple-system, "Helvetica Neue", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Press Space or tap PLAY', W/2, GROUND + 30);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  /* ---------- stage size: phones (760px and under, matching the
+     stylesheet's breakpoints) keep the original 960x540 view and the
+     desktop wide view is 1280x572; the switch only re-windows the
+     world, it never touches the run itself ---------- */
+  var mqNarrow = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
+  function applyStageSize(){
+    var m = (mqNarrow && mqNarrow.matches)
+      ? { w:960, h:540, ground:494 }
+      : { w:1280, h:572, ground:526 };
+    if(canvas.width !== m.w || canvas.height !== m.h){
+      canvas.width = m.w; canvas.height = m.h;
+    }
+    W = m.w; H = m.h; GROUND = m.ground;
+    seedSnow(); seedTufts();
+  }
+  applyStageSize();
+  if(mqNarrow){
+    if(mqNarrow.addEventListener) mqNarrow.addEventListener('change', applyStageSize);
+    else if(mqNarrow.addListener) mqNarrow.addListener(applyStageSize);
+  }
+
+  /* ---------- loop ---------- */
+  var last = 0, elapsed = 0;
+  function loop(ts){
+    var t = ts/1000;
+    var dt = Math.min(0.033, last ? t - last : 0.016);
+    last = t;
+    elapsed = t;
+    if(state === 'playing') update(dt);
+    else if(state === 'over' || state === 'paused'){ tickSparks(dt); }
+    else if(state === 'ready'){
+      /* gentle idle scroll on the start screen */
+      if(!reduced){ distPx += 22*dt; player.runPhase += dt*5; }
+      tickHeadPops(dt, true);
+    }
+    draw(elapsed);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  updateHud();
+
+  /* ---------- input ---------- */
+  document.getElementById('startBtn').addEventListener('click', startRun);
+  document.getElementById('restartBtn').addEventListener('click', startRun);
+  document.getElementById('resumeBtn').addEventListener('click', togglePause);
+  document.getElementById('pauseClose').addEventListener('click', togglePause);
+  document.getElementById('pauseBtn').addEventListener('click', function(){
+    if(state==='playing' || state==='paused') togglePause();
+  });
+  document.getElementById('jumpBtn').addEventListener('click', jump);
+  var duckBtn = document.getElementById('duckBtn');
+  duckBtn.addEventListener('pointerdown', function(e){ e.preventDefault(); duckStart(); });
+  duckBtn.addEventListener('pointerup', duckEnd);
+  duckBtn.addEventListener('pointerleave', duckEnd);
+  duckBtn.addEventListener('pointercancel', duckEnd);
+
+  document.addEventListener('keydown', function(e){
+    var code = e.code;
+    if(code === 'Escape' && settingsOverlay && !settingsOverlay.hidden){
+      e.preventDefault();
+      closeSettings();
+      return;
+    }
+    if(code === 'Space' || code === 'ArrowUp' || code === 'KeyW'){
+      e.preventDefault();
+      if(!e.repeat) jump();
+    } else if(code === 'ArrowDown' || code === 'KeyZ' || code === 'KeyS'){
+      /* Down arrow or Z (S kept as an extra) = duck */
+      e.preventDefault();
+      duckStart();
+    } else if(code === 'ArrowRight' || code === 'KeyD'){
+      /* Right arrow or D = move forward; in the air it dashes */
+      e.preventDefault();
+      if(!e.repeat) forwardStart(); else inputRight = true;
+    } else if(code === 'ArrowLeft' || code === 'KeyA'){
+      /* Left arrow or A = move back */
+      e.preventDefault();
+      if(!e.repeat) backStart(); else inputLeft = true;
+    } else if(code === 'KeyP' || code === 'Escape'){
+      if(state==='playing' || state==='paused') togglePause();
+    } else if(code === 'KeyM'){
+      setMuted(!muted);
+      if(!muted) sfx.click();
+    } else if(code === 'Enter'){
+      if(state === 'over' || state === 'ready') startRun();
+    }
+  });
+  document.addEventListener('keyup', function(e){
+    if(e.code === 'ArrowDown' || e.code === 'KeyZ' || e.code === 'KeyS') duckEnd();
+    else if(e.code === 'ArrowRight' || e.code === 'KeyD') forwardEnd();
+    else if(e.code === 'ArrowLeft' || e.code === 'KeyA') backEnd();
+  });
+
+  /* touch on canvas: tap = jump, swipe down = duck */
+  var touchY = null;
+  canvas.addEventListener('touchstart', function(e){
+    touchY = e.changedTouches[0].clientY;
+  }, { passive:true });
+  canvas.addEventListener('touchend', function(e){
+    if(touchY === null) return;
+    var dy = e.changedTouches[0].clientY - touchY;
+    touchY = null;
+    if(dy > 36){
+      duckStart();
+      setTimeout(duckEnd, 420);
+    } else {
+      jump();
+    }
+  }, { passive:true });
+  canvas.addEventListener('mousedown', function(){ jump(); });
+
+  /* ---------- settings panel ---------- */
+  var settingsOverlay = document.getElementById('settingsOverlay');
+  var settingsBtn = document.getElementById('settingsBtn');
+  var musicVolEl = document.getElementById('musicVol');
+  var soundVolEl = document.getElementById('soundVol');
+  var tipsToggle = document.getElementById('tipsToggle');
+  var noticeBtn = document.getElementById('noticeBtn');
+  var noticeText = document.getElementById('noticeText');
+  var noticeBadge = document.getElementById('noticeBadge');
+  var connectBtn = document.getElementById('connectBtn');
+  var walletStatus = document.getElementById('walletStatus');
+
+  function paintRange(el){
+    var p = Number(el.value);
+    el.style.background = 'linear-gradient(90deg,#4aa8e8 ' + p + '%,#c3dcee ' + p + '%)';
+  }
+  function syncVolumes(){
+    soundVolVal = Number(soundVolEl.value)/100;
+    musicVolVal = Number(musicVolEl.value)/100;
+    applyVolumes();
+    paintRange(soundVolEl);
+    paintRange(musicVolEl);
+    saveSave();
+  }
+  musicVolEl.addEventListener('input', function(){ syncVolumes(); startMusic(); });
+  soundVolEl.addEventListener('input', syncVolumes);
+  /* restore the saved settings into the panel before the first sync */
+  musicVolEl.value = Math.round(musicVolVal*100);
+  soundVolEl.value = Math.round(soundVolVal*100);
+  tipsToggle.classList.toggle('on', tipsOn);
+  tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+  syncVolumes();
+
+  function openSettings(){
+    settingsOverlay.hidden = false;
+    if(state === 'playing') togglePause();
+    sfx.click();
+  }
+  function closeSettings(){
+    settingsOverlay.hidden = true;
+    sfx.click();
+  }
+  settingsBtn.addEventListener('click', openSettings);
+  document.getElementById('settingsOk').addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', function(e){
+    if(e.target === settingsOverlay) closeSettings();
+  });
+
+  tipsToggle.addEventListener('click', function(){
+    tipsOn = !tipsOn;
+    tipsToggle.classList.toggle('on', tipsOn);
+    tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+    if(!tipsOn) headPops = [];
+    saveSave();
+    sfx.click();
+  });
+  noticeBtn.addEventListener('click', function(){
+    var show = noticeText.hidden;
+    noticeText.hidden = !show;
+    if(show && noticeBadge) noticeBadge.style.display = 'none';
+    sfx.click();
+  });
+
+  /* ---------- SUI wallet: Wallet Standard discovery + connect ----------
+     Wallets register themselves with the page; Connect asks the first
+     SUI wallet found to connect and shows the account on the button.
+     With no wallet installed the panel says so, plainly. */
+  var suiWallets = [], connectedWallet = null, connectedAddress = '';
+  var wsApi = { registerWallet: function(w){ if(w && suiWallets.indexOf(w) < 0) suiWallets.push(w); } };
+  try{
+    window.addEventListener('wallet-standard:register-wallet', function(e){
+      if(e.detail && typeof e.detail.register === 'function'){
+        try{ e.detail.register(wsApi); }catch(err){}
+      }
+    });
+    window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: wsApi }));
+  }catch(e){}
+  function shortAddr(a){ return a ? a.slice(0,6) + '…' + a.slice(-4) : ''; }
+  connectBtn.addEventListener('click', function(){
+    if(connectedAddress){
+      if(connectedWallet && connectedWallet.features && connectedWallet.features['standard:disconnect']){
+        try{ connectedWallet.features['standard:disconnect'].disconnect(); }catch(e){}
+      }
+      connectedWallet = null; connectedAddress = '';
+      connectBtn.textContent = 'Connect';
+      connectBtn.classList.remove('connected');
+      walletStatus.textContent = 'Wallet disconnected.';
+      return;
+    }
+    var w = null;
+    for(var i=0;i<suiWallets.length;i++){
+      var cand = suiWallets[i];
+      if(cand.features && cand.features['standard:connect'] &&
+         (cand.chains || []).some(function(c){ return String(c).indexOf('sui:') === 0; })){ w = cand; break; }
+    }
+    if(!w){
+      walletStatus.textContent = 'No SUI wallet found in this browser. Install a SUI wallet extension, then tap Connect again.';
+      return;
+    }
+    walletStatus.textContent = 'Connecting… approve it in your wallet.';
+    w.features['standard:connect'].connect().then(function(res){
+      var acc = res && res.accounts && res.accounts[0];
+      if(acc && acc.address){
+        connectedWallet = w; connectedAddress = acc.address;
+        connectBtn.textContent = shortAddr(acc.address);
+        connectBtn.classList.add('connected');
+        walletStatus.textContent = 'Connected with ' + (w.name || 'SUI wallet') + ' · ' + shortAddr(acc.address);
+        sfx.click();
+      } else {
+        walletStatus.textContent = 'The wallet returned no account.';
+      }
+    }).catch(function(){
+      walletStatus.textContent = 'Connection cancelled in the wallet.';
+    });
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden && state === 'playing') togglePause();
+  });
+
+  /* Start Firebase sync last, once every game variable and settings
+     control exists, so a sign-in merge loads into a ready game. */
+  initFirebaseSync();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="icon" type="image/png" href="/lofigame/assets/favicon.png">
+<title>Lofi Games — Play like a yeti</title>
+<meta name="description" content="Four free mini games starring Lofi the Yeti, all live now and playable right in your browser. Sign in with your SUI Wallet, Google or email. No downloads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<script>
+/* Theme: apply the saved Ice / Night choice before first paint, so a
+   returning Night player never sees a light flash on load. */
+try { if (localStorage.getItem("lofi_theme") === "night") document.documentElement.setAttribute("data-theme", "night"); } catch (e) {}
+</script>
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#ffffff;
+    --ice:#eef8ff;
+    --ice-mid:#d9eefb;
+    --ice-deep:#bfe1f6;
+    --surface:#ffffff;
+    --ink:#17384d;
+    --ink-soft:#4a6a7d;
+    --ink-faint:#7d99ab;
+    --border:#bcd9ee;
+    --border-light:#d8ecf9;
+    --blue:#0f7fd0;
+    --blue-deep:#0b5fa5;
+    --blue-dark:#0d3f68;
+    --navy:#123a5c;
+    --navy-deep:#0c2a44;
+    --green:#248a3d;
+    --radius:18px;
+    --maxw:1024px;
+    --display:"Baloo 2",-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;overflow-x:hidden;overflow-x:clip}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;overflow-x:clip;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    background:
+      radial-gradient(900px 340px at 12% -40px,rgba(140,205,250,.35),rgba(140,205,250,0) 70%),
+      radial-gradient(1000px 380px at 88% -60px,rgba(120,195,248,.32),rgba(120,195,248,0) 70%),
+      radial-gradient(1200px 500px at 50% 108%,rgba(150,210,250,.30),rgba(150,210,250,0) 70%),
+      linear-gradient(180deg,#e3f3fd 0%,#f4fbff 260px,#ffffff 560px,#f2faff 100%);
+  }
+  ::selection{background:var(--blue);color:#fff}
+  a{color:var(--blue)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* ---------- display headings: bold ice blue with a frosted white edge ---------- */
+  .display{
+    font-family:var(--display);
+    color:var(--blue-deep);
+    -webkit-text-stroke:1.5px rgba(255,255,255,.85);
+    paint-order:stroke fill;
+    text-shadow:0 3px 0 rgba(11,95,165,.14),0 12px 30px rgba(70,165,230,.28);
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(244,251,255,.9);
+    border-bottom:1px solid var(--border-light);
+    backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+  }
+  .nav{
+    max-width:var(--maxw);margin:0 auto;padding:0 22px;
+    display:flex;align-items:center;gap:24px;height:52px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);
+    font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.01em;min-height:44px;
+  }
+  .brand img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 50%;display:block}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:600;text-decoration:none;border:none;cursor:pointer;
+    border-radius:980px;padding:10px 22px;min-height:40px;
+    transition:background .2s;
+  }
+  .btn-primary{background:linear-gradient(180deg,#2b9bf0,#0f7fd0);color:#fff}
+  .btn-primary:hover{background:linear-gradient(180deg,#1c8fe8,#0b6cb8)}
+  .btn-ghost{background:rgba(255,255,255,.75);color:var(--blue-deep);border:1.5px solid var(--border)}
+  .btn-ghost:hover{background:#fff}
+  .btn-signin{
+    display:inline-flex;align-items:center;gap:7px;cursor:pointer;font:inherit;
+    font-size:13px;font-weight:700;color:var(--blue-deep);
+    background:#fff;border:1.5px solid var(--border);
+    padding:6px 14px;border-radius:980px;min-height:32px;white-space:nowrap;
+  }
+  .btn-signin:hover{border-color:var(--blue);color:var(--blue-dark)}
+  .btn-signin img{width:20px;height:20px;border-radius:50%;object-fit:cover;flex:none;display:block}
+  .wallet-pill{
+    display:none;align-items:center;gap:7px;cursor:pointer;font:inherit;
+    font-size:13px;font-weight:700;color:var(--blue-dark);
+    background:linear-gradient(180deg,#f7fcff,#e9f6fe);border:1.5px solid var(--border);
+    padding:5px 12px 5px 8px;border-radius:980px;min-height:32px;white-space:nowrap;
+  }
+  .wallet-pill.show{display:inline-flex}
+  .wallet-pill .dot{width:20px;height:20px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none}
+  .wallet-pill .dot img{width:100%;height:100%;object-fit:cover;display:block}
+  /* ---------- nav auth pending state: shown until Firebase confirms the session,
+       so a signed-in user never sees the signed-out "Sign in" button flash on reload ---------- */
+  .nav-pending{
+    display:none;align-items:center;gap:8px;
+    font-size:13px;font-weight:600;color:var(--ink-faint);
+    background:#fff;border:1.5px solid var(--border-light);
+    padding:6px 14px;border-radius:980px;min-height:32px;white-space:nowrap;
+  }
+  body.auth-pending .nav-pending{display:inline-flex}
+  body.auth-pending #signin-open{display:none}
+  .nav-pending .spin{
+    width:13px;height:13px;flex:none;border-radius:50%;
+    border:2px solid var(--ice-deep);border-top-color:var(--blue);
+    animation:nav-spin .8s linear infinite;
+  }
+  @keyframes nav-spin{to{transform:rotate(360deg)}}
+  @media (max-width:640px){
+    .nav{gap:12px;padding:0 16px}
+    .wrap{padding:0 16px}
+    .brand span{display:none}
+    .btn-signin,.wallet-pill,.nav-pending{padding-left:11px;padding-right:11px}
+  }
+
+  /* ---------- sign-in modal: same ice theme ---------- */
+  .signin-overlay{
+    position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;
+    background:rgba(12,42,68,.48);padding:0;
+  }
+  .signin-overlay.open{display:flex}
+  @media (min-width:641px){ .signin-overlay{align-items:center;padding:22px} }
+  .signin-card{
+    position:relative;width:100%;max-width:360px;max-height:88vh;overflow-y:auto;
+    background:linear-gradient(180deg,#f7fcff,#eef8ff 55%,#ffffff);
+    border:1.5px solid var(--border);border-radius:20px 20px 0 0;
+    padding:20px 20px 18px;text-align:left;
+    box-shadow:0 24px 60px rgba(12,42,68,.28);
+  }
+  @media (min-width:641px){ .signin-card{border-radius:20px} }
+  .signin-close{
+    position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;
+    border:1.5px solid var(--border-light);background:#fff;color:var(--ink-soft);
+    font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .signin-close:hover{color:var(--blue-dark);border-color:var(--border)}
+  .signin-head{text-align:center;padding:0 8px}
+  .signin-head img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border-light)}
+  .signin-head h2{font-size:22px;margin-top:6px}
+  .signin-head p{margin-top:3px;font-size:13px;line-height:1.45;color:var(--ink-soft)}
+  .sui-btn{
+    width:100%;display:flex;align-items:center;gap:11px;cursor:pointer;font:inherit;text-align:left;
+    background:linear-gradient(180deg,#2b9bf0,#0f7fd0);color:#fff;border:1.5px solid #0f7fd0;
+    border-radius:13px;padding:11px 13px;min-height:50px;margin-top:16px;
+  }
+  .sui-btn:hover{background:linear-gradient(180deg,#1c8fe8,#0b6cb8)}
+  .sui-btn:disabled{opacity:.65;cursor:wait}
+  .sui-btn .sui-ic{width:28px;height:28px;border-radius:50%;overflow:hidden;display:flex;flex:none}
+  .sui-btn .sui-ic img{width:100%;height:100%;object-fit:cover;display:block}
+  /* wallet chooser: shown when more than one SUI wallet is installed, so
+     Connect never silently picks the wrong one */
+  .sui-wallets{display:none;flex-direction:column;gap:8px;margin-top:10px}
+  .sui-wallets.show{display:flex}
+  .sui-wallet-opt{
+    width:100%;display:flex;align-items:center;gap:11px;cursor:pointer;font:inherit;text-align:left;
+    background:#fff;color:var(--ink);border:1.5px solid var(--border);border-radius:12px;padding:10px 13px;min-height:48px;
+  }
+  .sui-wallet-opt:hover{border-color:var(--blue)}
+  .sui-wallet-opt:disabled{opacity:.65;cursor:wait}
+  .sui-wallet-opt img{width:26px;height:26px;border-radius:7px;flex:none;display:block}
+  .sui-wallet-opt b{font-size:14.5px;font-weight:700}
+  .sui-wallet-opt .chev{margin-left:auto;font-size:18px;color:var(--ink-faint);flex:none}
+  .sui-btn b{display:block;font-size:15px;font-weight:700;line-height:1.25}
+  .sui-btn span{display:block;font-size:12px;color:#d8efff;line-height:1.35}
+  .sui-btn .chev{margin-left:auto;font-size:18px;color:#cfeaff;flex:none}
+  .signin-status{margin-top:8px;font-size:13px;line-height:1.5;color:var(--ink-soft);min-height:0}
+  .signin-status:empty{margin-top:0}
+  .signin-status.err{color:#b3261e}
+  .signin-status.ok{color:var(--green);font-weight:600}
+  .signin-status a{font-weight:600}
+  .wallet-addr{
+    display:none;margin-top:10px;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;
+  }
+  .wallet-addr.show{display:block}
+  .wallet-addr small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+  .wallet-addr code{font-size:13px;color:var(--blue-dark);word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wallet-actions{display:flex;gap:8px;margin-top:10px}
+  .wallet-actions button{
+    flex:1;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;min-height:38px;border-radius:980px;padding:7px 12px;
+  }
+  .btn-copy{background:#fff;color:var(--blue-deep);border:1.5px solid var(--border)}
+  .btn-disconnect{background:#fff;color:#b3261e;border:1.5px solid #eec9c6}
+  .signin-divider{display:flex;align-items:center;gap:12px;margin:14px 0 10px;color:var(--ink-faint);font-size:12px;font-weight:600}
+  .signin-divider::before,.signin-divider::after{content:"";flex:1;height:1px;background:var(--border-light)}
+  .google-btn{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font:inherit;
+    background:#fff;color:var(--ink);border:1.5px solid var(--border);
+    border-radius:13px;padding:10px 13px;min-height:47px;font-size:14.5px;font-weight:600;margin-top:10px;
+  }
+  .google-btn:hover{border-color:var(--blue)}
+  .google-btn svg{width:18px;height:18px;flex:none}
+  .soon-tag{font-size:11px;font-weight:700;color:var(--blue-deep);background:var(--ice);border:1px solid var(--border);border-radius:980px;padding:2px 8px;white-space:nowrap}
+  /* email sign-in lives behind one quiet row until it is needed, so the
+     sheet opens short: wallet, Google, then email on demand */
+  .email-reveal{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:inherit;
+    background:transparent;color:var(--blue-deep);border:1.5px solid var(--border-light);
+    border-radius:13px;padding:9px 13px;min-height:44px;font-size:14px;font-weight:600;
+  }
+  .email-reveal:hover{border-color:var(--blue)}
+  .email-reveal svg{width:17px;height:17px;flex:none}
+  .email-reveal .chev{width:14px;height:14px;color:var(--ink-faint);transition:transform .2s}
+  .email-reveal.open .chev{transform:rotate(180deg)}
+  .email-section{margin-top:10px}
+  .email-section[hidden]{display:none}
+  .email-form{display:flex;flex-direction:column;gap:7px}
+  .email-form label{font-size:13px;font-weight:600;color:var(--ink)}
+  .email-form input{
+    font:inherit;font-size:15px;color:var(--ink);background:#fff;
+    border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;min-height:44px;width:100%;
+  }
+  .email-form input:focus{outline:2px solid rgba(15,127,208,.35);border-color:var(--blue)}
+  .email-btn{
+    width:100%;cursor:pointer;font:inherit;font-size:14.5px;font-weight:600;color:var(--blue-deep);
+    background:#fff;border:1.5px solid var(--border);border-radius:980px;padding:9px 18px;min-height:43px;
+  }
+  .email-btn:hover{border-color:var(--blue)}
+  .signin-note{margin-top:12px;font-size:12px;line-height:1.55;color:var(--ink-faint);text-align:center}
+  body.modal-open{overflow:hidden}
+
+  /* ---------- water vapour over the whole site ---------- */
+  .vapor{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:hidden}
+  .vapor i{
+    position:absolute;display:block;border-radius:50%;filter:blur(22px);
+    background:radial-gradient(closest-side,rgba(190,226,250,.55),rgba(225,243,253,.30) 55%,rgba(255,255,255,0) 72%);
+  }
+  .vapor i:nth-child(1){width:560px;height:190px;top:12%;left:-140px;animation:vapor-drift 26s ease-in-out infinite alternate}
+  .vapor i:nth-child(2){width:680px;height:220px;top:38%;right:-200px;animation:vapor-drift 32s ease-in-out infinite alternate-reverse}
+  .vapor i:nth-child(3){width:480px;height:160px;top:62%;left:-120px;animation:vapor-drift 24s ease-in-out infinite alternate}
+  .vapor i:nth-child(4){width:600px;height:200px;top:84%;right:-160px;animation:vapor-drift 30s ease-in-out infinite alternate-reverse}
+  .vapor i:nth-child(5){width:380px;height:130px;top:26%;left:42%;animation:vapor-drift 21s ease-in-out infinite alternate}
+  @keyframes vapor-drift{
+    from{transform:translateX(0) translateY(0);opacity:.55}
+    50%{opacity:.95}
+    to{transform:translateX(90px) translateY(-14px);opacity:.6}
+  }
+
+  /* ---------- fog + ice shards ---------- */
+  .mist{
+    position:absolute;border-radius:50%;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(255,255,255,.98),rgba(226,242,252,.45) 55%,rgba(255,255,255,0) 75%);
+    filter:blur(14px);
+  }
+  .mist-a{width:460px;height:170px;top:4%;left:-90px;animation:drift 16s ease-in-out infinite alternate}
+  .mist-b{width:560px;height:200px;bottom:-50px;right:-120px;animation:drift 20s ease-in-out infinite alternate-reverse}
+  .mist-c{width:320px;height:120px;top:52%;left:38%;animation:drift 13s ease-in-out infinite alternate}
+  .mist-d{width:640px;height:120px;bottom:-34px;left:-60px;animation:drift 22s ease-in-out infinite alternate}
+  .mist-e{width:420px;height:100px;top:-24px;right:16%;animation:drift 18s ease-in-out infinite alternate-reverse}
+  @keyframes drift{from{transform:translateX(0);opacity:.75}to{transform:translateX(64px);opacity:1}}
+  .shard{
+    position:absolute;pointer-events:none;opacity:.5;
+    background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(168,216,246,.55) 60%,rgba(120,190,240,.35));
+    clip-path:polygon(50% 0,88% 38%,72% 100%,30% 82%,8% 30%);
+  }
+
+  /* ---------- hero: left-aligned copy beside the folder, banner below ----------
+     Two columns at every width: copy on the left and the folder on the right,
+     vertically centred against the copy. On phones the folder shrinks and the
+     copy type scales down so the row still fits without wrapping under. */
+  .hero{position:relative;overflow:hidden;padding:52px 0 8px;text-align:left}
+  .hero-inner{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  .hero-top{display:flex;flex-direction:row;align-items:center;gap:16px}
+  .hero-copy{flex:1 1 auto;min-width:0}
+  .hero-kicker{
+    font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.14em;
+    color:var(--blue);text-transform:uppercase;
+  }
+  h1{
+    margin-top:2px;
+    font-size:clamp(46px,7.2vw,76px);font-weight:800;letter-spacing:.005em;line-height:1.04;
+  }
+  h1 .accent{color:var(--blue)}
+  .hero-sub{margin:14px 0 0;font-size:17px;line-height:1.55;color:var(--ink-soft);max-width:520px}
+  /* hero pill: hand-finished frosted ice — a 2px ice-blue rim with a bright
+     inset highlight line just inside it, soft frost blooms in the corners,
+     a few uneven snow dots, and tiny melt drips hanging off the bottom edge
+     at hand-picked spots. The corner radii deliberately do not match, so it
+     reads drawn by a designer rather than generated. */
+  .hero-official{
+    position:relative;
+    margin:14px 0 0;display:inline-flex;align-items:center;gap:8px;
+    font-size:13.5px;font-weight:700;line-height:1.4;color:var(--blue-deep);
+    background:
+      radial-gradient(70px 16px at 16% -2px,rgba(255,255,255,.95),rgba(255,255,255,0) 70%),
+      radial-gradient(54px 14px at 88% 108%,rgba(190,225,248,.55),rgba(190,225,248,0) 70%),
+      radial-gradient(2.2px 2.2px at calc(100% - 26px) 32%,rgba(127,195,238,.85) 98%,rgba(127,195,238,0)),
+      radial-gradient(1.8px 1.8px at calc(100% - 15px) 62%,rgba(127,195,238,.7) 98%,rgba(127,195,238,0)),
+      radial-gradient(1.6px 1.6px at 30px 68%,rgba(127,195,238,.6) 98%,rgba(127,195,238,0)),
+      linear-gradient(180deg,#ffffff,#f0f8fe);
+    border:2px solid #79bde9;
+    border-radius:28px 33px 30px 26px / 31px 27px 32px 29px;
+    padding:7px 15px 8px;max-width:520px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 0 0 1px rgba(255,255,255,.55),
+      inset 0 -7px 11px rgba(140,205,250,.20),
+      inset 3px 0 8px rgba(255,255,255,.65),
+      0 2px 5px rgba(35,115,180,.10),
+      0 9px 20px rgba(35,115,180,.09);
+  }
+  .hero-official::before{
+    content:"";width:8px;height:8px;border-radius:50%;flex:none;
+    background:radial-gradient(circle at 35% 30%,#ffffff 0%,#bfe1f6 55%,#79bde9 100%);
+    border:1.5px solid #79bde9;
+    box-shadow:0 0 0 3px rgba(217,238,251,.9);
+  }
+  /* melt drips: five uneven droplets along the bottom edge, longest near the middle */
+  .hero-official::after{
+    content:"";position:absolute;left:6px;right:6px;bottom:-6px;height:8px;pointer-events:none;
+    background:
+      radial-gradient(2.6px 6.5px at 11% 0,#a9d7f4 96%,rgba(169,215,244,0)),
+      radial-gradient(2px 4.5px at 31% 0,#c4e4f8 96%,rgba(196,228,248,0)),
+      radial-gradient(3px 7.5px at 55% 0,#9fd0f1 96%,rgba(159,208,241,0)),
+      radial-gradient(1.8px 4px at 74% 0,#cfeafb 96%,rgba(207,234,251,0)),
+      radial-gradient(2.4px 5.5px at 90% 0,#a9d7f4 96%,rgba(169,215,244,0));
+    background-repeat:no-repeat;
+  }
+  .hero-cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start;margin-top:24px}
+  @media (min-width:900px){
+    .hero-top{flex-direction:row;align-items:center;gap:44px}
+    .hero-copy{flex:0 1 auto}
+  }
+  .hero-banner{position:relative;max-width:880px;margin:36px auto 0}
+  .hero-banner img{
+    width:100%;aspect-ratio:21/9;object-fit:cover;object-position:50% 32%;display:block;
+    border-radius:22px;border:3px solid rgba(255,255,255,.95);
+    box-shadow:0 18px 44px rgba(35,115,180,.28);
+  }
+  .hero-banner .mist{width:420px;height:120px;bottom:-56px;left:-70px;z-index:2}
+  .hero-banner .mist.m2{left:auto;right:-70px;animation-delay:-8s}
+
+  /* ---------- hero sticker folder: Archer's finalized folder artwork, shown
+     exactly as supplied — the frosted folder, the three fanned cards and the
+     dotted background are all baked into the one image. It links to the
+     stickers page, sits tilted about 6 degrees, and floats gently up and
+     down while keeping the tilt. The artwork's dotted background has rounded
+     corners with plain white outside them, so the image is clipped with a
+     matching border-radius (about 9.5% of its width, scaling with size) to
+     hide the white corners against the pale hero. It is the hero's right
+     column at every width, close to the headline; on phones it shrinks to
+     about 120px so it stays on the same row as the copy. ---------- */
+  .hero-folder{
+    display:block;position:relative;flex:none;width:120px;margin:0;
+    cursor:pointer;
+    transform:rotate(6deg);
+    animation:hero-folder-float 3.6s ease-in-out infinite;
+  }
+  .hero-folder img{width:100%;height:auto;display:block;border-radius:9.5%}
+  @keyframes hero-folder-float{
+    0%,100%{transform:rotate(6deg) translateY(-6px)}
+    50%{transform:rotate(6deg) translateY(6px)}
+  }
+  @media (min-width:900px){
+    .hero-folder{flex:none;margin:0;width:288px}
+  }
+  @media (max-width:899px){
+    .hero-top{gap:18px}
+    .hero-kicker{font-size:14px}
+    h1{font-size:clamp(30px,8.6vw,44px);line-height:1.08}
+    .hero-sub{font-size:14px;line-height:1.5;margin-top:10px}
+    .hero-official{font-size:12.5px;margin-top:10px;padding:7px 13px 8px}
+    .hero-cta{gap:8px;margin-top:16px}
+    .hero-cta .btn{padding:8px 16px;font-size:14px;min-height:36px}
+  }
+  @media (max-width:720px){
+    .hero{padding-top:38px}
+    .hero-inner{padding:0 16px}
+    .hero-banner img{aspect-ratio:16/10}
+  }
+
+  /* ---------- sections ---------- */
+  section{padding:52px 0}
+  section.alt{position:relative;overflow:hidden}
+  section.alt .wrap{position:relative;z-index:1}
+  .sec-head{text-align:center;margin-bottom:26px}
+  h2{font-size:clamp(30px,4.4vw,40px);font-weight:800;line-height:1.12}
+  .sec-sub{margin:8px auto 0;font-size:16px;line-height:1.5;color:var(--ink-soft);max-width:560px}
+
+  /* ---------- games ---------- */
+  .games{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .game-card{
+    background:linear-gradient(180deg,#f7fcff,#e9f6fe);
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;
+  }
+  .game-card .art{position:relative}
+  .game-card .art img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+  .game-card.coming{opacity:1}
+  .art-placeholder{
+    width:100%;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,#d9eefb 0%,#eef8ff 58%,#ffffff 100%);
+    border-bottom:1px solid var(--border-light);overflow:hidden;position:relative;
+  }
+  .art-placeholder svg{width:100%;height:100%;display:block}
+  .coming-pill{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--blue-deep);
+    background:#fff;border:1.5px dashed var(--border);border-radius:980px;
+    padding:7px 14px;min-height:36px;
+  }
+  .coming-pill i{
+    width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block;flex:none;
+    box-shadow:0 0 0 3px var(--ice);
+  }
+  .soon{
+    position:absolute;top:12px;right:12px;
+    background:rgba(255,255,255,.92);border:1px solid var(--border-light);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    color:var(--blue-dark);font-size:12px;font-weight:700;
+    padding:5px 11px;border-radius:980px;
+  }
+  .game-body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .game-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .game-top h3{font-family:var(--display);font-size:23px;font-weight:800;letter-spacing:.005em;color:var(--blue-dark)}
+  .genre{
+    font-size:12px;font-weight:700;color:var(--blue-deep);white-space:nowrap;
+    background:#fff;border:1.5px solid var(--border);border-radius:980px;padding:3px 10px;
+  }
+  .game-body p{font-size:15px;line-height:1.5;color:var(--ink-soft)}
+  .game-meta{margin-top:4px;font-size:13px;color:var(--ink-faint)}
+  .notify-row{display:flex;align-items:center;gap:10px;margin-top:14px}
+  .notify-note{font-size:13px;color:var(--ink-faint)}
+  .soon.live{color:var(--green);border-color:#bfe3c8}
+  .play-btn{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    font-size:15px;font-weight:700;color:#fff;text-decoration:none;
+    background:linear-gradient(180deg,#2b9bf0,#0f7fd0);border:1.5px solid #0f7fd0;
+    padding:8px 22px;border-radius:980px;min-height:40px;
+    transition:background .2s;
+  }
+  .play-btn:hover{background:linear-gradient(180deg,#1c8fe8,#0b6cb8)}
+  .play-btn svg{width:12px;height:12px;flex:none}
+  @media (max-width:720px){ .games{grid-template-columns:1fr} }
+
+  /* ---------- achievements (inside each game card, hidden until clicked) ---------- */
+  .game-ach{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .game-ach-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    width:100%;background:none;border:none;font:inherit;cursor:pointer;
+    padding:4px 0;text-align:left;color:var(--ink);
+  }
+  .ach-title{font-size:13px;font-weight:700;letter-spacing:.01em;color:var(--blue-dark)}
+  .ach-right{display:inline-flex;align-items:center;gap:8px}
+  .ach-total{font-size:12px;color:var(--ink-faint);white-space:nowrap}
+  .ach-chev{width:14px;height:14px;flex:none;color:var(--ink-faint);transition:transform .2s}
+  .game-ach-head[aria-expanded="true"] .ach-chev{transform:rotate(180deg)}
+  .ach-list[hidden]{display:none}
+  .ach-list{list-style:none}
+  .ach-list li{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:6px 0;border-top:1px solid var(--border-light);
+    font-size:13.5px;color:var(--ink-soft);
+  }
+  .ach-list li:first-child{border-top:none}
+  .ach-list li:last-child{padding-bottom:0}
+  .xp{
+    flex:none;font-size:12px;font-weight:700;color:var(--blue-deep);
+    background:#fff;border:1px solid var(--border);
+    padding:2px 9px;border-radius:980px;
+  }
+
+  /* ---------- how to play: glowing ice rings ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:center}
+  .step{padding:10px 14px 4px}
+  .ring{
+    position:relative;width:104px;height:104px;margin:0 auto 16px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 34% 28%,#ffffff 0%,#eaf7ff 52%,#cfeafb 100%);
+    border:3px solid #8ecdf3;
+    box-shadow:0 0 0 7px rgba(255,255,255,.75),0 0 30px rgba(96,182,242,.55),inset 0 0 18px rgba(140,205,250,.5);
+  }
+  .ring b{font-family:var(--display);font-size:42px;font-weight:800;color:var(--blue-deep);line-height:1}
+  .step h3{font-family:var(--display);font-size:19px;font-weight:800;color:var(--blue-dark);margin-bottom:6px}
+  .step p{font-size:15px;line-height:1.55;color:var(--ink-soft);max-width:300px;margin:0 auto}
+  @media (max-width:720px){ .steps{grid-template-columns:1fr;gap:28px} }
+
+  /* ---------- about cards ---------- */
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .info-card{
+    background:linear-gradient(180deg,#f7fcff,#e9f6fe);
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);padding:22px;text-align:center;
+  }
+  .info-card h3{font-family:var(--display);font-size:18px;font-weight:800;color:var(--blue-dark);margin-bottom:6px}
+  .info-card p{font-size:15px;line-height:1.5;color:var(--ink-soft)}
+  @media (max-width:720px){ .cards3{grid-template-columns:1fr} }
+
+  /* ---------- yeti: character standing on the ice ---------- */
+  .yeti{
+    position:relative;
+    display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:end;
+  }
+  .yeti > img{
+    width:100%;height:380px;object-fit:cover;object-position:50% 55%;display:block;
+    border-radius:20px;border:3px solid rgba(255,255,255,.95);
+    box-shadow:0 16px 36px rgba(35,115,180,.25);
+  }
+  .yeti-body{padding:28px 28px 34px;display:flex;flex-direction:column;justify-content:center;align-self:center}
+  .yeti-body h2{margin-bottom:8px}
+  .yeti-body p{font-size:16px;line-height:1.55;color:var(--ink-soft)}
+  @media (max-width:640px){
+    .yeti{grid-template-columns:1fr}
+    .yeti > img{height:auto;aspect-ratio:4/5;object-position:50% 55%}
+    .yeti-body{padding:20px 4px 8px;text-align:center}
+    .yeti-body p{margin:0 auto}
+  }
+
+  /* ---------- footer: dark navy band, notes + copyright bar like the reference ---------- */
+  footer{
+    position:relative;z-index:41;margin-top:12px;
+    background:linear-gradient(180deg,#10395e,var(--navy-deep));color:#cfe6f5;
+  }
+  .foot-main{
+    max-width:var(--maxw);margin:0 auto;padding:42px 22px 38px;
+    display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;gap:32px;
+  }
+  footer .f-brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--display);font-weight:700;color:#fff;font-size:18px;text-decoration:none}
+  footer .f-brand img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:50% 50%;border:2px solid rgba(255,255,255,.6)}
+  .f-tag{margin-top:12px;font-size:14px;line-height:1.6;color:#9dbfd6;max-width:320px}
+  .f-tag a{color:#cfe6f5;text-decoration:underline;text-underline-offset:3px}
+  .f-tag a:hover{color:#fff}
+  .f-meta{margin-top:14px;font-size:13px;font-weight:600;color:#7fb8dd;letter-spacing:.02em}
+  .f-lofi-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .f-lofi-links a{display:inline-flex;align-items:center;font-size:13px;font-weight:700;color:#eaf6ff;text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:980px;padding:6px 13px;min-height:32px}
+  .f-lofi-links a:hover{background:rgba(255,255,255,.18);color:#fff}
+  .f-our-links{margin-top:16px}
+  .f-x-icon{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:none;color:#fff;text-decoration:none;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:50%}
+  .f-x-icon:hover{background:rgba(255,255,255,.22);color:#fff}
+  .f-x-icon svg{width:17px;height:17px;flex:none;fill:currentColor}
+  .foot-col h3{
+    font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:#7fb8dd;margin-bottom:12px;
+  }
+  .foot-col nav{display:flex;flex-direction:column;align-items:flex-start}
+  .foot-col nav a{
+    color:#cfe6f5;text-decoration:none;font-size:14px;line-height:1.4;
+    padding:5px 0;min-height:32px;display:inline-flex;align-items:center;
+  }
+  .foot-col nav a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+  .foot-bar{
+    background:rgba(4,18,32,.45);border-top:1px solid rgba(255,255,255,.08);
+    text-align:center;font-size:12.5px;color:#8fb3ca;padding:15px 22px 17px;
+  }
+  @media (max-width:640px){
+    .foot-main{grid-template-columns:1fr 1fr;padding:34px 16px 32px;gap:26px 20px}
+    .foot-brand-col{grid-column:1/-1}
+    .f-tag{max-width:none}
+    .foot-bar{padding-left:16px;padding-right:16px}
+  }
+
+  .view{padding:52px 0 10px}
+  .view[hidden]{display:none}
+  .view-subh{font-family:var(--display);font-size:20px;font-weight:800;color:var(--blue-dark);margin:26px 0 12px}
+  .empty-card{background:linear-gradient(180deg,#f7fcff,#e9f6fe);border:1.5px solid var(--border);border-radius:var(--radius);padding:26px;text-align:center}
+  .empty-card p{font-size:15px;line-height:1.55;color:var(--ink-soft);max-width:440px;margin:0 auto 16px}
+  .empty-note{text-align:center;font-size:14.5px;color:var(--ink-faint);padding:18px 0}
+  .player-head{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:22px}
+  .player-head h3{font-family:var(--display);font-size:26px;font-weight:800;color:var(--blue-dark)}
+  .player-head p{font-size:14px;color:var(--ink-faint)}
+  .avatar{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;overflow:hidden;background:linear-gradient(180deg,#2b9bf0,#0b5fa5);color:#fff;flex:none}
+  .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+  .avatar svg{width:62%;height:62%}
+  .avatar.lg{width:64px;height:64px}
+  .avatar.sm{width:22px;height:22px}
+  #user-pill .avatar{width:20px;height:20px}
+  .pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .pstat{background:linear-gradient(180deg,#f7fcff,#e9f6fe);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center}
+  .pstat b{display:block;font-family:var(--display);font-size:24px;font-weight:800;color:var(--blue-deep);line-height:1.15}
+  .pstat span{font-size:13px;color:var(--ink-faint)}
+  @media (max-width:640px){.pstats{grid-template-columns:1fr}}
+  .best-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){.best-grid{grid-template-columns:1fr}}
+  .best-card{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--border-light);border-radius:14px;padding:12px 16px 12px 12px}
+  .best-card img{width:64px;height:48px;object-fit:cover;border-radius:8px;flex:none}
+  .best-card h4{font-family:var(--display);font-size:16.5px;font-weight:800;color:var(--blue-dark)}
+  .best-card p{font-size:13.5px;color:var(--ink-soft)}
+  .best-card b{margin-left:auto;font-family:var(--display);font-size:20px;color:var(--blue-deep);white-space:nowrap}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+  .chip{cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;color:var(--blue-deep);background:#fff;border:1.5px solid var(--border);border-radius:980px;padding:7px 15px;min-height:36px}
+  .chip.active{background:linear-gradient(180deg,#2b9bf0,#0f7fd0);color:#fff;border-color:#0f7fd0}
+  .filter-note{text-align:center;font-size:13px;color:var(--ink-faint);min-height:18px;margin-bottom:6px}
+  .stickers{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px}
+  .sticker{background:#fff;border:1.5px solid var(--border-light);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:5px}
+  .sticker.st-collected{border-color:var(--border);background:linear-gradient(180deg,#f7fcff,#eef8ff)}
+  .sticker.st-locked{opacity:.78}
+  .sticker-top{display:flex;align-items:center;justify-content:space-between}
+  .sticker-medal{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--ice);color:var(--blue)}
+  .sticker-medal svg{width:18px;height:18px}
+  .st-collected .sticker-medal{background:linear-gradient(180deg,#2b9bf0,#0b5fa5);color:#fff}
+  .st-ready .sticker-medal{background:var(--green);color:#fff}
+  @keyframes medal-spark{0%{transform:scale(1)}35%{transform:scale(1.16);box-shadow:0 0 0 5px rgba(43,155,240,.22),0 0 16px rgba(43,155,240,.5)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(43,155,240,0)}}
+  .st-collected .sticker-medal{animation:medal-spark .9s ease 1}
+  .sticker h4{font-family:var(--display);font-size:15.5px;font-weight:800;color:var(--blue-dark);line-height:1.25}
+  .sticker p{font-size:12.5px;line-height:1.45;color:var(--ink-soft)}
+  .sticker .st-status{margin-top:auto;font-size:12px;font-weight:700;color:var(--ink-faint);padding-top:4px}
+  .st-collected .st-status{color:var(--blue-deep)}
+  .st-ready .st-status{color:var(--green)}
+  .bar{height:7px;background:var(--ice-mid);border-radius:99px;overflow:hidden;margin-top:4px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#2b9bf0,#0b5fa5);border-radius:99px}
+  .bar-label{font-size:11.5px;color:var(--ink-faint)}
+  .chal-list{display:flex;flex-direction:column;gap:10px;max-width:640px;margin:0 auto}
+  .chal-row{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--border-light);border-radius:14px;padding:13px 16px}
+  .chal-row .chal-ic{width:30px;height:30px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--ice);color:var(--blue);font-weight:800;font-size:14px}
+  .chal-row .chal-ic svg{width:15px;height:15px}
+  .chal-row.done .chal-ic{background:var(--green);color:#fff}
+  .chal-row b{font-size:15px;color:var(--ink);font-weight:600}
+  .chal-row span{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--ink-faint);white-space:nowrap}
+  .chal-row.done span{color:var(--green)}
+  .board-list{display:flex;flex-direction:column;gap:8px;max-width:640px;margin:0 auto}
+  .board-row{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--border-light);border-radius:14px;padding:9px 16px 9px 12px}
+  .board-row .rank{font-family:var(--display);font-weight:800;font-size:17px;color:var(--blue-deep);width:30px;text-align:center;flex:none}
+  .board-row .bname{font-weight:600;font-size:15px;color:var(--ink)}
+  .board-row .bxp{margin-left:auto;font-family:var(--display);font-weight:800;color:var(--blue-deep)}
+  .board-row.me{border-color:var(--blue);background:linear-gradient(180deg,#f7fcff,#eef8ff)}
+  .profile-card{max-width:640px;margin:0 auto;background:linear-gradient(180deg,#f7fcff,#ffffff);border:1.5px solid var(--border);border-radius:var(--radius);padding:6px 24px 26px}
+  .profile-card .view-subh:first-child{margin-top:18px}
+  .avatar-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .avatar-pick{cursor:pointer;background:#fff;border:2px solid var(--border-light);border-radius:50%;padding:3px;line-height:0}
+  .avatar-pick.sel{border-color:var(--blue)}
+  .avatar-pick .avatar{width:44px;height:44px}
+  .linked-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border-light);font-size:14.5px;flex-wrap:wrap}
+  .linked-row b{color:var(--blue-dark)}
+  .linked-row .lstate{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .mini-btn{cursor:pointer;font:inherit;font-size:13px;font-weight:600;color:var(--blue-deep);background:#fff;border:1.5px solid var(--border);border-radius:980px;padding:6px 13px;min-height:34px}
+  .mini-btn:hover{border-color:var(--blue)}
+  .mini-btn.red{color:#b3261e;border-color:#eec9c6}
+  .linked-addr{font-size:12px;color:var(--ink-faint);word-break:break-all;flex-basis:100%}
+  .link-toggle{background:none;border:none;color:var(--blue);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;padding:8px 0 0;display:block;margin:0 auto}
+  .account-line{display:flex;align-items:center;gap:10px}
+  .btn-ghost.danger{color:#b3261e;border-color:#eec9c6}
+
+  /* ---------- header profile dropdown ---------- */
+  .nav{position:relative}
+  .user-menu{
+    position:absolute;top:calc(100% + 8px);right:22px;z-index:60;min-width:212px;
+    background:#fff;border:1.5px solid var(--border);border-radius:14px;
+    box-shadow:0 18px 44px rgba(12,42,68,.22);padding:6px;
+  }
+  .user-menu[hidden]{display:none}
+  .user-menu a,.user-menu button{
+    display:flex;align-items:center;width:100%;text-align:left;cursor:pointer;font:inherit;
+    font-size:14.5px;font-weight:600;color:var(--ink);text-decoration:none;
+    background:none;border:none;border-radius:9px;padding:10px 12px;min-height:42px;
+  }
+  .user-menu a:hover,.user-menu button:hover{background:var(--ice)}
+  .user-menu button{color:#b3261e}
+  @media (max-width:640px){ .user-menu{right:16px} }
+
+  /* ---------- help / your data documents ---------- */
+  .doc-list{display:flex;flex-direction:column;gap:14px;max-width:720px;margin:0 auto}
+  .doc-card{background:linear-gradient(180deg,#f7fcff,#eef8ff);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px 24px}
+  .doc-card h3{font-family:var(--display);font-size:19px;font-weight:800;color:var(--blue-dark);margin-bottom:8px}
+  .doc-card p{font-size:15px;line-height:1.6;color:var(--ink-soft)}
+  .doc-card p + p{margin-top:8px}
+  .doc-card a{font-weight:600}
+
+  /* ---------- decorative sticker showcase + take-stickers page ----------
+     These are the shareable stickers only; the achievement stickerbook
+     above (.stickers / .sticker) is a separate system and is untouched. */
+  .showcase-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .showcase-item{
+    background:#fff;border:1.5px solid var(--border-light);border-radius:14px;
+    padding:12px 10px 10px;text-align:center;
+  }
+  .showcase-item img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block}
+  .showcase-item span{display:block;margin-top:6px;font-family:var(--display);font-size:14.5px;font-weight:700;color:var(--blue-dark)}
+  .showcase-more{text-align:center;margin-top:24px}
+  @media (max-width:720px){ .showcase-grid{grid-template-columns:repeat(2,1fr)} }
+  .take-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .take-card{
+    background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);
+    padding:18px 16px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;
+  }
+  .take-card img{width:100%;max-width:230px;aspect-ratio:1/1;object-fit:contain;display:block}
+  .take-card h3{font-family:var(--display);font-size:18px;font-weight:800;color:var(--blue-dark)}
+  .take-card .btn{margin-top:auto;width:100%}
+  @media (max-width:720px){ .take-grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:480px){ .take-grid{grid-template-columns:1fr} .take-card img{max-width:200px} }
+
+  /* ---------- phone wallpapers on the take-stickers page ---------- */
+  .wallpaper-head{margin-top:48px}
+  .wallpaper-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .take-card.wallpaper-card img{max-width:180px;aspect-ratio:9/16;object-fit:cover;border-radius:10px}
+  @media (max-width:720px){ .wallpaper-grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:480px){ .wallpaper-grid{grid-template-columns:1fr} .take-card.wallpaper-card img{max-width:220px} }
+
+  /* ---------- player: close to earning, sign-out row, settings avatar ---------- */
+  .close-list{display:flex;flex-direction:column;gap:10px}
+  .close-row{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--border-light);border-radius:14px;padding:12px 16px;text-decoration:none;color:inherit}
+  .close-row:hover{border-color:var(--blue)}
+  .close-row .c-main{flex:1;min-width:0}
+  .close-row h4{font-family:var(--display);font-size:16px;font-weight:800;color:var(--blue-dark);line-height:1.25}
+  .close-row .c-game{font-size:12.5px;color:var(--ink-faint)}
+  .close-row .c-arrow{font-size:20px;color:var(--ink-faint);flex:none}
+  .player-actions{text-align:center;margin-top:28px}
+  .avatar-current{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .avatar-current b{font-family:var(--display);font-size:16.5px;font-weight:800;color:var(--blue-dark);display:block}
+  .avatar-current p{font-size:13.5px;line-height:1.45;color:var(--ink-soft)}
+  .chal-play{
+    flex:none;display:inline-flex;align-items:center;cursor:pointer;text-decoration:none;
+    font-size:13px;font-weight:700;color:#fff;background:linear-gradient(180deg,#2b9bf0,#0f7fd0);
+    border:1.5px solid #0f7fd0;border-radius:980px;padding:5px 14px;min-height:32px;
+  }
+  .chal-play:hover{background:linear-gradient(180deg,#1c8fe8,#0b6cb8)}
+
+  /* ---------- home sticker strip: compact row under the hero ---------- */
+  .sticker-strip{
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    background:linear-gradient(180deg,#f7fcff,#eef8ff);
+    border:1.5px solid var(--border);border-radius:var(--radius);
+    padding:12px 16px;margin-top:24px;text-decoration:none;color:inherit;
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  }
+  .sticker-strip:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(35,115,180,.16);border-color:var(--blue)}
+  .sticker-strip-label{font-family:var(--display);font-size:19px;font-weight:800;color:var(--blue-dark);white-space:nowrap}
+  .sticker-strip-thumbs{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
+  .sticker-strip-thumbs img{width:68px;height:68px;object-fit:contain;display:block;border-radius:12px;background:#fff;border:1px solid var(--border-light)}
+  .sticker-strip-cta{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;
+    font-size:14px;font-weight:700;color:#fff;white-space:nowrap;
+    background:linear-gradient(180deg,#2b9bf0,#0f7fd0);border:1.5px solid #0f7fd0;
+    padding:8px 18px;border-radius:980px;min-height:38px;
+  }
+  @media (max-width:640px){ .sticker-strip-thumbs img{width:56px;height:56px} }
+  /* ---------- hub polish: loading pulse + subtle hover states ---------- */
+  @keyframes nav-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  .nav-pending{animation:nav-pulse 1.6s ease-in-out infinite}
+  .game-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .game-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(35,115,180,.16);border-color:var(--blue)}
+  .take-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .take-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(35,115,180,.15);border-color:var(--blue)}
+  .showcase-item{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .showcase-item:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(35,115,180,.13);border-color:var(--blue)}
+  .foot-col nav a{transition:color .2s ease,transform .2s ease}
+  .foot-col nav a:hover{transform:translateX(2px)}
+
+  /* ---------- player badges: collected achievement stickers ---------- */
+  .badge-row{display:flex;flex-wrap:wrap;gap:10px}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:#fff;border:1.5px solid var(--border);border-radius:980px;
+    padding:6px 14px 6px 8px;font-size:13.5px;font-weight:600;color:var(--blue-dark);
+  }
+  .badge .sticker-medal{width:28px;height:28px;background:linear-gradient(180deg,#2b9bf0,#0b5fa5);color:#fff}
+  .badge .sticker-medal svg{width:15px;height:15px}
+  .badge-empty{font-size:14.5px;line-height:1.55;color:var(--ink-faint)}
+
+  /* ---------- settings: theme picker ---------- */
+  .theme-card{margin-top:16px}
+  .theme-note{font-size:14.5px;line-height:1.55;color:var(--ink-soft);margin-bottom:14px}
+  .theme-opts{display:flex;gap:10px;flex-wrap:wrap}
+  .theme-opt{
+    cursor:pointer;font:inherit;font-size:14.5px;font-weight:600;color:var(--blue-deep);
+    background:#fff;border:1.5px solid var(--border);border-radius:12px;
+    padding:10px 20px;min-height:44px;transition:border-color .2s ease,background .2s ease,color .2s ease;
+  }
+  .theme-opt:hover{border-color:var(--blue)}
+  .theme-opt[aria-pressed="true"]{background:linear-gradient(180deg,#2b9bf0,#0f7fd0);color:#fff;border-color:#0f7fd0}
+
+  /* ---------- Night theme: dark navy chrome, same ice-blue accents ----------
+     Only the hub chrome is themed; the game pages keep their own look.
+     Sticker artwork keeps a white tile so it reads the same in both themes. */
+  html[data-theme="night"]{
+    color-scheme:dark;
+    --ice:#122c47;
+    --ice-mid:#1a3a5c;
+    --ice-deep:#26507a;
+    --surface:#10263f;
+    --ink:#e8f4fc;
+    --ink-soft:#b8d2e4;
+    --ink-faint:#8fb0c8;
+    --border:#2e5a85;
+    --border-light:#234a70;
+    --blue:#4db2f5;
+    --blue-deep:#7cc4f8;
+    --blue-dark:#a8d8fb;
+  }
+  html[data-theme="night"] body{
+    background:
+      radial-gradient(900px 340px at 12% -40px,rgba(50,110,170,.28),rgba(50,110,170,0) 70%),
+      radial-gradient(1000px 380px at 88% -60px,rgba(45,100,160,.26),rgba(45,100,160,0) 70%),
+      radial-gradient(1200px 500px at 50% 108%,rgba(50,110,170,.22),rgba(50,110,170,0) 70%),
+      linear-gradient(180deg,#0d2440 0%,#0a1c30 260px,#081627 560px,#0a1e35 100%);
+  }
+  html[data-theme="night"] .display{-webkit-text-stroke:1.5px rgba(6,20,36,.55);text-shadow:0 3px 0 rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.35)}
+  html[data-theme="night"] header{background:rgba(10,28,48,.92)}
+  html[data-theme="night"] .vapor{opacity:.35}
+  html[data-theme="night"] .mist{opacity:.22}
+  html[data-theme="night"] .game-card,
+  html[data-theme="night"] .info-card,
+  html[data-theme="night"] .empty-card,
+  html[data-theme="night"] .pstat,
+  html[data-theme="night"] .doc-card,
+  html[data-theme="night"] .sticker-strip{background:linear-gradient(180deg,#132c49,#0f243d)}
+  html[data-theme="night"] .profile-card{background:linear-gradient(180deg,#132c49,#0d2138)}
+  html[data-theme="night"] .sticker,
+  html[data-theme="night"] .chal-row,
+  html[data-theme="night"] .board-row,
+  html[data-theme="night"] .best-card,
+  html[data-theme="night"] .close-row,
+  html[data-theme="night"] .take-card,
+  html[data-theme="night"] .showcase-item,
+  html[data-theme="night"] .badge{background:#10263f}
+  html[data-theme="night"] .sticker.st-collected,
+  html[data-theme="night"] .board-row.me{background:linear-gradient(180deg,#16324f,#10263f)}
+  html[data-theme="night"] .btn-signin,
+  html[data-theme="night"] .nav-pending,
+  html[data-theme="night"] .google-btn,
+  html[data-theme="night"] .email-btn,
+  html[data-theme="night"] .btn-copy,
+  html[data-theme="night"] .btn-disconnect,
+  html[data-theme="night"] .sui-wallet-opt,
+  html[data-theme="night"] .user-menu,
+  html[data-theme="night"] .chip,
+  html[data-theme="night"] .mini-btn,
+  html[data-theme="night"] .avatar-pick,
+  html[data-theme="night"] .theme-opt{background:#10263f}
+  html[data-theme="night"] .wallet-pill{background:linear-gradient(180deg,#16324f,#10263f)}
+  html[data-theme="night"] .btn-ghost{background:#132c49}
+  html[data-theme="night"] .btn-ghost:hover{background:#1a3a5c}
+  html[data-theme="night"] .genre,
+  html[data-theme="night"] .xp,
+  html[data-theme="night"] .coming-pill{background:#0d2138}
+  html[data-theme="night"] .wallet-addr{background:#0d2138}
+  html[data-theme="night"] .signin-card{background:linear-gradient(180deg,#132c49,#0f243d 55%,#0d2138)}
+  html[data-theme="night"] .signin-close{background:#10263f}
+  html[data-theme="night"] .email-form input{background:#0d2138}
+  html[data-theme="night"] .soon{background:rgba(10,28,48,.92)}
+  html[data-theme="night"] .art-placeholder{background:linear-gradient(180deg,#1a3a5c 0%,#122c47 58%,#0f243d 100%)}
+  html[data-theme="night"] .ring{background:radial-gradient(circle at 34% 28%,#1d4066 0%,#14304f 52%,#0f2743 100%);border-color:#3f7fb8;box-shadow:0 0 0 7px rgba(10,28,48,.6),0 0 30px rgba(40,110,180,.4),inset 0 0 18px rgba(80,150,220,.35)}
+  html[data-theme="night"] .take-card img,
+  html[data-theme="night"] .showcase-item img{background:#fff;border-radius:12px}
+  html[data-theme="night"] .hero-official{
+    background:
+      radial-gradient(70px 16px at 16% -2px,rgba(124,196,248,.28),rgba(124,196,248,0) 70%),
+      radial-gradient(54px 14px at 88% 108%,rgba(70,140,200,.35),rgba(70,140,200,0) 70%),
+      linear-gradient(180deg,#16324f,#10263f);
+    border-color:#3f7fb8;
+  }
+
+
+  /* ---------- header sticker folder (frosted glass, Apple style) ---------- */
+  .folder-btn{
+    position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;
+    width:40px;height:40px;margin-left:auto;cursor:pointer;font:inherit;padding:0;overflow:hidden;
+    background:rgba(255,255,255,.55);border:1.5px solid rgba(255,255,255,.75);border-radius:10px;
+    backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+    box-shadow:0 4px 14px rgba(35,115,180,.18),inset 0 1px 0 rgba(255,255,255,.8);
+    transition:transform .2s ease,box-shadow .2s ease;
+  }
+  .folder-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(35,115,180,.24),inset 0 1px 0 rgba(255,255,255,.8)}
+  .folder-img{width:100%;height:100%;object-fit:cover;display:block}
+  .sticker-folder-panel{
+    position:absolute;top:calc(100% + 8px);right:22px;z-index:60;width:308px;max-width:92vw;
+    background:#fff;border:1.5px solid var(--border);border-radius:16px;
+    box-shadow:0 18px 44px rgba(12,42,68,.22);padding:14px;
+  }
+  .sticker-folder-panel[hidden]{display:none}
+  .sticker-folder-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .sticker-folder-grid img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;background:var(--ice);border:1px solid var(--border-light);border-radius:10px;padding:3px}
+  .sticker-folder-link{
+    display:flex;align-items:center;justify-content:center;margin-top:12px;
+    font-size:14px;font-weight:700;color:#fff;text-decoration:none;
+    background:linear-gradient(180deg,#2b9bf0,#0f7fd0);border:1.5px solid #0f7fd0;
+    border-radius:980px;padding:8px 18px;min-height:38px;transition:transform .2s ease,background .2s ease;
+  }
+  .sticker-folder-link:hover{background:linear-gradient(180deg,#1c8fe8,#0b6cb8);transform:translateY(-1px)}
+  @media (max-width:640px){ .sticker-folder-panel{right:16px} }
+  html[data-theme="night"] .sticker-folder-panel{background:#10263f}
+  html[data-theme="night"] .folder-btn{background:rgba(16,38,63,.6)}
+
+  /* ---------- nav pending: bouncing Lofi ---------- */
+  .nav-pending-lofi{width:20px;height:20px;border-radius:50%;object-fit:cover;flex:none;display:block;animation:lofi-bounce 1s ease-in-out infinite}
+  @keyframes lofi-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+  /* ---------- footer Hub tooltips ---------- */
+  .foot-col nav a[data-tip]{position:relative}
+  .foot-col nav a[data-tip]:hover::after,.foot-col nav a[data-tip]:focus-visible::after{
+    content:attr(data-tip);position:absolute;left:0;bottom:calc(100% + 4px);z-index:70;
+    background:#0c2a44;color:#eaf6ff;font-size:11.5px;font-weight:600;line-height:1.35;white-space:nowrap;
+    padding:5px 9px;border-radius:8px;box-shadow:0 8px 20px rgba(4,18,32,.35);pointer-events:none;
+  }
+
+  /* ---------- achievement toast with spark burst ---------- */
+  .ach-toast{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);z-index:90;
+    display:flex;align-items:center;gap:9px;max-width:92vw;
+    background:linear-gradient(180deg,#123a5c,#0c2a44);color:#fff;
+    font-size:14.5px;font-weight:700;border:1.5px solid rgba(255,255,255,.35);border-radius:980px;
+    padding:10px 18px;box-shadow:0 16px 38px rgba(12,42,68,.35);opacity:0;pointer-events:none;
+  }
+  .ach-toast[hidden]{display:none}
+  .ach-toast.show{opacity:1;transform:translateX(-50%) translateY(0);transition:opacity .3s ease,transform .3s ease}
+  .ach-toast-sparks{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
+  .ach-toast-sparks i{
+    position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;
+    background:#ffd94d;box-shadow:0 0 8px rgba(255,217,77,.9);
+  }
+  .ach-toast.show .ach-toast-sparks i{animation:spark-burst .8s ease-out 1}
+  .ach-toast-sparks i:nth-child(1){--dx:-52px;--dy:-30px}
+  .ach-toast-sparks i:nth-child(2){--dx:-28px;--dy:-44px}
+  .ach-toast-sparks i:nth-child(3){--dx:0px;--dy:-50px}
+  .ach-toast-sparks i:nth-child(4){--dx:28px;--dy:-44px}
+  .ach-toast-sparks i:nth-child(5){--dx:52px;--dy:-30px}
+  .ach-toast-sparks i:nth-child(6){--dx:0px;--dy:34px}
+  @keyframes spark-burst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+
+  /* ---------- hub polish: cute hover lifts ---------- */
+  .btn,.play-btn,.chip,.mini-btn,.email-btn,.google-btn,.sui-btn{transition:transform .2s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease}
+  .btn:hover,.play-btn:hover,.chip:hover,.mini-btn:hover{transform:translateY(-1px) scale(1.02)}
+  .game-card:hover{transform:translateY(-3px) scale(1.01) rotate(.35deg)}
+  .take-card:hover{transform:translateY(-3px) scale(1.01) rotate(.35deg)}
+  .user-menu a,.user-menu button{transition:background .18s ease,transform .18s ease}
+  .user-menu a:hover,.user-menu button:hover{transform:translateX(2px)}
+  .close-row{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+  .close-row:hover{transform:translateY(-1px) scale(1.01)}
+  .soon-badge{
+    font-size:11px;font-weight:800;letter-spacing:.04em;color:#0b5fa5;background:#fff;
+    border:1.5px solid rgba(255,255,255,.9);border-radius:980px;padding:2px 9px;white-space:nowrap;flex:none;
+    box-shadow:0 2px 8px rgba(11,95,165,.25);
+  }
+
+  /* ---------- light entrance: content rises in gently on load and on view change ---------- */
+  @keyframes rise-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .anim-in > *{animation:rise-in .7s ease backwards}
+  .anim-in > *:nth-child(2){animation-delay:.09s}
+  .anim-in > *:nth-child(3){animation-delay:.18s}
+  .anim-in > *:nth-child(4){animation-delay:.27s}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .btn,.ach-chev{transition:none}
+    .mist,.vapor i{animation:none}
+    .hero-folder{animation:none}
+    .nav-pending .spin{animation:none}
+    .anim-in > *{animation:none}
+    .st-collected .sticker-medal{animation:none}
+    .nav-pending{animation:none}
+    .game-card,.take-card,.showcase-item,.sticker-strip,.foot-col nav a{transition:none}
+    .game-card:hover,.take-card:hover,.showcase-item:hover,.sticker-strip:hover,.foot-col nav a:hover{transform:none}
+    .nav-pending-lofi{animation:none}
+    .btn:hover,.play-btn:hover,.chip:hover,.mini-btn:hover,.close-row:hover,.folder-btn:hover,.sticker-folder-link:hover,.user-menu a:hover,.user-menu button:hover{transform:none}
+    .btn,.play-btn,.chip,.mini-btn,.email-btn,.google-btn,.sui-btn,.close-row,.folder-btn,.sticker-folder-link,.user-menu a,.user-menu button{transition:none}
+    .ach-toast.show .ach-toast-sparks i{animation:none}
+    .ach-toast{transition:none}
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+</head>
+<body class="auth-pending">
+
+<div class="vapor" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+<header>
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="#top">
+      <img src="assets/lofi-face-a1b88584.webp" alt="">
+      <span>Lofi Games</span>
+    </a>
+    <span class="nav-pending" id="nav-pending" role="status"><img class="nav-pending-lofi" src="assets/lofi-face-a1b88584.webp" alt="" aria-hidden="true">Loading</span>
+    <button class="folder-btn" id="sticker-folder-btn" type="button" aria-label="Stickers" aria-haspopup="true" aria-expanded="false" aria-controls="sticker-folder-panel">
+      <img class="folder-img" src="assets/img-display-6d920d9b.webp" alt="" aria-hidden="true">
+    </button>
+    <div class="sticker-folder-panel" id="sticker-folder-panel" aria-label="Lofi stickers" hidden>
+      <div class="sticker-folder-grid" aria-hidden="true">
+        <img src="assets/sticker-display-a52b194a.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-9fc7824d.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-a58a2c6a.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-41a43ec5.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-41c07710.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-34bb9419.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-3c6fd165.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-80bde6f1.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-46570a31.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-2a19660b.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-6fbbc31f.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-7fdb7e4d.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-9c6f8eb3.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-1e8012bf.webp" alt="" loading="lazy">
+        <img src="assets/sticker-display-d9a7ef5f.webp" alt="" loading="lazy">
+      </div>
+      <a class="sticker-folder-link" href="#/take-stickers">Take some stickers</a>
+    </div>
+    <button class="btn-signin" id="signin-open" type="button" aria-haspopup="dialog">
+      <img src="assets/lofi-face-a1b88584.webp" alt="">
+      Sign in
+    </button>
+    <button class="wallet-pill" id="wallet-pill" type="button" aria-haspopup="dialog">
+      <span class="dot"><img src="assets/sui-logo-427d941f.png" alt=""></span>
+      <span id="wallet-pill-addr">0x…</span>
+    </button>
+    <button class="wallet-pill" id="user-pill" type="button" aria-label="Open your player menu" aria-haspopup="menu" aria-expanded="false" aria-controls="user-menu">
+      <span class="avatar" id="user-pill-avatar"></span>
+      <span id="user-pill-name">Player</span>
+    </button>
+    <div class="user-menu" id="user-menu" role="menu" aria-label="Player menu" hidden>
+      <a href="#/player" role="menuitem">My player page</a>
+      <a href="#/settings" role="menuitem">Profile &amp; settings</a>
+      <button type="button" id="user-menu-signout" role="menuitem">Sign out</button>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+<div id="view-home">
+
+  <!-- HERO: left-aligned copy with the folder beside it, banner below -->
+  <div class="hero">
+    <span class="mist mist-a" aria-hidden="true"></span>
+    <span class="mist mist-b" aria-hidden="true"></span>
+    <span class="mist mist-c" aria-hidden="true"></span>
+    <span class="mist mist-e" aria-hidden="true"></span>
+    <span class="shard" style="width:54px;height:96px;top:64px;left:6%" aria-hidden="true"></span>
+    <span class="shard" style="width:38px;height:70px;top:150px;right:8%" aria-hidden="true"></span>
+    <span class="shard" style="width:28px;height:52px;top:36px;right:22%" aria-hidden="true"></span>
+    <div class="hero-inner">
+      <div class="hero-top">
+        <div class="hero-copy">
+          <p class="hero-kicker display">Lofi Games</p>
+          <h1 class="display">Play like a <span class="accent">yeti</span>.</h1>
+          <p class="hero-sub">Four free mini games starring Lofi the Yeti, up on the ice. All four are live now, tap Play on any card and play right in your browser.</p>
+          <p class="hero-official">Made for Lofi the Yeti and the Lofi community.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#games">Browse games</a>
+            <a class="btn btn-ghost" href="#how">How to play</a>
+          </div>
+        </div>
+        <a class="hero-folder" href="#/take-stickers" aria-label="Take some stickers">
+          <img src="assets/img-display-222bea75.webp" alt="Frosted Lofi sticker folder with three fanned sticker cards">
+        </a>
+      </div>
+      <div class="hero-banner">
+        <img src="assets/hero-b25f6836.webp" alt="Lofi the Yeti smiling on a snowy peak, arms raised, with mountains and a crescent moon behind him" fetchpriority="high">
+        <span class="mist" aria-hidden="true"></span>
+        <span class="mist m2" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- GAMES -->
+    <section id="games" aria-labelledby="games-h">
+      <div class="sec-head">
+        <h2 id="games-h" class="display">Games</h2>
+        <p class="sec-sub">All four games are live. Tap Play on a card to play, no downloads, no installs.</p>
+      </div>
+      <div class="games">
+
+        <article class="game-card">
+          <div class="art">
+            <img src="assets/banner-6a93c876.webp" alt="Lofi sprinting across the ice, leaping a cracked ice block toward a trail of gold coins" loading="lazy">
+            <span class="soon live">Now live</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Dash</h3><span class="genre">Endless runner</span></div>
+            <p>Leap ice blocks, duck low pines, grab coins. One hit ends the run.</p>
+            <div class="game-meta">Space to jump · ↓ to duck</div>
+            <div class="game-ach">
+              <button class="game-ach-head" type="button" aria-expanded="false"><span class="ach-title">Achievements</span><span class="ach-right"><span class="ach-total">210 XP in this game</span><svg class="ach-chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+              <ul class="ach-list" hidden>
+                <li>First run <span class="xp">10 XP</span></li>
+                <li>500 m without a scratch <span class="xp">25 XP</span></li>
+                <li>50 coins in one run <span class="xp">25 XP</span></li>
+                <li>1,500 m in one run <span class="xp">50 XP</span></li>
+                <li>3,000 m in one run <span class="xp">100 XP</span></li>
+              </ul>
+            </div>
+            <div class="notify-row">
+              <a class="play-btn" href="/lofigame/dash/" aria-label="Play Lofi Dash"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 1.8v8.4c0 .8.9 1.3 1.6.9l6-4.2c.6-.4.6-1.3 0-1.7l-6-4.2c-.7-.5-1.6 0-1.6.8Z" fill="currentColor"/></svg>Play</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card">
+          <div class="art">
+            <img src="assets/banner-crossing-732e2db5.webp" alt="Lofi waiting at a snowy night crossing beside a green walk signal while cars blur past as streaks of light" loading="lazy">
+            <span class="soon live">Now live</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Frozen Crossing</h3><span class="genre">Timing</span></div>
+            <p>Cross ten frozen roads on the green signal. Three lives.</p>
+            <div class="game-meta">Arrow keys, one step at a time</div>
+            <div class="game-ach">
+              <button class="game-ach-head" type="button" aria-expanded="false"><span class="ach-title">Achievements</span><span class="ach-right"><span class="ach-total">210 XP in this game</span><svg class="ach-chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+              <ul class="ach-list" hidden>
+                <li>First crossing <span class="xp">10 XP</span></li>
+                <li>Through the station <span class="xp">25 XP</span></li>
+                <li>Commuter <span class="xp">25 XP</span></li>
+                <li>The whole way <span class="xp">50 XP</span></li>
+                <li>Not a scratch <span class="xp">100 XP</span></li>
+              </ul>
+            </div>
+            <div class="notify-row">
+              <a class="play-btn" href="/lofigame/crossing/" aria-label="Play Frozen Crossing"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 1.8v8.4c0 .8.9 1.3 1.6.9l6-4.2c.6-.4.6-1.3 0-1.7l-6-4.2c-.7-.5-1.6 0-1.6.8Z" fill="currentColor"/></svg>Play</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card">
+          <div class="art">
+            <img src="assets/banner-rush-414cab74.webp" alt="Lofi sliding downhill on a three-lane ice track toward a huge full moon, coins lined up ahead" loading="lazy">
+            <span class="soon live">Now live</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Rush</h3><span class="genre">3-lane runner</span></div>
+            <p>Switch lanes, leap barriers, chain coins toward the moon. Three hearts per run.</p>
+            <div class="game-meta">← → switch · ↑ jump · ↓ duck</div>
+            <div class="game-ach">
+              <button class="game-ach-head" type="button" aria-expanded="false"><span class="ach-title">Achievements</span><span class="ach-right"><span class="ach-total">210 XP in this game</span><svg class="ach-chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+              <ul class="ach-list" hidden>
+                <li>First slide <span class="xp">10 XP</span></li>
+                <li>10-coin chain <span class="xp">25 XP</span></li>
+                <li>First Perfect dodge <span class="xp">25 XP</span></li>
+                <li>Reach stage 3 <span class="xp">50 XP</span></li>
+                <li>Reach the moon <span class="xp">100 XP</span></li>
+              </ul>
+            </div>
+            <div class="notify-row">
+              <a class="play-btn" href="/lofigame/rush/" aria-label="Play Lofi Rush"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 1.8v8.4c0 .8.9 1.3 1.6.9l6-4.2c.6-.4.6-1.3 0-1.7l-6-4.2c-.7-.5-1.6 0-1.6.8Z" fill="currentColor"/></svg>Play</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card">
+          <div class="art">
+            <img src="assets/banner-climb-e6cb52da.webp" alt="Lofi bouncing up between floating ice platforms and glowing lanterns toward a crescent moon, a red rocket nearby" loading="lazy">
+            <span class="soon live">Now live</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Climb</h3><span class="genre">Vertical jumper</span></div>
+            <p>Steer the bounce, ride platforms, climb to the moon across 10 levels.</p>
+            <div class="game-meta">← → steer · Space for rocket</div>
+            <div class="game-ach">
+              <button class="game-ach-head" type="button" aria-expanded="false"><span class="ach-title">Achievements</span><span class="ach-right"><span class="ach-total">210 XP in this game</span><svg class="ach-chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+              <ul class="ach-list" hidden>
+                <li>First bounce <span class="xp">10 XP</span></li>
+                <li>500 m up <span class="xp">25 XP</span></li>
+                <li>Ride a rocket <span class="xp">25 XP</span></li>
+                <li>2,000 m up <span class="xp">50 XP</span></li>
+                <li>Reach the moon <span class="xp">100 XP</span></li>
+              </ul>
+            </div>
+            <div class="notify-row">
+              <a class="play-btn" href="/lofigame/climb/" aria-label="Play Lofi Climb"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 1.8v8.4c0 .8.9 1.3 1.6.9l6-4.2c.6-.4.6-1.3 0-1.7l-6-4.2c-.7-.5-1.6 0-1.6.8Z" fill="currentColor"/></svg>Play</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card coming">
+          <div class="art">
+            <img src="assets/banner-32f68c93.webp" alt="Big icy title banner reading LOFI MUNCH over an ice maze with frost ghosts and Lofi the Yeti in the snow" loading="lazy">
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Munch</h3><span class="genre">Maze</span></div>
+            <p>Munch the snowflakes, dodge the frost ghosts.</p>
+            <div class="game-meta">Maze chase · In the works</div>
+            <div class="notify-row">
+              <span class="coming-pill"><i aria-hidden="true"></i>Coming soon</span>
+              <span class="notify-note">Not playable yet</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card coming">
+          <div class="art">
+            <img src="assets/banner-48bbbb90.webp" alt="Big icy title banner reading LOFI SNOWBALL over falling snowballs and a red target in the snow" loading="lazy">
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Snowball</h3><span class="genre">Aim &amp; throw</span></div>
+            <p>Aim and throw snowballs at the targets.</p>
+            <div class="game-meta">Target practice · In the works</div>
+            <div class="notify-row">
+              <span class="coming-pill"><i aria-hidden="true"></i>Coming soon</span>
+              <span class="notify-note">Not playable yet</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card coming">
+          <div class="art">
+            <img src="assets/banner-14231e1f.webp" alt="Big icy title banner reading LOFI CATCH with Lofi the Yeti holding a basket to catch falling snowflakes" loading="lazy">
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Catch</h3><span class="genre">Catch</span></div>
+            <p>Catch the falling snowflakes before they melt.</p>
+            <div class="game-meta">Quick hands · In the works</div>
+            <div class="notify-row">
+              <span class="coming-pill"><i aria-hidden="true"></i>Coming soon</span>
+              <span class="notify-note">Not playable yet</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="game-card coming">
+          <div class="art">
+            <img src="assets/banner-f014530d.webp" alt="Big icy title banner reading LOFI MEMORY over fanned memory cards showing a star, moon and pine tree" loading="lazy">
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="game-body">
+            <div class="game-top"><h3>Lofi Memory</h3><span class="genre">Memory</span></div>
+            <p>Flip the cards and match the pairs.</p>
+            <div class="game-meta">Pairs puzzle · In the works</div>
+            <div class="notify-row">
+              <span class="coming-pill"><i aria-hidden="true"></i>Coming soon</span>
+              <span class="notify-note">Not playable yet</span>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- HOW TO PLAY -->
+  <section id="how" class="alt" aria-labelledby="how-h">
+    <span class="mist mist-a" aria-hidden="true"></span>
+    <span class="mist mist-b" aria-hidden="true"></span>
+    <span class="mist mist-d" aria-hidden="true"></span>
+    <div class="wrap">
+    <div class="sec-head">
+      <h2 id="how-h" class="display">How to play</h2>
+      <p class="sec-sub">Three steps, the same for every game on the hub.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="ring"><b>1</b></div>
+        <h3>Pick a game</h3>
+        <p>Choose any of the four games above. Each one opens and plays right here in your browser.</p>
+      </div>
+      <div class="step">
+        <div class="ring"><b>2</b></div>
+        <h3>Play and score</h3>
+        <p>Every game uses a few keys, listed on its card. Chase coins, dodge what is in the way, and push your score up.</p>
+      </div>
+      <div class="step">
+        <div class="ring"><b>3</b></div>
+        <h3>Beat your best</h3>
+        <p>Chase your best score in every game, unlock its five achievements as you go, and come back to top them.</p>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+
+    <!-- ABOUT: in its proper place, after the games and how to play -->
+    <section id="about" aria-labelledby="about-h">
+      <div class="sec-head">
+        <h2 id="about-h" class="display">About the hub</h2>
+        <p class="sec-sub">One small arcade on the ice. Every game stars Lofi, runs in the browser, and takes a minute to learn. We made this hub for Lofi and the Lofi community — games built for them by us, not Lofi's own official game.</p>
+      </div>
+      <div class="cards3">
+        <div class="info-card">
+          <h3>Free to play</h3>
+          <p>Every game is free. No downloads, no installs, no payments. Just open a game and play.</p>
+        </div>
+        <div class="info-card">
+          <h3>Sign in, your way</h3>
+          <p>Sign in with Google, email or your SUI Wallet, no seed phrase ever asked.</p>
+        </div>
+        <div class="info-card">
+          <h3>Four ways to play</h3>
+          <p>Run, cross, slide and climb. Four different mini games, one yeti, all set on the same snowy mountain.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE YETI -->
+    <section id="yeti" aria-labelledby="yeti-h">
+      <div class="yeti">
+        <img src="assets/brand-d42d1948.webp" alt="Lofi the Yeti smiling and waving from the mouth of his ice cave, icicles overhead and a warm lantern beside him" loading="lazy">
+        <div class="yeti-body">
+          <h2 id="yeti-h" class="display">Meet Lofi</h2>
+          <p>Lofi lives in an ice cave halfway up the mountain. Fluffy white fur, big shiny eyes, rosy cheeks, a tiny pink nose and the sweetest smile on the mountain. Every game on this hub is one of his adventures on the ice.</p>
+        </div>
+      </div>
+    </section>
+
+
+  </div>
+</div>
+
+  <!-- PLAYER -->
+  <div class="view" id="view-player" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Player</h2>
+        <p class="sec-sub">Your XP, achievements and best scores across all four games.</p>
+      </div>
+      <div id="player-signedout" class="empty-card" hidden>
+        <p>Sign in to open your player page, and your XP and achievements will follow you on any device.</p>
+        <button class="btn btn-primary" type="button" data-signin-open>Sign in</button>
+      </div>
+      <div id="player-main" hidden>
+        <div class="player-head">
+          <span class="avatar lg" id="player-avatar"></span>
+          <div>
+            <h3 id="player-name">Player</h3>
+            <p id="player-sub"></p>
+          </div>
+        </div>
+        <div class="pstats">
+          <div class="pstat"><b id="player-xp">0</b><span>Total XP</span></div>
+          <div class="pstat"><b id="player-stickers">0 / 20</b><span>Achievements</span></div>
+          <div class="pstat"><b id="player-chaldays">0</b><span>Challenge days</span></div>
+        </div>
+        <h3 class="view-subh">Your achievements</h3>
+        <div class="badge-row" id="player-badges"></div>
+        <h3 class="view-subh">Close to earning</h3>
+        <div class="close-list" id="player-close"></div>
+        <h3 class="view-subh">Best scores</h3>
+        <div class="best-grid" id="player-bests"></div>
+        <div class="player-actions">
+          <button class="btn btn-ghost danger" id="player-signout" type="button">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKERBOOK -->
+  <div class="view" id="view-stickers" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Achievements</h2>
+        <p class="sec-sub">All 20 achievements, five in each game. Earn them in the games and they land here.</p>
+      </div>
+      <div class="chips" id="sticker-filters" role="group" aria-label="Filter achievements">
+        <button class="chip active" type="button" data-filter="all">All</button>
+        <button class="chip" type="button" data-filter="progress">In progress</button>
+        <button class="chip" type="button" data-filter="ready">Ready to claim</button>
+        <button class="chip" type="button" data-filter="collected">Collected</button>
+      </div>
+      <p class="filter-note" id="sticker-note"></p>
+      <div id="sticker-groups"></div>
+    </div>
+  </div>
+
+  <!-- DAILY CHALLENGES -->
+  <div class="view" id="view-challenges" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Daily challenges</h2>
+        <p class="sec-sub">Three challenges a day, new ones at 10 PM Dhaka time. Finish all three in a day to bank a Challenge Day. Challenges count toward Challenge Days only, they award no XP.</p>
+      </div>
+      <div class="chal-list" id="challenges-today"></div>
+      <h3 class="view-subh" style="text-align:center">Last 7 days</h3>
+      <div class="chal-list" id="challenges-history"></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="view" id="view-leaderboard" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Leaderboard</h2>
+        <p class="sec-sub">The top 25 players by XP across all four games.</p>
+      </div>
+      <div class="board-list" id="board-list"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE / SETTINGS -->
+  <div class="view" id="view-profile" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Profile &amp; settings</h2>
+        <p class="sec-sub">Your name, your look, and the accounts linked to this player.</p>
+      </div>
+      <div id="profile-signedout" class="empty-card" hidden>
+        <p>Sign in to change your username, pick an avatar, and link your accounts.</p>
+        <button class="btn btn-primary" type="button" data-signin-open>Sign in</button>
+      </div>
+      <div id="profile-main" hidden>
+        <div class="profile-card">
+          <h3 class="view-subh">Username</h3>
+          <form class="email-form" id="username-form" novalidate>
+            <label for="username-input">3 to 20 characters: letters, numbers and underscore</label>
+            <input id="username-input" name="username" type="text" maxlength="20" autocomplete="off" spellcheck="false">
+            <button class="email-btn" type="submit">Save username</button>
+          </form>
+          <p class="signin-status" id="username-status" aria-live="polite"></p>
+
+          <h3 class="view-subh">Avatar</h3>
+          <div class="avatar-current" id="avatar-current"></div>
+          <div class="avatar-grid" id="avatar-grid"></div>
+          <p class="signin-status" id="avatar-status" aria-live="polite"></p>
+
+          <h3 class="view-subh">Linked accounts</h3>
+          <div id="linked-list"></div>
+          <div id="link-email-box" hidden>
+            <form class="email-form" id="link-email-form" novalidate style="margin-top:12px">
+              <label for="link-email">Email address</label>
+              <input id="link-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+              <label for="link-password">Password (at least 6 characters)</label>
+              <input id="link-password" name="password" type="password" autocomplete="new-password" placeholder="At least 6 characters">
+              <button class="email-btn" type="submit">Link email account</button>
+            </form>
+          </div>
+          <p class="signin-status" id="link-status" aria-live="polite"></p>
+
+          <h3 class="view-subh">Session</h3>
+          <button class="btn btn-ghost danger" id="profile-signout" type="button">Sign out</button>
+        </div>
+      </div>
+      <div class="profile-card theme-card">
+        <h3 class="view-subh">Theme</h3>
+        <p class="theme-note">Choose how the hub looks on this device. Your choice is saved here and used on every visit.</p>
+        <div class="theme-opts" role="group" aria-label="Theme">
+          <button class="theme-opt" type="button" id="theme-opt-ice" aria-pressed="true">Ice</button>
+          <button class="theme-opt" type="button" id="theme-opt-night" aria-pressed="false">Night</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP -->
+  <div class="view" id="view-help" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Help</h2>
+        <p class="sec-sub">Sign in to keep your XP, achievements and daily challenges together in one player account.</p>
+      </div>
+      <div class="doc-list">
+        <article class="doc-card">
+          <h3>Find a game and its controls</h3>
+          <p>The Games section on the home page lists all four games by name: Lofi Dash, Frozen Crossing, Lofi Rush and Lofi Climb. Each card shows that game's controls under its description, and each game keeps its own pause and sound controls on its game screen.</p>
+          <p>Tap Play on a card and the game opens right here in your browser, no downloads. The hub header stays at the top, so your profile and the way back are always one tap away.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Saved runs and local bests</h3>
+          <p>Your best score in each game is saved on this device, so it is waiting for you when you come back in the same browser. Sign in and your bests sync to your player account too, so they follow you to your other devices.</p>
+          <p>A local best belongs to the browser it was set in. Clearing this site's browser data removes local bests and on-device saves, but anything already synced to your player account stays. <a href="#/your-data">Your data</a> explains what is kept where.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Achievements, XP and daily challenges</h3>
+          <p>There are 20 achievements, five in each game. Each game also awards XP for completing its 10 levels, so your total XP has no cap. Open <a href="#/stickers">Achievements</a> to see every achievement, what it takes to earn it, and how close you are. When an achievement unlocks in a game, its XP is added to your player account.</p>
+          <p>Three daily challenges arrive every day and reset at 22:00 (10 PM) Asia/Dhaka time. Challenges count toward Challenge Days only; they award no XP. Finishing all three in one day banks a Challenge Day on your player page.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Your account</h3>
+          <p><a href="#/settings">Profile &amp; settings</a> lets you edit your public username, pick an avatar, review the accounts linked to this player, and sign out. Sign in with Google, email, or a SUI Wallet, and use Link another account in Profile &amp; settings to add a second sign-in method to the same player; your saved progress stays intact.</p>
+          <p>Signing out signs you out of Lofi Games only, never out of your Google account, and your synced progress is still here when you sign back in.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Report a problem</h3>
+          <p>A useful report makes a problem much easier to find and fix. Include the name of the game, the device and browser you were using, the steps that led to the problem, what you expected to happen and what happened instead. A screenshot, or the score shown at the end of the run, helps a lot.</p>
+          <p>Keep personal sign-in details, passwords and wallet information out of any report you post in public.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- YOUR DATA -->
+  <div class="view" id="view-yourdata" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Your data</h2>
+        <p class="sec-sub">What is kept on this device, what is kept in your player account, and the controls you have over both.</p>
+      </div>
+      <div class="doc-list">
+        <article class="doc-card">
+          <h3>Playing on this device</h3>
+          <p>Your browser keeps your local best score for each game, plus small bits of on-device state: a saved wallet address so a SUI Wallet can reconnect, your username-change count for the day, and whether you picked an avatar yourself.</p>
+          <p>These belong to this device and this browser. Clearing the site's browser data removes them and signs you out here; it does not erase the progress saved to your player account.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Your player account</h3>
+          <p>A signed-in player has one shared player record, kept in Firebase: your public username, your chosen avatar, your XP, the achievements you have collected, your challenge days, and your synced best scores across the four games. That record is what lets the same progress follow you between devices.</p>
+          <p>Your player page shows your totals, and <a href="#/stickers">Achievements</a> shows each achievement's state: collected, ready to claim, or in progress.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Sign-in and optional connections</h3>
+          <p>Sign-in runs through Firebase Authentication, with the method you choose on the sign-in screen: Google, email and password, or a SUI Wallet. Linking another method in <a href="#/settings">Profile &amp; settings</a> attaches it to the same player, so no second account is created.</p>
+          <p>A SUI Wallet connection is optional and separate: only your public wallet address is stored on your profile, and Lofi never asks for a seed phrase or a wallet password. Signing out ends your Lofi session on this site only; it does not sign you out of Google, and it does not delete saved scores or achievements.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Public names and reports</h3>
+          <p>Your username, avatar and XP are public: they appear on the <a href="#/leaderboard">Leaderboard</a>, which lists the top 25 players by XP. Pick a username you are happy for other players to see. Your email address and your sign-in details are never shown publicly.</p>
+          <p>If a problem in a game needs reporting, <a href="#/help">Help</a> explains what to include so it can be found and fixed.</p>
+        </article>
+        <article class="doc-card">
+          <h3>Questions and account controls</h3>
+          <p>You can review your player, your linked accounts and your saved achievements from <a href="#/player">Your player</a> and <a href="#/settings">Profile &amp; settings</a>. There you can change your username, switch between your Google photo and the preset avatars, link or disconnect accounts, and sign out.</p>
+          <p><a href="#/help">Help</a> explains how the games, achievements and daily challenges work, and what to include when you report a problem.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAKE STICKERS -->
+  <div class="view" id="view-take-stickers" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Take some stickers.</h2>
+        <p class="sec-sub">All fifteen Lofi stickers and four phone wallpapers, free to save and share. Tap Download PNG on any sticker or wallpaper to keep the full-size file.</p>
+      </div>
+      <div class="take-grid">
+        <article class="take-card">
+          <img src="assets/sticker-display-a52b194a.webp" alt="Lofi sticker: The face, Lofi's smiling face close up" loading="lazy">
+          <h3>The face</h3>
+          <a class="btn btn-primary" href="assets/sticker-109ce427.png" download="sticker-01-face.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-9fc7824d.webp" alt="Lofi sticker: Waving Lofi, waving hello" loading="lazy">
+          <h3>Waving Lofi</h3>
+          <a class="btn btn-primary" href="assets/sticker-1a2ca346.png" download="sticker-02-waving.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-a58a2c6a.webp" alt="Lofi sticker: Butterfly Lofi, with a butterfly" loading="lazy">
+          <h3>Butterfly Lofi</h3>
+          <a class="btn btn-primary" href="assets/sticker-0ea2ec5b.png" download="sticker-03-butterfly.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-41a43ec5.webp" alt="Lofi sticker: Snowflake, Lofi with a snowflake" loading="lazy">
+          <h3>Snowflake</h3>
+          <a class="btn btn-primary" href="assets/sticker-21ad8833.png" download="sticker-04-snowflake.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-41c07710.webp" alt="Lofi sticker: Pine tree, Lofi beside a pine tree" loading="lazy">
+          <h3>Pine tree</h3>
+          <a class="btn btn-primary" href="assets/sticker-ac126092.png" download="sticker-05-pine.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-34bb9419.webp" alt="Lofi sticker: The Lofi mark" loading="lazy">
+          <h3>The Lofi mark</h3>
+          <a class="btn btn-primary" href="assets/sticker-3511f839.png" download="sticker-06-logo.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-3c6fd165.webp" alt="Lofi sticker: The Lofi stamp, a round Lofi stamp" loading="lazy">
+          <h3>The Lofi stamp</h3>
+          <a class="btn btn-primary" href="assets/sticker-da8d4048.png" download="sticker-07-stamp.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-80bde6f1.webp" alt="Lofi sticker: Chill, Lofi relaxing" loading="lazy">
+          <h3>Chill</h3>
+          <a class="btn btn-primary" href="assets/sticker-a8602fd2.png" download="sticker-08-chill.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-46570a31.webp" alt="Lofi sticker: Stay frosty, Lofi staying frosty" loading="lazy">
+          <h3>Stay frosty</h3>
+          <a class="btn btn-primary" href="assets/sticker-3e50c727.png" download="sticker-09-frosty.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-2a19660b.webp" alt="Lofi sticker: Snowball Lofi, holding a big snowball" loading="lazy">
+          <h3>Snowball Lofi</h3>
+          <a class="btn btn-primary" href="assets/sticker-9730383f.png" download="sticker-10-snowball.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-6fbbc31f.webp" alt="Lofi sticker: Red scarf" loading="lazy">
+          <h3>Red scarf</h3>
+          <a class="btn btn-primary" href="assets/sticker-b5d08b08.png" download="sticker-11-scarf.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-7fdb7e4d.webp" alt="Lofi sticker: Sledding" loading="lazy">
+          <h3>Sledding</h3>
+          <a class="btn btn-primary" href="assets/sticker-5160770e.png" download="sticker-12-sledding.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-9c6f8eb3.webp" alt="Lofi sticker: Hot cocoa" loading="lazy">
+          <h3>Hot cocoa</h3>
+          <a class="btn btn-primary" href="assets/sticker-7c15e5ec.png" download="sticker-13-cocoa.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-1e8012bf.webp" alt="Lofi sticker: Under the moon" loading="lazy">
+          <h3>Under the moon</h3>
+          <a class="btn btn-primary" href="assets/sticker-4cfe7b9f.png" download="sticker-14-moon.png">Download PNG</a>
+        </article>
+        <article class="take-card">
+          <img src="assets/sticker-display-d9a7ef5f.webp" alt="Lofi sticker: Aurora" loading="lazy">
+          <h3>Aurora</h3>
+          <a class="btn btn-primary" href="assets/sticker-44df27ee.png" download="sticker-15-aurora.png">Download PNG</a>
+        </article>
+      </div>
+      <div class="sec-head wallpaper-head">
+        <h2 class="display">Phone wallpapers</h2>
+        <p class="sec-sub">Four Lofi phone wallpapers, made for your lock screen. Tap Download PNG to keep the full-size file.</p>
+      </div>
+      <div class="wallpaper-grid">
+        <article class="take-card wallpaper-card">
+          <img src="assets/wallpaper-display-7f69b519.webp" alt="Lofi phone wallpaper: Snowfall, Lofi sitting in the snow with snowflakes falling" loading="lazy">
+          <h3>Snowfall</h3>
+          <a class="btn btn-primary" href="assets/wallpaper-0054fd46.png" download="lofi-wallpaper-final-snowfall.png">Download PNG</a>
+        </article>
+        <article class="take-card wallpaper-card">
+          <img src="assets/wallpaper-display-c210551d.webp" alt="Lofi phone wallpaper: Snow hills with butterfly, Lofi standing and waving in snowy hills with a pink butterfly on his head" loading="lazy">
+          <h3>Snow hills with butterfly</h3>
+          <a class="btn btn-primary" href="assets/wallpaper-57d3a2f7.png" download="lofi-wallpaper-final-snowhills-butterfly.png">Download PNG</a>
+        </article>
+        <article class="take-card wallpaper-card">
+          <img src="assets/wallpaper-display-22fbd1bc.webp" alt="Lofi phone wallpaper: Ice blue, Lofi standing and waving as a die-cut sticker on a flat ice-blue background" loading="lazy">
+          <h3>Ice blue</h3>
+          <a class="btn btn-primary" href="assets/wallpaper-d5f2dea2.png" download="lofi-wallpaper-final-flat-iceblue.png">Download PNG</a>
+        </article>
+        <article class="take-card wallpaper-card">
+          <img src="assets/wallpaper-display-9c603fb5.webp" alt="Lofi phone wallpaper: Pale pink, Lofi standing and waving as a die-cut sticker on a flat pale pink background" loading="lazy">
+          <h3>Pale pink</h3>
+          <a class="btn btn-primary" href="assets/wallpaper-6eebd0b1.png" download="lofi-wallpaper-final-flat-pink.png">Download PNG</a>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-main">
+      <div class="foot-brand-col">
+        <a class="f-brand" href="#top" title="Back to top"><img src="assets/lofi-face-a1b88584.webp" alt=""> Lofi Games</a>
+        <p class="f-tag">Four free mini games starring Lofi the Yeti, made for Lofi and the Lofi community, played right in your browser. Sign in with your SUI Wallet. No downloads.</p>
+        <div class="f-our-links">
+          <a class="f-x-icon" href="https://x.com/lofigamexyz" target="_blank" rel="noopener" aria-label="Follow Lofi Games on X @lofigamexyz" title="Follow Lofi Games on X @lofigamexyz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644Z"/></svg></a>
+        </div>
+        <div class="f-lofi-links" aria-label="Official Lofi links">
+          <a href="https://x.com/lofitheyeti" target="_blank" rel="noopener">Lofi on X</a>
+          <a href="https://hackathon.lofitheyeti.com" target="_blank" rel="noopener">Lofi's site</a>
+        </div>
+        <p class="f-meta">4 games · 20 achievements · Free, always</p>
+      </div>
+      <div class="foot-col">
+        <h3>Games</h3>
+        <nav aria-label="Footer games">
+          <a href="/lofigame/dash/" title="Play Lofi Dash">Lofi Dash</a>
+          <a href="/lofigame/crossing/" title="Play Frozen Crossing">Frozen Crossing</a>
+          <a href="/lofigame/rush/" title="Play Lofi Rush">Lofi Rush</a>
+          <a href="/lofigame/climb/" title="Play Lofi Climb">Lofi Climb</a>
+        </nav>
+      </div>
+      <div class="foot-col">
+        <h3>Hub</h3>
+        <nav aria-label="Footer hub">
+          <a href="#games" title="Games" data-tip="Games — all four Lofi games">Games</a>
+          <a href="#/player" title="Your player page" data-tip="Player — your XP, achievements and best scores">Player</a>
+          <a href="#/take-stickers" title="Lofi stickers" data-tip="Stickers — save and share Lofi stickers">Stickers</a>
+          <a href="#/stickers" title="Achievements" data-tip="Achievements — all 20 game achievements">Achievements</a>
+          <a href="#/challenges" title="Daily challenges" data-tip="Challenges — three new challenges every day">Challenges</a>
+          <a href="#/leaderboard" title="Leaderboard" data-tip="Leaderboard — the top 25 players by XP">Leaderboard</a>
+          <a href="#/settings" title="Profile and settings" data-tip="Profile — name, avatar and linked accounts">Profile</a>
+          <a href="#/help" title="Help" data-tip="Help — how the hub works">Help</a>
+          <a href="#/your-data" title="Your data" data-tip="Your data — what is kept and where">Your data</a>
+        </nav>
+      </div>
+      <div class="foot-col">
+        <h3>Explore</h3>
+        <nav aria-label="Footer explore">
+          <a href="#how" title="How to play">How to play</a>
+          <a href="#about" title="About the hub">About the hub</a>
+          <a href="#yeti" title="Meet Lofi">Meet Lofi</a>
+          <a href="#top" title="Back to top">Back to top</a>
+        </nav>
+      </div>
+    </div>
+    <div class="foot-bar">© 2026 Lofi Games · Made for Lofi the Yeti · Play like a yeti.</div>
+  </footer>
+
+  <div class="ach-toast" id="ach-toast" role="status" aria-live="polite" hidden><span class="ach-toast-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><span id="ach-toast-text">Achievement unlocked</span></div>
+
+  <!-- SIGN IN -->
+  <div class="signin-overlay" id="signin-overlay">
+    <div class="signin-card" role="dialog" aria-modal="true" aria-labelledby="signin-h">
+      <button class="signin-close" id="signin-close" type="button" aria-label="Close sign in">×</button>
+      <div class="signin-head">
+        <img src="assets/lofi-face-a1b88584.webp" alt="">
+        <h2 id="signin-h" class="display">Sign in</h2>
+        <p>One account for all four games, your scores and your achievements.</p>
+      </div>
+
+      <button class="sui-btn" id="sui-connect" type="button">
+        <span class="sui-ic"><img src="assets/sui-logo-427d941f.png" alt=""></span>
+        <span><b id="sui-btn-title">Connect SUI Wallet</b></span><span class="soon-badge">Soon</span>
+        <span class="chev" aria-hidden="true">›</span>
+      </button>
+      <p class="signin-status" id="sui-status" aria-live="polite"></p>
+      <div class="sui-wallets" id="sui-wallet-list" role="group" aria-label="Choose a wallet"></div>
+      <div class="wallet-addr" id="wallet-addr-box">
+        <small>Connected wallet</small>
+        <code id="wallet-addr-full"></code>
+        <div class="wallet-actions">
+          <button class="btn-copy" id="wallet-copy" type="button">Copy address</button>
+          <button class="btn-disconnect" id="wallet-disconnect" type="button">Disconnect</button>
+        </div>
+      </div>
+
+      <button class="google-btn" id="google-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.3h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.2 3.7-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-5.9-2.1-6.8-5.1L1.3 17.2C3.3 21.2 7.3 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3L1.3 6.8C.5 8.4 0 10.1 0 12s.5 3.6 1.3 5.2l3.9-2.9z"/><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.3 0 3.3 2.8 1.3 6.8l3.9 2.9c.9-2.9 3.6-5 6.8-5z"/></svg>
+        Continue with Google
+      </button>
+      <p class="signin-status" id="google-status" aria-live="polite"></p>
+
+      <div class="signin-divider" aria-hidden="true"><span>or</span></div>
+
+      <button class="email-reveal" id="email-reveal" type="button" aria-expanded="false" aria-controls="email-section">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 7.5L12 13l7.5-5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Continue with email
+        <svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="email-section" id="email-section" hidden>
+        <form class="email-form" id="email-form" novalidate>
+          <label for="signin-email">Email address</label>
+          <input id="signin-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+          <label for="signin-password">Password</label>
+          <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="At least 6 characters">
+          <button class="email-btn" type="submit" id="email-submit">Sign in with email</button>
+        </form>
+        <button class="link-toggle" id="email-toggle" type="button">New here? Create an account</button>
+        <p class="signin-status" id="email-status" aria-live="polite"></p>
+      </div>
+
+      <div class="wallet-addr" id="account-box">
+        <small>Signed in</small>
+        <div class="account-line"><span class="avatar" id="account-avatar"></span><b id="account-name"></b></div>
+        <p class="signin-status" id="account-sub"></p>
+        <div class="wallet-actions">
+          <button class="btn-copy" id="account-profile" type="button">My player page</button>
+          <button class="btn-disconnect" id="account-signout" type="button">Sign out</button>
+        </div>
+      </div>
+
+      <p class="signin-note">Nothing here ever asks for a seed phrase or a wallet password.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- sign-in: SUI Wallet first (Wallet Standard), Google + email marked coming soon ---------- */
+  /* SUI Wallet is not live yet: while this flag is false the SUI button
+     only shows "SUI Wallet is coming soon." and never polls for wallets.
+     Set it to true to enable the full Wallet Standard connect flow below
+     unchanged. */
+  var SUI_ENABLED = false;
+  var overlay = document.getElementById("signin-overlay");
+  var suiBtn = document.getElementById("sui-connect");
+  var suiTitle = document.getElementById("sui-btn-title");
+  var suiStatus = document.getElementById("sui-status");
+  var addrBox = document.getElementById("wallet-addr-box");
+  var addrFull = document.getElementById("wallet-addr-full");
+  var walletList = document.getElementById("sui-wallet-list");
+  var navSignin = document.getElementById("signin-open");
+  var pill = document.getElementById("wallet-pill");
+  var pillAddr = document.getElementById("wallet-pill-addr");
+  var session = { wallet: null, account: null, address: "" };
+
+  /* Sign-in is remembered on this device only, so a reload does not sign
+     you out: only the public wallet address and the wallet name are kept
+     in localStorage, never anything secret. On load the wallet is asked
+     for a silent reconnect, and the hub only shows "signed in" again if
+     the wallet itself confirms the account. Disconnect clears the save. */
+  var SESSION_KEY = "lofi_hub_session_v1";
+  function saveSession(){
+    try {
+      if (session.address) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ address: session.address, wallet: (session.wallet && session.wallet.name) || "" }));
+      } else {
+        localStorage.removeItem(SESSION_KEY);
+      }
+    } catch (e) { /* storage unavailable: the sign-in stays in memory only */ }
+  }
+  function loadSavedSession(){
+    try {
+      var raw = localStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      return (data && data.address) ? data : null;
+    } catch (e) { return null; }
+  }
+
+  var suiWallets = [];
+  function registerWallet(wallet){
+    if (wallet && suiWallets.indexOf(wallet) === -1) suiWallets.push(wallet);
+  }
+  /* Wallet discovery runs continuously, not once, and follows the
+     official Wallet Standard handshake: the app announces itself by
+     dispatching "wallet-standard:app-ready" with { register }, and
+     wallets answer by dispatching "wallet-standard:register-wallet"
+     whose detail.register the app calls with its own register callback.
+     (The two event names were previously swapped, which is why no
+     wallet was ever detected.) detectWallets() re-announces the app so
+     a late-registering wallet is still picked up the next time Connect
+     is tapped. */
+  function detectWallets(){
+    try {
+      window.dispatchEvent(new CustomEvent("wallet-standard:app-ready", { detail: { register: registerWallet } }));
+    } catch (e) { /* wallet discovery is best-effort */ }
+  }
+  try {
+    window.addEventListener("wallet-standard:register-wallet", function(e){
+      if (e && e.detail && typeof e.detail.register === "function") e.detail.register(registerWallet);
+    });
+    detectWallets();
+  } catch (e) { /* wallet discovery is best-effort */ }
+
+  function suiCapable(wallet){
+    if (!wallet || !wallet.features) return false;
+    var chains = wallet.chains || [];
+    var isSui = chains.some(function(c){ return String(c).indexOf("sui:") === 0; });
+    return isSui && !!wallet.features["standard:connect"];
+  }
+  function shortAddr(a){ return a ? a.slice(0, 6) + "…" + a.slice(-4) : ""; }
+
+  /* Every detected SUI-capable wallet, de-duplicated by name: a wallet
+     that registers twice (or under two wrappers) is still one choice. */
+  function capableWallets(){
+    var out = [], seen = {};
+    suiWallets.filter(suiCapable).forEach(function(w){
+      var key = w.name || "SUI Wallet";
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push(w);
+    });
+    return out;
+  }
+  function hideWalletChoices(){ walletList.classList.remove("show"); walletList.innerHTML = ""; }
+  /* When several SUI wallets are installed, the player picks one instead
+     of the hub silently connecting whichever registered first. */
+  function renderWalletChoices(list){
+    walletList.innerHTML = "";
+    list.forEach(function(w){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "sui-wallet-opt";
+      if (w.icon) {
+        var img = document.createElement("img");
+        img.src = w.icon;
+        img.alt = "";
+        b.appendChild(img);
+      }
+      var label = document.createElement("b");
+      label.textContent = w.name || "SUI Wallet";
+      b.appendChild(label);
+      var chev = document.createElement("span");
+      chev.className = "chev";
+      chev.setAttribute("aria-hidden", "true");
+      chev.textContent = "›";
+      b.appendChild(chev);
+      b.addEventListener("click", function(){
+        walletList.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
+        connectTo(w);
+      });
+      walletList.appendChild(b);
+    });
+    walletList.classList.add("show");
+  }
+
+  function renderSession(){
+    hideWalletChoices();
+    if (session.address) {
+      navSignin.style.display = "none";
+      pill.classList.add("show");
+      pillAddr.textContent = shortAddr(session.address);
+      addrBox.classList.add("show");
+      addrFull.textContent = session.address;
+      suiTitle.textContent = (session.wallet && session.wallet.name ? session.wallet.name : "SUI Wallet") + " · " + shortAddr(session.address);
+      suiStatus.className = "signin-status ok";
+      suiStatus.textContent = "You are signed in with your SUI Wallet for this session.";
+    } else {
+      navSignin.style.display = "";
+      pill.classList.remove("show");
+      addrBox.classList.remove("show");
+      addrFull.textContent = "";
+      suiTitle.textContent = "Connect SUI Wallet";
+    }
+  }
+
+  function openSignin(){
+    if (SUI_ENABLED) detectWallets();
+    overlay.classList.add("open");
+    document.body.classList.add("modal-open");
+    var c = document.getElementById("signin-close");
+    if (c) c.focus();
+  }
+  function closeSignin(){
+    overlay.classList.remove("open");
+    document.body.classList.remove("modal-open");
+  }
+  navSignin.addEventListener("click", openSignin);
+  pill.addEventListener("click", openSignin);
+  document.querySelectorAll("[data-signin-open]").forEach(function(b){ b.addEventListener("click", openSignin); });
+  document.getElementById("signin-close").addEventListener("click", closeSignin);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) closeSignin(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && overlay.classList.contains("open")) closeSignin(); });
+  /* Coming back to this tab (for example after installing a wallet, or
+     after the wallet app hands the page back) re-runs discovery while
+     the sign-in sheet is open, so a wallet that appeared in the meantime
+     is found by the next Connect tap without reopening the sheet. */
+  document.addEventListener("visibilitychange", function(){
+    if (SUI_ENABLED && document.visibilityState === "visible" && overlay.classList.contains("open") && !session.address) detectWallets();
+  });
+
+  function setSuiError(html){
+    suiStatus.className = "signin-status err";
+    suiStatus.innerHTML = html;
+  }
+
+  suiBtn.addEventListener("click", function(){
+    if (!SUI_ENABLED) {
+      /* Coming soon: show only the short status, nothing else. No wallet
+         polling, no picker, no address box, no error styling. */
+      hideWalletChoices();
+      addrBox.classList.remove("show");
+      suiStatus.className = "signin-status";
+      suiStatus.textContent = "SUI Wallet is coming soon.";
+      return;
+    }
+    if (session.address) { renderSession(); return; }
+    suiBtn.disabled = true;
+    hideWalletChoices();
+    suiStatus.className = "signin-status";
+    suiStatus.textContent = "Looking for a SUI wallet…";
+    /* Re-run detection on every Connect tap, then keep checking briefly:
+       a wallet extension that registered late (or is still starting up)
+       gets several chances to appear before we report none found. */
+    detectWallets();
+    var tries = 0;
+    var poll = setInterval(function(){
+      tries++;
+      var list = capableWallets();
+      if (!list.length && tries < 10) { if (tries % 3 === 0) detectWallets(); return; }
+      clearInterval(poll);
+      suiBtn.disabled = false;
+      if (!list.length) {
+        suiStatus.className = "signin-status err";
+        suiStatus.textContent = "No SUI wallet found in this browser.";
+        return;
+      }
+      if (list.length > 1) {
+        suiStatus.className = "signin-status";
+        suiStatus.textContent = "More than one SUI wallet is installed. Pick the one to sign in with:";
+        renderWalletChoices(list);
+        return;
+      }
+      connectTo(list[0]);
+    }, 150);
+  });
+
+  async function connectTo(wallet){
+      try {
+        suiStatus.textContent = "Approve the connection in your " + (wallet.name || "wallet") + " pop-up…";
+        var result = await wallet.features["standard:connect"].connect();
+        var accounts = (result && result.accounts) || wallet.accounts || [];
+        var acct = accounts.filter(function(a){ return a && a.address; })[0];
+        if (!acct) throw new Error("No account returned by the wallet.");
+        session.wallet = wallet;
+        session.account = acct;
+        session.address = acct.address;
+        saveSession();
+        /* Follow account changes in the wallet itself, when it supports
+           the Wallet Standard events feature; a wallet without it (or
+           one whose .on throws) must never break the connect. */
+        try {
+          var evFeature = wallet.features && wallet.features["standard:events"];
+          if (evFeature && typeof evFeature.on === "function") {
+            evFeature.on("change", function(props){
+              try {
+                var accs = (props && props.accounts) || wallet.accounts || [];
+                var next = accs.filter(function(a){ return a && a.address; })[0];
+                if (next && next.address !== session.address) {
+                  session.account = next;
+                  session.address = next.address;
+                  saveSession();
+                  renderSession();
+                  notifySui();
+                } else if (!next && session.address) {
+                  session.account = null;
+                  session.address = "";
+                  saveSession();
+                  renderSession();
+                  notifySui();
+                }
+              } catch (e) { /* account-change handling is best-effort */ }
+            });
+          }
+        } catch (e) { /* events feature is optional */ }
+        renderSession();
+        notifySui();
+      } catch (err) {
+        setSuiError("Connection was cancelled or failed in the wallet. Nothing was signed and no funds moved. Tap Connect to try again.");
+        walletList.querySelectorAll("button").forEach(function(x){ x.disabled = false; });
+      } finally {
+        suiBtn.disabled = false;
+      }
+  }
+
+  /* Broadcast SUI connect/disconnect so the Firebase layer can mirror the
+     public address onto the signed-in profile (and clear it again). */
+  function notifySui(){
+    try {
+      document.dispatchEvent(new CustomEvent("lofi:sui-changed", { detail: { address: session.address || "" } }));
+    } catch (e) { /* best-effort */ }
+  }
+  async function disconnectSui(){
+    try {
+      if (session.wallet && session.wallet.features && session.wallet.features["standard:disconnect"]) {
+        await session.wallet.features["standard:disconnect"].disconnect();
+      }
+    } catch (e) { /* disconnect locally regardless */ }
+    session = { wallet: null, account: null, address: "" };
+    saveSession();
+    suiStatus.className = "signin-status";
+    suiStatus.textContent = "Disconnected.";
+    renderSession();
+    notifySui();
+  }
+  document.getElementById("wallet-disconnect").addEventListener("click", disconnectSui);
+  window.LofiSui = {
+    address: function(){ return session.address || ""; },
+    disconnect: function(){ return disconnectSui(); },
+    openModal: function(){ openSignin(); }
+  };
+
+  document.getElementById("wallet-copy").addEventListener("click", function(){
+    var btn = this;
+    function done(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy address"; }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(session.address).then(done, done);
+    } else { done(); }
+  });
+
+  document.querySelectorAll(".game-ach-head").forEach(function(toggle){
+    toggle.addEventListener("click", function(){
+      var list = toggle.parentElement.querySelector(".ach-list");
+      if (!list) return;
+      var open = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!open));
+      list.hidden = open;
+    });
+  });
+  /* Restore a saved sign-in after a reload: wait briefly for a wallet to
+     register, then ask it for a silent reconnect. No pop-up is ever shown
+     on load; if the wallet does not confirm the saved account, the hub
+     simply stays signed out and the saved address is never displayed
+     as if it were connected. */
+  function tryRestoreSession(){
+    var saved = loadSavedSession();
+    if (!saved) return;
+    detectWallets();
+    var tries = 0;
+    var poll = setInterval(function(){
+      tries++;
+      var wallet = capableWallets()[0] || null;
+      if (!wallet) {
+        if (tries % 3 === 0) detectWallets();
+        if (tries >= 14) clearInterval(poll);
+        return;
+      }
+      clearInterval(poll);
+      var attempt;
+      try {
+        attempt = wallet.features["standard:connect"].connect({ silent: true });
+      } catch (e) { return; }
+      Promise.resolve(attempt).then(function(result){
+        var accounts = (result && result.accounts) || wallet.accounts || [];
+        var acct = accounts.filter(function(a){ return a && a.address === saved.address; })[0] ||
+                   accounts.filter(function(a){ return a && a.address; })[0];
+        if (!acct) return;
+        session.wallet = wallet;
+        session.account = acct;
+        session.address = acct.address;
+        saveSession();
+        renderSession();
+        notifySui();
+      }).catch(function(){ /* wallet did not silently reconnect: stay signed out */ });
+    }, 150);
+  }
+  if (SUI_ENABLED) tryRestoreSession();
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= Firebase: Auth + Firestore (compat SDK v10) =================
+     Public client config for the "Lofi Games" project (project ID lofi-games).
+     This config is not a secret; security lives in the Firestore rules. */
+  var firebaseConfig = {
+    apiKey: "AIzaSyBQ5isDVE9nWFXO-3es3OmxVL047HmnE28",
+    authDomain: "winterplay.online",
+    projectId: "lofi-games",
+    storageBucket: "lofi-games.firebasestorage.app",
+    messagingSenderId: "885237508877",
+    appId: "1:885237508877:web:ac09a74ce6a82d8e5c1e44"
+  };
+  var auth = null, db = null, FB = false;
+  try {
+    if (typeof firebase !== "undefined" && firebase.auth && firebase.firestore) {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      FB = true;
+    }
+  } catch (e) { FB = false; }
+  function TS(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+
+  /* ================= Catalogue: 20 stickers (achievements are 840 XP in total; level XP is uncapped on top) ================= */
+  var GAME_SLUGS = ["lofi-dash", "frozen-crossing", "lofi-rush", "lofi-climb"];
+  var GAME_NAMES = { "lofi-dash":"Lofi Dash", "frozen-crossing":"Frozen Crossing", "lofi-rush":"Lofi Rush", "lofi-climb":"Lofi Climb" };
+  var GAME_ART = { "lofi-dash":"assets/banner-6a93c876.webp", "frozen-crossing":"assets/banner-crossing-732e2db5.webp", "lofi-rush":"assets/banner-rush-414cab74.webp", "lofi-climb":"assets/banner-climb-e6cb52da.webp" };
+  var GAME_UNITS = { "lofi-dash":"m", "frozen-crossing":"pts", "lofi-rush":"m", "lofi-climb":"m" };
+  var LOCAL_KEYS = { "lofi-dash":"lofi_dash_save_v1", "frozen-crossing":"frozen-crossing-save-v1", "lofi-rush":"lofi_rush_save_v1", "lofi-climb":"lofi_climb_save_v1" };
+  var CATALOG = [
+    { id:"dash-first", slug:"lofi-dash", bare:"first", name:"First run", desc:"Start your first run", xp:10 },
+    { id:"dash-clean", slug:"lofi-dash", bare:"clean", name:"500 m without a scratch", desc:"Reach 500 m in one run", xp:25 },
+    { id:"dash-coins", slug:"lofi-dash", bare:"coins", name:"50 coins in one run", desc:"Collect 50 coins in a single run", xp:25 },
+    { id:"dash-long", slug:"lofi-dash", bare:"long", name:"1,500 m in one run", desc:"Run 1,500 m in a single run", xp:50 },
+    { id:"dash-ultra", slug:"lofi-dash", bare:"ultra", name:"3,000 m in one run", desc:"Run 3,000 m in a single run", xp:100 },
+    { id:"crossing-first", slug:"frozen-crossing", bare:"first", name:"First crossing", desc:"Finish a crossing", xp:10 },
+    { id:"crossing-station", slug:"frozen-crossing", bare:"station", name:"Through the station", desc:"Finish 6 crossings in one run", xp:25 },
+    { id:"crossing-commuter", slug:"frozen-crossing", bare:"commuter", name:"Commuter", desc:"Finish 30 crossings across runs", xp:25 },
+    { id:"crossing-wholeway", slug:"frozen-crossing", bare:"wholeway", name:"The whole way", desc:"Reach the end of all ten crossings", xp:50 },
+    { id:"crossing-scratch", slug:"frozen-crossing", bare:"scratch", name:"Not a scratch", desc:"Reach the end without losing a life", xp:100 },
+    { id:"rush-first", slug:"lofi-rush", bare:"first", name:"First slide", desc:"Start your first slide downhill", xp:10 },
+    { id:"rush-chain", slug:"lofi-rush", bare:"chain", name:"10-coin chain", desc:"Chain 10 coins without a break", xp:25 },
+    { id:"rush-perfect", slug:"lofi-rush", bare:"perfect", name:"First Perfect dodge", desc:"Dodge an obstacle at the last moment", xp:25 },
+    { id:"rush-stage3", slug:"lofi-rush", bare:"stage3", name:"Reach stage 3", desc:"Reach stage 3 in one run", xp:50 },
+    { id:"rush-moon", slug:"lofi-rush", bare:"moon", name:"Reach the moon", desc:"Slide all 3,000 m to the moon", xp:100 },
+    { id:"climb-first", slug:"lofi-climb", bare:"first", name:"First bounce", desc:"Bounce on your first platform", xp:10 },
+    { id:"climb-m500", slug:"lofi-climb", bare:"m500", name:"500 m up", desc:"Climb 500 m above the snow", xp:25 },
+    { id:"climb-rocket", slug:"lofi-climb", bare:"rocket", name:"Ride a rocket", desc:"Grab a rocket and ride it up", xp:25 },
+    { id:"climb-m2000", slug:"lofi-climb", bare:"m2000", name:"2,000 m up", desc:"Climb 2,000 m above the snow", xp:50 },
+    { id:"climb-moon", slug:"lofi-climb", bare:"moon", name:"Reach the moon", desc:"Touch the moon, 50,000 m up", xp:100 }
+  ];
+  /* Real progress numbers only: these read straight from the save's own
+     best / totalCrossings counters. Every other sticker shows earned or
+     locked state only, no invented progress. */
+  var PROGRESS = {
+    "dash-clean": { from:"best", target:500, unit:"m" },
+    "dash-long": { from:"best", target:1500, unit:"m" },
+    "dash-ultra": { from:"best", target:3000, unit:"m" },
+    "rush-moon": { from:"best", target:3000, unit:"m" },
+    "climb-m500": { from:"best", target:500, unit:"m" },
+    "climb-m2000": { from:"best", target:2000, unit:"m" },
+    "climb-moon": { from:"best", target:50000, unit:"m" },
+    "crossing-commuter": { from:"totalCrossings", target:30, unit:"crossings" }
+  };
+
+  /* ================= Avatars (presets only, no uploads) ================= */
+  var AVATARS = {
+    yeti: { label:"Lofi the Yeti", img:"assets/lofi-face-a1b88584.webp" },
+    lofi: { label:"Lofi on the peak", img:"assets/hero-b25f6836.webp" },
+    snow: { label:"Snowflake", svg:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17M12 2l-2.2 2.6M12 2l2.2 2.6M12 22l-2.2-2.6M12 22l2.2-2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' },
+    star: { label:"Star", svg:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.5l-5.9 3.1 1.2-6.5L2.5 9.5l6.6-.9 2.9-6z" fill="currentColor"/></svg>' },
+    moon: { label:"Moon", svg:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.4 14.2A8.5 8.5 0 1 1 9.8 3.6a7 7 0 1 0 10.6 10.6z" fill="currentColor"/></svg>' },
+    pine: { label:"Pine tree", svg:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l5.5 7h-3.4L19 15h-5.2v7h-3.6v-7H5l4.9-6H6.5L12 2z" fill="currentColor"/></svg>' }
+  };
+  var AVATAR_IDS = Object.keys(AVATARS);
+  function avatarHTML(id){
+    var a = AVATARS[id] || AVATARS.yeti;
+    if (a.img) return '<img src="' + a.img + '" alt="">';
+    return a.svg;
+  }
+  /* Display avatar resolution: an explicitly chosen preset wins; otherwise
+     the Google profile photo (Firebase Auth photoURL) when there is one;
+     otherwise the default preset. The profile doc's avatar field starts as
+     the creation default "yeti", which is not a choice, so a device-side
+     flag records when the player actually picks an avatar in settings;
+     only the "yeti" default is ambiguous, every other stored preset id
+     could only have been written by an explicit pick. The special stored
+     value "google" means the player picked their Google photo. */
+  function avatarPickedFlag(uid){
+    try { return !!localStorage.getItem("lofi_avatar_picked_" + uid); } catch (e) { return false; }
+  }
+  function resolvedAvatarId(profile, user){
+    var chosen = profile && profile.avatar;
+    if (chosen === "google") return (user && user.photoURL) ? "google" : "yeti";
+    if (chosen && AVATARS[chosen] && chosen !== "yeti") return chosen;
+    if (chosen === "yeti" && user && avatarPickedFlag(user.uid)) return "yeti";
+    if (user && user.photoURL) return "google";
+    return (chosen && AVATARS[chosen]) ? chosen : "yeti";
+  }
+  function displayAvatarHTML(profile, user){
+    var id = resolvedAvatarId(profile, user);
+    if (id === "google" && user && user.photoURL) {
+      return '<img src="' + esc(user.photoURL) + '" alt="" referrerpolicy="no-referrer">';
+    }
+    return avatarHTML(id);
+  }
+
+  /* ================= State ================= */
+  var state = { user:null, profile:null, games:{}, unsubs:[], stickerFilter:"all", chalHistory:null, boardLoaded:false };
+  function suiAddr(){ return (window.LofiSui && window.LofiSui.address()) || ""; }
+  function localSave(slug){
+    try { var raw = localStorage.getItem(LOCAL_KEYS[slug]); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+  }
+  function tsMs(v){
+    if (!v) return null;
+    if (typeof v.toDate === "function") { try { return v.toDate().getTime(); } catch (e) { return null; } }
+    if (typeof v === "number") return v;
+    return null;
+  }
+  function fmtDate(ms){
+    return new Date(ms).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+  }
+
+  /* ================= Router: home + 5 views inside this hub ================= */
+  var ROUTES = { "player":"view-player", "stickers":"view-stickers", "challenges":"view-challenges", "leaderboard":"view-leaderboard", "profile":"view-profile", "help":"view-help", "your-data":"view-yourdata", "take-stickers":"view-take-stickers" };
+  function currentRoute(){
+    var h = (location.hash || "").replace(/^#\/?/, "");
+    if (h === "settings") h = "profile"; /* #/settings is the canonical name for the profile & settings view */
+    if (h === "achievements") h = "stickers"; /* #/achievements is an alias for the achievements (stickerbook) view */
+    return ROUTES[h] ? h : "home";
+  }
+  var lastRoute = null;
+  function playEnter(route){
+    /* Light entrance: the newly shown view's blocks rise in gently.
+       Re-triggered only when the route actually changes, so in-page
+       anchor jumps (#games, #how) do not replay it. The CSS class is
+       a no-op under prefers-reduced-motion. */
+    if (route === lastRoute) return;
+    lastRoute = route;
+    var el = route === "home" ? $("view-home") : $(ROUTES[route]);
+    if (!el) return;
+    el.classList.remove("anim-in");
+    void el.offsetWidth; /* restart the animation */
+    el.classList.add("anim-in");
+  }
+  function applyRoute(){
+    var route = currentRoute();
+    $("view-home").hidden = route !== "home";
+    Object.keys(ROUTES).forEach(function(k){ $(ROUTES[k]).hidden = k !== route; });
+    playEnter(route);
+    if (route === "home") {
+      var target = (location.hash || "").replace(/^#/, "");
+      if (target && target.charAt(0) !== "/") {
+        var el = document.getElementById(target);
+        if (el) el.scrollIntoView();
+      } else { window.scrollTo(0, 0); }
+    } else {
+      window.scrollTo(0, 0);
+      if (route === "player") renderPlayer();
+      if (route === "stickers") renderStickers();
+      if (route === "challenges") { renderChallenges(); loadHistory(); }
+      if (route === "leaderboard") loadBoard();
+      if (route === "profile") renderProfile();
+    }
+  }
+  window.addEventListener("hashchange", applyRoute);
+
+  /* ================= Profile doc: create on first sign-in ================= */
+  function sanitizeName(name, uid){
+    var s = String(name || "").replace(/[^A-Za-z0-9_]/g, "_").replace(/^_+|_+$/g, "").slice(0, 20);
+    if (s.length < 3) s = "LofiPlayer_" + String(uid || "").slice(0, 6);
+    return s.slice(0, 20);
+  }
+  function ensureProfile(user){
+    var ref = db.collection("users").doc(user.uid);
+    return ref.get().then(function(snap){
+      if (snap.exists) {
+        var d = snap.data() || {};
+        var addr = suiAddr();
+        if (addr && d.suiAddress !== addr) {
+          ref.update({ suiAddress: addr, updatedAt: TS() }).catch(function(){});
+        }
+        return d;
+      }
+      var data = {
+        username: sanitizeName(user.displayName, user.uid),
+        avatar: "yeti",
+        xp: 0,
+        suiAddress: suiAddr() || null,
+        challengeDays: 0,
+        createdAt: TS(),
+        updatedAt: TS()
+      };
+      return ref.set(data).then(function(){ return data; });
+    }).catch(function(){ return null; });
+  }
+
+  /* ================= Live data: profile + 4 game docs ================= */
+  function clearSubs(){
+    state.unsubs.forEach(function(u){ try { u(); } catch (e) {} });
+    state.unsubs = [];
+  }
+  function subscribeUser(uid){
+    clearSubs();
+    var uref = db.collection("users").doc(uid);
+    state.unsubs.push(uref.onSnapshot(function(snap){
+      state.profile = snap.exists ? snap.data() : state.profile;
+      renderAuthUI(); renderPlayer(); renderProfile(); renderChallenges();
+    }, function(){}));
+    GAME_SLUGS.forEach(function(slug){
+      state.unsubs.push(uref.collection("games").doc(slug).onSnapshot(function(snap){
+        if (snap.exists) state.games[slug] = snap.data(); else delete state.games[slug];
+        syncCachedXP();
+        renderPlayer(); renderStickers(); renderChallenges(); persistChallenges();
+      }, function(){}));
+    });
+  }
+  function levelXPOf(slug){
+    var cloud = 0, local = 0;
+    try {
+      var g = state.games[slug];
+      var gv = g ? Number(g.levelXP) : 0;
+      cloud = isFinite(gv) && gv > 0 ? gv : 0;
+    } catch (e) { cloud = 0; }
+    try {
+      var loc = localSave(slug);
+      var lv = loc ? Number(loc.levelXP) : 0;
+      local = isFinite(lv) && lv > 0 ? lv : 0;
+    } catch (e) { local = 0; }
+    return Math.max(cloud, local);
+  }
+  function computeXP(){
+    var total = 0;
+    CATALOG.forEach(function(s){
+      var g = state.games[s.slug];
+      if (g && g.unlocked && g.unlocked[s.bare]) total += s.xp;
+    });
+    GAME_SLUGS.forEach(function(slug){
+      try { total += levelXPOf(slug); } catch (e) {}
+    });
+    return total;
+  }
+  function collectedCount(){
+    var n = 0;
+    CATALOG.forEach(function(s){
+      var g = state.games[s.slug];
+      if (g && g.unlocked && g.unlocked[s.bare]) n++;
+    });
+    return n;
+  }
+  function syncCachedXP(){
+    if (!state.user || !state.profile) return;
+    var xp = computeXP();
+    if (state.profile.xp !== xp) {
+      db.collection("users").doc(state.user.uid).update({ xp: xp, updatedAt: TS() }).catch(function(){});
+    }
+  }
+
+  /* ================= Auth UI (header pill, modal account box) ================= */
+  function providerLabel(){
+    if (!state.user) return "";
+    var ids = state.user.providerData.map(function(p){ return p.providerId; });
+    if (ids.indexOf("google.com") !== -1) return "Google account";
+    if (ids.indexOf("password") !== -1) return "Email account";
+    return "Signed in";
+  }
+  function renderAuthUI(){
+    var user = state.user, profile = state.profile;
+    var pill = $("user-pill"), navSignin = $("signin-open"), walletPill = $("wallet-pill");
+    if (user) {
+      navSignin.style.display = "none";
+      walletPill.style.display = "none";
+      pill.classList.add("show");
+      $("user-pill-avatar").innerHTML = displayAvatarHTML(profile, user);
+      $("user-pill-name").textContent = profile ? profile.username : "Player";
+      $("account-box").classList.add("show");
+      $("account-avatar").innerHTML = displayAvatarHTML(profile, user);
+      $("account-name").textContent = profile ? profile.username : "Player";
+      var sub = providerLabel();
+      if (state.user.email) sub += " · " + state.user.email;
+      $("account-sub").textContent = sub + ". Your progress syncs to this account.";
+    } else {
+      navSignin.style.display = "";
+      walletPill.style.display = "";
+      pill.classList.remove("show");
+      $("account-box").classList.remove("show");
+      closeUserMenu();
+    }
+  }
+  /* Header profile dropdown: the pill opens a small menu (player page,
+     profile & settings, sign out) instead of jumping straight to a page.
+     Clicking anywhere outside the pill and menu closes it. */
+  function closeUserMenu(){
+    var m = $("user-menu"); if (m) m.hidden = true;
+    $("user-pill").setAttribute("aria-expanded", "false");
+  }
+  $("user-pill").addEventListener("click", function(e){
+    e.stopPropagation();
+    var m = $("user-menu");
+    var open = m.hidden;
+    m.hidden = !open;
+    this.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", function(e){
+    var m = $("user-menu");
+    if (m && !m.hidden && !m.contains(e.target)) closeUserMenu();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeUserMenu(); });
+  $("user-menu").addEventListener("click", function(){ closeUserMenu(); });
+  $("user-menu-signout").addEventListener("click", function(){ closeUserMenu(); fullSignOut(); });
+  $("player-signout").addEventListener("click", function(){ fullSignOut(); });
+  $("account-profile").addEventListener("click", function(){
+    $("signin-overlay").classList.remove("open");
+    document.body.classList.remove("modal-open");
+    location.hash = "#/player";
+  });
+  $("account-signout").addEventListener("click", function(){ fullSignOut(); });
+  $("profile-signout").addEventListener("click", function(){ fullSignOut(); });
+
+  function fullSignOut(){
+    try { localStorage.removeItem("lofi_hub_session_v1"); } catch (e) {}
+    if (window.LofiSui && window.LofiSui.address()) {
+      try { window.LofiSui.disconnect(); } catch (e) {}
+    }
+    if (FB && auth) auth.signOut().catch(function(){});
+    $("signin-overlay").classList.remove("open");
+    document.body.classList.remove("modal-open");
+    /* Back home with a clean URL: clear the route hash without leaving
+       a stray "#" behind, then let the router show the home view. */
+    try {
+      history.pushState(null, "", location.pathname + location.search);
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    } catch (e) { location.hash = ""; }
+    window.scrollTo(0, 0);
+  }
+
+  /* ================= Plain-word Firebase errors ================= */
+  function fbErr(err){
+    var code = (err && err.code) || "";
+    switch (code) {
+      case "auth/invalid-email": return "That email address does not look right. Check it and try again.";
+      case "auth/user-not-found": return "No account exists for that email yet. Switch to Create an account below.";
+      case "auth/wrong-password":
+      case "auth/invalid-credential": return "That password does not match this email. Try again.";
+      case "auth/email-already-in-use": return "That email already has an account. Sign in with it instead.";
+      case "auth/weak-password": return "That password is too short. Use at least 6 characters.";
+      case "auth/credential-already-in-use": return "That account is already linked to a different player profile.";
+      case "auth/popup-closed-by-user": return "The sign-in pop-up was closed before it finished. Nothing was changed.";
+      case "auth/cancelled-popup-request": return "A sign-in pop-up is already open. Finish that one first.";
+      case "auth/network-request-failed": return "The network dropped the sign-in. Check your connection and try again.";
+      default: return "Sign-in did not work (" + (code || "unknown error") + "). Please try again.";
+    }
+  }
+  function setStatus(id, msg, kind){
+    var s = $(id); if (!s) return;
+    s.className = "signin-status" + (kind ? " " + kind : "");
+    s.textContent = msg;
+  }
+  function noService(id){
+    setStatus(id, "The sign-in service could not load in this browser. The SUI Wallet option above still works.", "err");
+  }
+
+  /* ================= Sign-in actions ================= */
+  $("google-btn").addEventListener("click", function(){
+    if (!FB) { noService("google-status"); return; }
+    var provider = new firebase.auth.GoogleAuthProvider();
+    setStatus("google-status", "Opening Google sign-in…");
+    var done = function(){
+      setStatus("google-status", "Signed in with Google.", "ok");
+      $("signin-overlay").classList.remove("open");
+      document.body.classList.remove("modal-open");
+    };
+    auth.signInWithPopup(provider).then(done, function(err){ setStatus("google-status", fbErr(err), "err"); });
+  });
+
+  var emailMode = "signin";
+  $("email-toggle").addEventListener("click", function(){
+    emailMode = emailMode === "signin" ? "signup" : "signin";
+    $("email-submit").textContent = emailMode === "signin" ? "Sign in with email" : "Create account with email";
+    $("signin-password").setAttribute("autocomplete", emailMode === "signin" ? "current-password" : "new-password");
+    this.textContent = emailMode === "signin" ? "New here? Create an account" : "Already have an account? Sign in";
+    setStatus("email-status", "");
+  });
+  $("email-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!FB) { noService("email-status"); return; }
+    var email = ($("signin-email").value || "").trim();
+    var pass = $("signin-password").value || "";
+    if (!email || email.indexOf("@") < 1 || email.indexOf(".") < 0) { setStatus("email-status", "Enter a valid email address first.", "err"); $("signin-email").focus(); return; }
+    if (pass.length < 6) { setStatus("email-status", "Your password needs at least 6 characters.", "err"); $("signin-password").focus(); return; }
+    setStatus("email-status", emailMode === "signin" ? "Signing you in…" : "Creating your account…");
+    var okMsg = emailMode === "signin" ? "Signed in with email." : "Account created, you are signed in.";
+    if (emailMode === "signup") {
+      auth.createUserWithEmailAndPassword(email, pass).then(function(){ setStatus("email-status", okMsg, "ok"); }, function(err){ setStatus("email-status", fbErr(err), "err"); });
+    } else {
+      auth.signInWithEmailAndPassword(email, pass).then(function(){ setStatus("email-status", okMsg, "ok"); }, function(err){ setStatus("email-status", fbErr(err), "err"); });
+    }
+  });
+
+  /* SUI connect/disconnect mirrors onto the profile doc */
+  document.addEventListener("lofi:sui-changed", function(e){
+    var addr = (e && e.detail && e.detail.address) || "";
+    if (state.user && db) {
+      db.collection("users").doc(state.user.uid).update({ suiAddress: addr || null, updatedAt: TS() }).catch(function(){});
+    }
+    renderAuthUI(); renderProfile();
+  });
+
+  /* ================= Achievement toast (spark burst on unlock) ================= */
+  var prevAchIds = null, achToastTimer = null;
+  function showAchToast(item){
+    var toast = $("ach-toast"); if (!toast) return;
+    var txt = $("ach-toast-text");
+    if (txt) txt.textContent = "Achievement unlocked: " + item.name + " · +" + item.xp + " XP";
+    toast.hidden = false;
+    toast.classList.remove("show");
+    void toast.offsetWidth; /* restart the spark animation */
+    toast.classList.add("show");
+    clearTimeout(achToastTimer);
+    achToastTimer = setTimeout(function(){
+      toast.classList.remove("show");
+      setTimeout(function(){ toast.hidden = true; }, 350);
+    }, 3400);
+  }
+  function watchAchievements(){
+    var ids = {};
+    CATALOG.forEach(function(x){ if (getStickerState(x).status === "collected") ids[x.id] = x; });
+    if (prevAchIds === null) { prevAchIds = ids; return; }
+    var fresh = Object.keys(ids).filter(function(id){ return !prevAchIds[id]; });
+    prevAchIds = ids;
+    if (fresh.length && state.user) showAchToast(ids[fresh[fresh.length - 1]]);
+  }
+
+  /* ================= Player page ================= */
+  function renderPlayer(){
+    var signedOut = $("player-signedout"), main = $("player-main");
+    if (!signedOut || !main) return;
+    if (!state.user) { signedOut.hidden = false; main.hidden = true; return; }
+    signedOut.hidden = true; main.hidden = false;
+    var p = state.profile || {};
+    $("player-avatar").innerHTML = displayAvatarHTML(state.profile, state.user);
+    $("player-name").textContent = p.username || "Player";
+    $("player-sub").textContent = providerLabel();
+    $("player-xp").textContent = computeXP().toLocaleString("en-US");
+    $("player-stickers").textContent = collectedCount() + " / 20";
+    $("player-chaldays").textContent = String(p.challengeDays || 0);
+    /* Profile badges: one badge per collected achievement sticker,
+       using the same per-sticker icons as the stickerbook. Stickers
+       that are not collected yet are not shown here. */
+    var badgeBox = $("player-badges");
+    if (badgeBox) {
+      var collected = CATALOG.filter(function(s){ return getStickerState(s).status === "collected"; });
+      if (!collected.length) {
+        badgeBox.innerHTML = '<p class="badge-empty">No achievements collected yet — play a game to earn your first one.</p>';
+      } else {
+        badgeBox.innerHTML = collected.map(function(s){
+          return '<span class="badge"><span class="sticker-medal">' + stickerIcon(s.id) + '</span>' + esc(s.name) + '</span>';
+        }).join("");
+      }
+    }
+    $("player-bests").innerHTML = GAME_SLUGS.map(function(slug){
+      var g = state.games[slug];
+      var best = g && typeof g.best === "number" ? g.best.toLocaleString("en-US") + " " + GAME_UNITS[slug] : "—";
+      var sub = g ? "Synced from your account" : "No save yet, play the game to set one";
+      return '<div class="best-card"><img src="' + GAME_ART[slug] + '" alt=""><div><h4>' + GAME_NAMES[slug] + '</h4><p>' + sub + '</p></div><b>' + best + '</b></div>';
+    }).join("");
+    /* Close to earning: stickers with real progress above zero that are
+       not unlocked yet, closest to completion first. */
+    var closeBox = $("player-close");
+    if (closeBox) {
+      var inProg = CATALOG.map(function(s){ return { s: s, st: getStickerState(s) }; })
+        .filter(function(x){ return x.st.status === "progress" && x.st.progress; })
+        .sort(function(a, b){
+          return (b.st.progress.val / b.st.progress.target) - (a.st.progress.val / a.st.progress.target);
+        });
+      if (!inProg.length) {
+        closeBox.innerHTML = '<p class="empty-note" style="text-align:left;padding:6px 0">Nothing is part-way there yet. Play any game and the achievements you are closest to finishing will show up here.</p>';
+      } else {
+        closeBox.innerHTML = inProg.map(function(x){
+          var pct = Math.min(100, Math.round(x.st.progress.val / x.st.progress.target * 100));
+          return '<a class="close-row" href="#/stickers"><span class="sticker-medal">' + stickerIcon(x.s.id) + '</span>' +
+            '<div class="c-main"><h4>' + esc(x.s.name) + '</h4><span class="c-game">' + GAME_NAMES[x.s.slug] + '</span>' +
+            '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+            '<span class="bar-label">' + x.st.progress.val.toLocaleString("en-US") + " / " + x.st.progress.target.toLocaleString("en-US") + " " + x.st.progress.unit + '</span></div>' +
+            '<span class="xp">' + x.s.xp + ' XP</span><span class="c-arrow" aria-hidden="true">›</span></a>';
+        }).join("");
+      }
+    }
+    watchAchievements();
+  }
+
+  /* ================= Stickerbook ================= */
+  function stickerState(s){
+    var g = state.games[s.slug];
+    var cloud = !!(g && g.unlocked && g.unlocked[s.bare]);
+    var loc = localSave(s.slug);
+    var local = !!(loc && loc.unlocked && loc.unlocked[s.bare]);
+    if (cloud) {
+      var ea = g.earnedAt ? tsMs(g.earnedAt[s.bare]) : null;
+      return { status:"collected", label: ea ? "Collected · " + fmtDate(ea) : "Collected · Earned before sync" };
+    }
+    if (local) return { status:"ready", label:"Ready to claim · earned on this device, not synced yet" };
+    var pr = PROGRESS[s.id];
+    if (pr) {
+      var src = g || loc;
+      var val = src && typeof src[pr.from] === "number" ? src[pr.from] : 0;
+      if (val > 0) return { status:"progress", label:"In progress", progress:{ val:val, target:pr.target, unit:pr.unit } };
+    }
+    return { status:"locked", label:"Locked" };
+  }
+  /* Signed-out sticker state comes from this device's local saves only. */
+  function stickerStateSignedOut(s){
+    var loc = localSave(s.slug);
+    var local = !!(loc && loc.unlocked && loc.unlocked[s.bare]);
+    if (local) return { status:"ready", label:"Ready to claim · earned on this device" };
+    var pr = PROGRESS[s.id];
+    if (pr && loc && typeof loc[pr.from] === "number" && loc[pr.from] > 0) {
+      return { status:"progress", label:"In progress", progress:{ val:loc[pr.from], target:pr.target, unit:pr.unit } };
+    }
+    return { status:"locked", label:"Locked" };
+  }
+  function getStickerState(s){ return state.user ? stickerState(s) : stickerStateSignedOut(s); }
+  var ICONS = {
+    "dash-first": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3v9.5L16 14v4H8V3z" fill="currentColor"/><path d="M2 6h4M1 10h5M2 14h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    "dash-clean": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l7 2.5v6.2c0 4.8-3 8.3-7 10.3-4-2-7-5.5-7-10.3V5l7-2.5z" fill="currentColor"/></svg>',
+    "dash-coins": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>',
+    "dash-long": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8c4-2 8-2 11 0 2 1.3 4 .7 5-1M3 12c4-2 8-2 11 0 2 1.3 4 .7 5-1M3 16c4-2 8-2 11 0 2 1.3 4 .7 5-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    "dash-ultra": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h10v5.5A5 5 0 0 1 12 13.5 5 5 0 0 1 7 8.5V3z" fill="currentColor"/><path d="M7 4.5H3.8A3.4 3.4 0 0 0 7 9M17 4.5h3.2A3.4 3.4 0 0 1 17 9M11 13.5h2V17h-2z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    "crossing-first": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13.5" r="7" stroke="currentColor" stroke-width="1.8"/><circle cx="7.5" cy="6" r="2.5" fill="currentColor"/><circle cx="16.5" cy="6" r="2.5" fill="currentColor"/><circle cx="9.5" cy="12.5" r="1" fill="currentColor"/><circle cx="14.5" cy="12.5" r="1" fill="currentColor"/><path d="M9 16c1 1 5 1 6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    "crossing-station": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="2.5" width="6" height="2" rx="1" fill="currentColor"/><rect x="9" y="19.5" width="6" height="2" rx="1" fill="currentColor"/><ellipse cx="12" cy="12" rx="6.5" ry="7" stroke="currentColor" stroke-width="1.8"/><path d="M12 5v14M8.2 6.6c-1 3.4-1 7.4 0 10.8M15.8 6.6c1 3.4 1 7.4 0 10.8" stroke="currentColor" stroke-width="1.1"/></svg>',
+    "crossing-commuter": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12c3-4 6.5-6 10-6 2.6 0 5.2 1.6 7.2 3.7L21.5 12l-1.3 2.3C18.2 16.4 15.6 18 13 18c-3.7 0-7.5-2-10.5-6z" fill="currentColor"/><path d="M18.5 12l3.5-4.2v8.4L18.5 12z" fill="currentColor"/></svg>',
+    "crossing-wholeway": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 22V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 3.5c3-1.5 6 1.5 11 0v8c-5 1.5-8-1.5-11 0v-8z" fill="currentColor"/></svg>',
+    "crossing-scratch": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18L2 9l5 4 5-7 5 7 5-4-1 9H3z" fill="currentColor"/><rect x="3" y="19" width="18" height="2" rx="1" fill="currentColor"/></svg>',
+    "rush-first": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 19h18M3 19L19 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 8.5l6.5 6.5M15 9.8V15h-5.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "rush-chain": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="15" r="5.5" stroke="currentColor" stroke-width="2"/><circle cx="15" cy="9" r="5.5" stroke="currentColor" stroke-width="2"/></svg>',
+    "rush-perfect": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>',
+    "rush-stage3": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 19l6-11 4 6 3.5-5L22 19H2z" fill="currentColor"/></svg>',
+    "rush-moon": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.4 14.2A8.5 8.5 0 1 1 9.8 3.6a7 7 0 1 0 10.6 10.6z" fill="currentColor"/></svg>',
+    "climb-first": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c10 2 10 4 0 6 10 2 10 4 0 6 10 2 10 4 0 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    "climb-m500": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 19l9-14 9 14H3z" fill="currentColor"/></svg>',
+    "climb-rocket": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2c2.8 2.3 4.2 5.7 4.2 9.5L12 15.2 7.8 11.5C7.8 7.7 9.2 4.3 12 2z" fill="currentColor"/><path d="M7.8 11.8L4.8 16.5l3.6-.6M16.2 11.8l3 4.7-3.6-.6" fill="currentColor"/><path d="M10.4 17.6c.6 1.4 1.1 2.9 1.6 4.4.5-1.5 1-3 1.6-4.4-1 .6-2.2.6-3.2 0z" fill="currentColor"/></svg>',
+    "climb-m2000": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 19l7-9.5 4 4.8 2.2-2.6L22 19H2z" fill="currentColor"/><path d="M15.2 11.7V4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15.2 4c1.8-.9 3.6.8 5.6 0v3.6c-2 .8-3.8-.9-5.6 0V4z" fill="currentColor"/></svg>',
+    "climb-moon": '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10" cy="13.5" r="7.5" fill="currentColor"/><path d="M18.6 2.8l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z" fill="currentColor"/></svg>'
+  };
+  function stickerIcon(id){ return ICONS[id] || ICONS["dash-first"]; }
+  function renderStickers(){
+    var groups = $("sticker-groups"); if (!groups) return;
+    var f = state.stickerFilter;
+    var note = $("sticker-note");
+    if (!state.user) note.textContent = "You are not signed in, so this book reads this device only. Achievements earned here show as Ready to claim until they sync to an account.";
+    else if (f === "ready") note.textContent = "Ready to claim means the achievement is earned in a game on this device but has not synced to your account yet. Open that game while signed in and it syncs on its own.";
+    else note.textContent = "";
+    var html = "";
+    GAME_SLUGS.forEach(function(slug){
+      var items = CATALOG.filter(function(s){ return s.slug === slug; }).map(function(s){
+        var st = getStickerState(s);
+        if (f !== "all" && st.status !== f) return "";
+        var prog = "";
+        if (st.progress) {
+          var pct = Math.min(100, Math.round(st.progress.val / st.progress.target * 100));
+          prog = '<div class="bar"><i style="width:' + pct + '%"></i></div><span class="bar-label">' + st.progress.val.toLocaleString("en-US") + " / " + st.progress.target.toLocaleString("en-US") + " " + st.progress.unit + '</span>';
+        }
+        return '<div class="sticker st-' + st.status + '"><div class="sticker-top"><span class="sticker-medal">' + stickerIcon(s.id) + '</span><span class="xp">' + s.xp + ' XP</span></div><h4>' + esc(s.name) + '</h4><p>' + esc(s.desc) + '</p>' + prog + '<span class="st-status">' + esc(st.label) + '</span></div>';
+      }).join("");
+      if (items) html += '<h3 class="view-subh">' + GAME_NAMES[slug] + '</h3><div class="stickers">' + items + '</div>';
+    });
+    groups.innerHTML = html || '<p class="empty-note">No achievements in this group yet. Play the games to earn some.</p>';
+  }
+  $("sticker-filters").addEventListener("click", function(e){
+    var btn = e.target.closest ? e.target.closest("[data-filter]") : null;
+    if (!btn) return;
+    state.stickerFilter = btn.getAttribute("data-filter");
+    this.querySelectorAll(".chip").forEach(function(c){ c.classList.toggle("active", c === btn); });
+    renderStickers();
+  });
+
+  /* ================= Daily challenges (reset 22:00 Asia/Dhaka) ================= */
+  var GAME_LINKS = { "lofi-dash":"/lofigame/dash/", "frozen-crossing":"/lofigame/crossing/", "lofi-rush":"/lofigame/rush/", "lofi-climb":"/lofigame/climb/" };
+  var CHAL_POOL = [
+    { id:"play-dash", text:"Play Lofi Dash today", slug:"lofi-dash" },
+    { id:"play-crossing", text:"Play Frozen Crossing today", slug:"frozen-crossing" },
+    { id:"play-rush", text:"Play Lofi Rush today", slug:"lofi-rush" },
+    { id:"play-climb", text:"Play Lofi Climb today", slug:"lofi-climb" },
+    { id:"earn-one", text:"Earn any achievement today" },
+    { id:"play-two", text:"Play 2 different games today" }
+  ];
+  function chalKey(ms){
+    var t = new Date(ms + 6 * 3600 * 1000 + 2 * 3600 * 1000); /* Dhaka wall clock, +2h so the day rolls at 22:00 */
+    return t.toISOString().slice(0, 10);
+  }
+  function chalWindow(key){
+    var end = Date.parse(key + "T22:00:00+06:00");
+    return { start: end - 24 * 3600 * 1000, end: end };
+  }
+  function chalFor(key){
+    var h = 2166136261;
+    for (var i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = Math.imul(h, 16777619); }
+    var seed = h >>> 0;
+    function rnd(){ seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; }
+    var pool = CHAL_POOL.slice(), out = [];
+    while (out.length < 3 && pool.length) out.push(pool.splice(Math.floor(rnd() * pool.length), 1)[0]);
+    return out;
+  }
+  function evalChallenges(key){
+    var w = chalWindow(key), played = {}, earned = false;
+    GAME_SLUGS.forEach(function(slug){
+      var g = state.games[slug]; if (!g) return;
+      var u = tsMs(g.updatedAt);
+      if (u !== null && u >= w.start && u < w.end) played[slug] = true;
+      var ea = g.earnedAt || {};
+      Object.keys(ea).forEach(function(id){
+        var t = tsMs(ea[id]);
+        if (t !== null && t >= w.start && t < w.end) earned = true;
+      });
+    });
+    var done = {};
+    chalFor(key).forEach(function(c){
+      if (c.slug) done[c.id] = !!played[c.slug];
+      else if (c.id === "earn-one") done[c.id] = earned;
+      else if (c.id === "play-two") done[c.id] = Object.keys(played).length >= 2;
+    });
+    return done;
+  }
+  var chalTimer = null;
+  function persistChallenges(){
+    if (!state.user || !db) return;
+    clearTimeout(chalTimer);
+    chalTimer = setTimeout(function(){
+      if (!state.user) return;
+      var key = chalKey(Date.now());
+      var done = evalChallenges(key);
+      var all = chalFor(key).every(function(c){ return done[c.id]; });
+      var ref = db.collection("users").doc(state.user.uid).collection("challenges").doc(key);
+      ref.get().then(function(snap){
+        var was = snap.exists && snap.data().challengeDays === true;
+        var completed = {};
+        Object.keys(done).forEach(function(k){ if (done[k]) completed[k] = true; });
+        var jobs = [ref.set({ date:key, completed:completed, challengeDays:all, updatedAt:TS() }, { merge:true })];
+        if (all && !was) {
+          jobs.push(db.collection("users").doc(state.user.uid).update({
+            challengeDays: ((state.profile && state.profile.challengeDays) || 0) + 1, updatedAt: TS()
+          }));
+        }
+        return Promise.all(jobs);
+      }).catch(function(){});
+    }, 600);
+  }
+  var CHECK = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function renderChallenges(){
+    var box = $("challenges-today"); if (!box) return;
+    var key = chalKey(Date.now());
+    var done = state.user ? evalChallenges(key) : {};
+    box.innerHTML = chalFor(key).map(function(c){
+      var isDone = !!done[c.id];
+      var play = c.slug && GAME_LINKS[c.slug] ? '<a class="chal-play" href="' + GAME_LINKS[c.slug] + '" aria-label="Play ' + esc(GAME_NAMES[c.slug]) + '">Play</a>' : '';
+      return '<div class="chal-row' + (isDone ? " done" : "") + '"><span class="chal-ic">' + (isDone ? CHECK : "·") + '</span><b>' + esc(c.text) + '</b><span>' + (isDone ? "Done" : (state.user ? "Pending" : "Sign in to track")) + '</span>' + play + '</div>';
+    }).join("");
+    var hist = $("challenges-history");
+    if (hist && state.chalHistory) {
+      hist.innerHTML = state.chalHistory.map(function(h){
+        var d = new Date(Date.parse(h.key + "T12:00:00+06:00"));
+        var label = d.toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short" });
+        return '<div class="chal-row' + (h.full ? " done" : "") + '"><span class="chal-ic">' + (h.full ? CHECK : "·") + '</span><b>' + label + (h.today ? " · Today" : "") + '</b><span>' + h.count + " / 3" + (h.full ? " · Challenge Day" : "") + '</span></div>';
+      }).join("");
+    } else if (hist) {
+      hist.innerHTML = '<p class="empty-note">' + (state.user ? "Loading your last 7 days…" : "Sign in to keep a 7-day challenge history.") + '</p>';
+    }
+  }
+  function loadHistory(){
+    if (!state.user || !db) { state.chalHistory = null; renderChallenges(); return; }
+    var keys = [];
+    for (var i = 0; i < 7; i++) keys.push(chalKey(Date.now() - i * 24 * 3600 * 1000));
+    var uid = state.user.uid;
+    Promise.all(keys.map(function(k){
+      return db.collection("users").doc(uid).collection("challenges").doc(k).get()
+        .then(function(snap){ return { key:k, snap:snap }; })
+        .catch(function(){ return { key:k, snap:null }; });
+    })).then(function(rows){
+      var todayKey = chalKey(Date.now());
+      var todayDone = evalChallenges(todayKey);
+      state.chalHistory = rows.map(function(r){
+        var count = 0, full = false;
+        if (r.key === todayKey) {
+          count = Object.keys(todayDone).filter(function(k){ return todayDone[k]; }).length;
+          full = count === 3;
+        } else if (r.snap && r.snap.exists) {
+          var d = r.snap.data() || {};
+          count = d.completed ? Object.keys(d.completed).length : 0;
+          full = d.challengeDays === true;
+        }
+        return { key:r.key, count:count, full:full, today:r.key === todayKey };
+      });
+      renderChallenges();
+    });
+  }
+
+  /* ================= Leaderboard: top 25 by XP ================= */
+  function loadBoard(){
+    var box = $("board-list"); if (!box) return;
+    if (!FB) { box.innerHTML = '<p class="empty-note">The leaderboard needs the sign-in service, which could not load in this browser.</p>'; return; }
+    box.innerHTML = '<p class="empty-note">Loading the leaderboard…</p>';
+    db.collection("users").where("xp", ">", 0).orderBy("xp", "desc").limit(25).get().then(function(snap){
+      if (snap.empty) { box.innerHTML = '<p class="empty-note">No players on the board yet. Earn an achievement and you could be the first name here.</p>'; return; }
+      var html = "", rank = 0;
+      snap.forEach(function(doc){
+        rank++;
+        var d = doc.data() || {};
+        var me = state.user && doc.id === state.user.uid;
+        html += '<div class="board-row' + (me ? " me" : "") + '"><span class="rank">' + rank + '</span><span class="avatar">' + avatarHTML(d.avatar || "yeti") + '</span><span class="bname">' + esc(d.username || "Player") + '</span><span class="bxp">' + (d.xp || 0) + ' XP</span></div>';
+      });
+      box.innerHTML = html;
+    }).catch(function(){
+      box.innerHTML = '<p class="empty-note">The leaderboard could not load right now. Try again in a moment.</p>';
+    });
+  }
+
+  /* ================= Profile / settings ================= */
+  function renderProfile(){
+    var signedOut = $("profile-signedout"), main = $("profile-main");
+    if (!signedOut || !main) return;
+    if (!state.user) { signedOut.hidden = false; main.hidden = true; return; }
+    signedOut.hidden = true; main.hidden = false;
+    var p = state.profile || {};
+    var input = $("username-input");
+    if (document.activeElement !== input) input.value = p.username || "";
+    var resId = resolvedAvatarId(p, state.user);
+    var hasPhoto = !!(state.user && state.user.photoURL);
+    $("avatar-current").innerHTML = '<span class="avatar lg">' + displayAvatarHTML(p, state.user) + '</span><div><b>' +
+      (resId === "google" ? "Your Google photo" : esc(AVATARS[resId].label)) + '</b><p>' +
+      (resId === "google"
+        ? "This is the photo from your Google account. Pick a preset below to use that instead."
+        : (hasPhoto ? "Pick your Google photo or another preset below." : "Pick a preset below.")) +
+      '</p></div>';
+    var pickIds = (hasPhoto ? ["google"] : []).concat(AVATAR_IDS);
+    $("avatar-grid").innerHTML = pickIds.map(function(id){
+      var label = id === "google" ? "Google photo" : AVATARS[id].label;
+      var inner = id === "google" ? '<img src="' + esc(state.user.photoURL) + '" alt="" referrerpolicy="no-referrer">' : avatarHTML(id);
+      return '<button class="avatar-pick' + (resId === id ? " sel" : "") + '" type="button" data-avatar="' + id + '" aria-label="' + esc(label) + '" title="' + esc(label) + '"><span class="avatar">' + inner + '</span></button>';
+    }).join("");
+    var ids = state.user.providerData.map(function(x){ return x.providerId; });
+    var hasGoogle = ids.indexOf("google.com") !== -1;
+    var hasEmail = ids.indexOf("password") !== -1;
+    var addr = suiAddr() || p.suiAddress || "";
+    $("linked-list").innerHTML =
+      '<div class="linked-row"><b>Google</b><span class="lstate">' + (hasGoogle ? '<span>Linked</span>' : '<button class="mini-btn" type="button" id="link-google-btn">Link Google</button>') + '</span></div>' +
+      '<div class="linked-row"><b>Email</b><span>' + (hasEmail ? esc(state.user.email || "") : '') + '</span><span class="lstate">' + (hasEmail ? '<span>Linked</span>' : '<button class="mini-btn" type="button" id="link-email-btn">Link email</button>') + '</span></div>' +
+      '<div class="linked-row"><b>SUI Wallet</b><span class="lstate">' + (addr ? '<button class="mini-btn red" type="button" id="sui-disconnect-btn">Disconnect</button>' : '<button class="mini-btn" type="button" id="sui-connect-btn">Connect</button>') + '</span>' + (addr ? '<span class="linked-addr">' + esc(addr) + '</span>' : '') + '</div>' +
+      '<p class="signin-note" style="text-align:left;margin-top:12px">Link another account above and the same player, XP and achievements carry over.</p>';
+    var lg = $("link-google-btn");
+    if (lg) lg.addEventListener("click", linkGoogle);
+    var le = $("link-email-btn");
+    if (le) le.addEventListener("click", function(){ $("link-email-box").hidden = false; $("link-email").focus(); });
+    var sc = $("sui-connect-btn");
+    if (sc) sc.addEventListener("click", function(){ if (window.LofiSui) window.LofiSui.openModal(); });
+    var sd = $("sui-disconnect-btn");
+    if (sd) sd.addEventListener("click", function(){ if (window.LofiSui) window.LofiSui.disconnect(); });
+  }
+  function linkGoogle(){
+    if (!FB || !state.user) return;
+    var provider = new firebase.auth.GoogleAuthProvider();
+    setStatus("link-status", "Opening Google…");
+    state.user.linkWithPopup(provider).then(function(){
+      setStatus("link-status", "Google linked to this player.", "ok"); renderProfile();
+    }, function(err){
+      if (err && err.code === "auth/credential-already-in-use") setStatus("link-status", "That Google account already belongs to a different player profile, so it cannot be linked here.", "err");
+      else setStatus("link-status", fbErr(err), "err");
+    });
+  }
+  $("link-email-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!FB || !state.user) return;
+    var email = ($("link-email").value || "").trim();
+    var pass = $("link-password").value || "";
+    if (!email || email.indexOf("@") < 1) { setStatus("link-status", "Enter a valid email address first.", "err"); return; }
+    if (pass.length < 6) { setStatus("link-status", "Your password needs at least 6 characters.", "err"); return; }
+    var cred = firebase.auth.EmailAuthProvider.credential(email, pass);
+    state.user.linkWithCredential(cred).then(function(){
+      setStatus("link-status", "Email linked to this player.", "ok");
+      $("link-email-box").hidden = true;
+      renderProfile();
+    }, function(err){ setStatus("link-status", fbErr(err), "err"); });
+  });
+  $("avatar-grid").addEventListener("click", function(e){
+    var btn = e.target.closest ? e.target.closest("[data-avatar]") : null;
+    if (!btn || !state.user || !db) return;
+    var id = btn.getAttribute("data-avatar");
+    /* Record that this avatar was picked on purpose, so the display
+       resolution can tell a chosen preset from the creation default. */
+    try { localStorage.setItem("lofi_avatar_picked_" + state.user.uid, "1"); } catch (e2) {}
+    db.collection("users").doc(state.user.uid).update({ avatar: id, updatedAt: TS() }).then(function(){
+      setStatus("avatar-status", id === "google" ? "Google photo saved." : "Avatar saved.", "ok");
+    }).catch(function(){ setStatus("avatar-status", "The avatar could not be saved. Try again.", "err"); });
+  });
+  function nameChangeLog(){
+    try { return JSON.parse(localStorage.getItem("lofi_name_changes_v1") || "{}"); } catch (e) { return {}; }
+  }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  $("username-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    if (!FB || !state.user || !db) { setStatus("username-status", "Sign in first to change your username.", "err"); return; }
+    var name = ($("username-input").value || "").trim();
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) { setStatus("username-status", "Use 3 to 20 characters: letters, numbers and underscore only.", "err"); return; }
+    if (state.profile && state.profile.username === name) { setStatus("username-status", "That is already your username."); return; }
+    var log = nameChangeLog();
+    var used = log.day === todayStr() ? (log.count || 0) : 0;
+    if (used >= 3) { setStatus("username-status", "You have used today's 3 username changes. Try again tomorrow.", "err"); return; }
+    setStatus("username-status", "Checking that name…");
+    db.collection("users").where("username", "==", name).limit(1).get().then(function(snap){
+      var taken = false;
+      snap.forEach(function(doc){ if (doc.id !== state.user.uid) taken = true; });
+      if (taken) { setStatus("username-status", "That username is already taken. Pick another one.", "err"); return null; }
+      return db.collection("users").doc(state.user.uid).update({ username: name, updatedAt: TS() }).then(function(){
+        try { localStorage.setItem("lofi_name_changes_v1", JSON.stringify({ day: todayStr(), count: used + 1 })); } catch (e2) {}
+        setStatus("username-status", "Username saved. " + (2 - used) + " change" + (2 - used === 1 ? "" : "s") + " left today.", "ok");
+      });
+    }).catch(function(){ setStatus("username-status", "The username could not be saved. Try again.", "err"); });
+  });
+
+  /* ================= Auth state =================
+     The nav starts pending (body.auth-pending): the Sign in button stays
+     hidden behind a neutral loading pill until Firebase confirms whether
+     a session exists, so a signed-in user never sees a signed-out nav
+     flash on reload. The first onAuthStateChanged resolves it; when the
+     SDK did not load there is nothing to wait for, so it resolves at
+     once and the normal signed-out nav shows. Nothing here treats the
+     pending state as proof of a session. */
+  function resolveAuthPending(){ document.body.classList.remove("auth-pending"); }
+  if (FB) {
+    auth.onAuthStateChanged(function(user){
+      resolveAuthPending();
+      state.user = user;
+      state.chalHistory = null;
+      clearSubs();
+      if (user) {
+        $("signin-overlay").classList.remove("open");
+        document.body.classList.remove("modal-open");
+        ensureProfile(user).then(function(){ subscribeUser(user.uid); renderAuthUI(); });
+      } else {
+        state.profile = null;
+        state.games = {};
+      }
+      renderAuthUI(); renderPlayer(); renderStickers(); renderProfile(); renderChallenges();
+    });
+  } else {
+    resolveAuthPending();
+    renderPlayer(); renderStickers(); renderProfile(); renderChallenges();
+  }
+  applyRoute();
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- in-page anchors scroll without touching the URL ----------
+     Links like #games, #how, #about, #yeti and #top scroll to their
+     section with scrollIntoView and never set location.hash, so the
+     address stays clean (…/lofigame/). Hash routes for the real views
+     (#/player, #/stickers, #/challenges, #/leaderboard, #/settings)
+     are left alone and keep working through the router. */
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function scrollToId(id){
+    if (!id || id === "top") { window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" }); return; }
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    var href = a.getAttribute("href") || "";
+    if (href.charAt(1) === "/") return; /* a view route, not an in-page anchor */
+    a.addEventListener("click", function(e){
+      e.preventDefault();
+      var id = href.slice(1);
+      var home = document.getElementById("view-home");
+      if (home && home.hidden) {
+        /* Coming from a sub-view: return home first (clean URL, no
+           hash), then scroll once the home view is shown. */
+        try {
+          history.pushState(null, "", location.pathname + location.search);
+          window.dispatchEvent(new HashChangeEvent("hashchange"));
+        } catch (err) { location.hash = ""; }
+        setTimeout(function(){ scrollToId(id); }, 80);
+      } else {
+        scrollToId(id);
+      }
+    });
+  });
+
+  /* ---------- theme picker (Profile & settings): Ice / Night ----------
+     The choice is kept on this device in localStorage; the small script
+     in <head> applies it before first paint on every load, and this
+     block keeps the two buttons in step with the active theme. */
+  var iceBtn = document.getElementById("theme-opt-ice");
+  var nightBtn = document.getElementById("theme-opt-night");
+  function syncThemeButtons(){
+    var night = document.documentElement.getAttribute("data-theme") === "night";
+    if (iceBtn) iceBtn.setAttribute("aria-pressed", String(!night));
+    if (nightBtn) nightBtn.setAttribute("aria-pressed", String(night));
+  }
+  function setTheme(name){
+    if (name === "night") document.documentElement.setAttribute("data-theme", "night");
+    else document.documentElement.removeAttribute("data-theme");
+    try { localStorage.setItem("lofi_theme", name); } catch (e) {}
+    syncThemeButtons();
+  }
+  if (iceBtn) iceBtn.addEventListener("click", function(){ setTheme("ice"); });
+  if (nightBtn) nightBtn.addEventListener("click", function(){ setTheme("night"); });
+  syncThemeButtons();
+
+  /* ---------- header sticker folder: same open/close pattern as the
+     user menu (click toggles, outside click or Escape closes) ---------- */
+  var folderBtn = document.getElementById("sticker-folder-btn");
+  var folderPanel = document.getElementById("sticker-folder-panel");
+  function closeFolder(){
+    if (folderPanel) folderPanel.hidden = true;
+    if (folderBtn) folderBtn.setAttribute("aria-expanded", "false");
+  }
+  if (folderBtn && folderPanel) {
+    folderBtn.addEventListener("click", function(e){
+      e.stopPropagation();
+      var open = folderPanel.hidden;
+      folderPanel.hidden = !open;
+      folderBtn.setAttribute("aria-expanded", String(open));
+    });
+    folderPanel.addEventListener("click", function(e){ e.stopPropagation(); });
+    document.addEventListener("click", function(e){
+      if (!folderPanel.hidden && !folderPanel.contains(e.target)) closeFolder();
+    });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeFolder(); });
+    folderPanel.querySelectorAll("a").forEach(function(a){
+      a.addEventListener("click", function(){ closeFolder(); });
+    });
+  }
+
+  /* ---------- sign-in sheet: email section expands on demand ---------- */
+  var reveal = document.getElementById("email-reveal");
+  var section = document.getElementById("email-section");
+  if (reveal && section) {
+    reveal.addEventListener("click", function(){
+      var open = section.hidden;
+      section.hidden = !open;
+      reveal.setAttribute("aria-expanded", String(open));
+      reveal.classList.toggle("open", open);
+      if (open) {
+        var input = document.getElementById("signin-email");
+        if (input) input.focus();
+      }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

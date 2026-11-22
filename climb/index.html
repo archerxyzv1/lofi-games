@@ -1,0 +1,2727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/lofigame/assets/favicon.png" />
+<title>Lofi Climb</title>
+<style>
+  :root{
+    /* the logo's own stock: saturated ice blue, electric cyan, deep outline blue */
+    --blue:#0057ff;
+    --blue-deep:#003ecb;
+    --blue-dark:#002a7a;
+    --navy:#041e57;
+    --cyan:#00b7ff;
+    --ice:#59d8ff;
+    --ice-pale:#c9f1fc;
+    --ice-soft:#e8f6ff;
+    --ink:#0a2a5e;
+    --muted:#3d5a8a;
+    --gold:#ffc21f;
+    --gold-deep:#b97e06;
+    --pink:#ff5c8a;
+    --radius:16px;
+    /* chunky pixel facets laid over every ice button */
+    --facet:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 7px, rgba(255,255,255,0) 7px 14px),
+      repeating-linear-gradient(0deg, rgba(0,42,122,.08) 0 7px, rgba(0,42,122,0) 7px 14px);
+  }
+  html{ background:var(--navy); }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(760px 300px at 10% -60px, rgba(89,216,255,.5), transparent 70%),
+      radial-gradient(860px 340px at 92% -40px, rgba(0,183,255,.38), transparent 70%),
+      radial-gradient(600px 500px at 50% 115%, rgba(0,87,255,.5), transparent 70%),
+      linear-gradient(180deg,#031a4f 0%, #06389f 34%, #0057d9 62%, #0083e8 100%);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:1280px; margin:0 auto; padding:20px 16px 44px; position:relative; }
+  /* Desktop / PC sizing lives in a @media (min-width:761px) block at
+     the END of this stylesheet, after every base rule it adjusts:
+     placed here, the base .head / .logo / .stage-wrap / .touch rules
+     below would override it at equal specificity and the desktop
+     frame would blow past one screen again. */
+  /* vapour wisps */
+  .vapour{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .vapour span{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(190,235,255,.5), rgba(190,235,255,0));
+    filter:blur(6px);
+  }
+  .vapour span:nth-child(1){ width:420px;height:120px; left:-80px; top:16%; animation:drift 26s linear infinite; }
+  .vapour span:nth-child(2){ width:520px;height:140px; left:55%; top:52%; animation:drift 34s linear infinite reverse; }
+  .vapour span:nth-child(3){ width:340px;height:100px; left:30%; top:78%; animation:drift 30s linear infinite; }
+  @keyframes drift{ from{ transform:translateX(-30px);} to{ transform:translateX(70px);} }
+  @media (prefers-reduced-motion: reduce){
+    .vapour span{ animation:none !important; }
+  }
+  .head{ position:relative; z-index:1; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .head h1{ margin:0; line-height:0; }
+  /* The game's own logo art: icy bubble letters, transparency kept. */
+  .logo{ width:min(430px,92vw); height:auto; display:block; filter:drop-shadow(0 4px 0 rgba(0,42,122,.45)) drop-shadow(0 12px 20px rgba(0,10,40,.4)); }
+  .head p{ margin:8px 0 0; color:#d6e9ff; font-size:16px; font-weight:600; line-height:1.45; max-width:560px; text-shadow:0 1px 3px rgba(0,20,70,.5); }
+  .head-actions{ flex:none; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  /* ---------- site chrome: a compact hub-matching header (back,
+     brand, profile pill) and a slim footer, both outside the stage.
+     White ice pills on the navy sky, same family as the HUD chips. */
+  .site-head{
+    position:relative; z-index:2;
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:18px;
+  }
+  .back-btn{
+    flex:none; display:inline-flex; align-items:center; gap:7px;
+    min-height:40px; padding:8px 16px 8px 12px;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark); border-radius:999px;
+    box-shadow:0 3px 0 var(--blue-dark);
+    color:var(--ink); font-weight:800; font-size:15px; line-height:1; text-decoration:none;
+  }
+  .back-btn svg{ width:17px; height:17px; display:block; }
+  .back-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark); }
+  .back-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .site-brand{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:20px;
+    color:#fff; text-decoration:none; letter-spacing:.01em; line-height:1;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+  }
+  .site-brand img{
+    width:34px; height:34px; flex:none; border-radius:50%; object-fit:cover;
+    background:#fff; border:2px solid var(--blue-dark); box-shadow:0 2px 0 var(--blue-dark);
+  }
+  .site-brand:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; border-radius:999px; }
+  .profile-pill{
+    margin-left:auto; flex:none; display:inline-flex; align-items:center; gap:8px;
+    max-width:48vw; min-height:40px; padding:5px 14px 5px 6px;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark); border-radius:999px;
+    box-shadow:0 3px 0 var(--blue-dark);
+    color:var(--ink); font-weight:800; font-size:14px; line-height:1; text-decoration:none;
+  }
+  .profile-pill img{
+    width:28px; height:28px; flex:none; border-radius:50%; object-fit:cover; display:block;
+    background:var(--ice-soft); border:1.5px solid #8fd0ff;
+  }
+  .profile-pill span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .profile-pill:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark); }
+  .profile-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .site-foot{
+    position:relative; z-index:1; margin-top:30px; padding-top:16px;
+    border-top:2px solid rgba(201,241,252,.35);
+    display:flex; align-items:center; justify-content:space-between; gap:10px 18px; flex-wrap:wrap;
+    color:#d6e9ff; font-size:13.5px;
+  }
+  .site-foot .foot-name{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15px; color:#fff;
+    text-shadow:0 1px 0 rgba(0,42,122,.5);
+  }
+  .site-foot .foot-name img{
+    width:24px; height:24px; flex:none; border-radius:50%;
+    object-fit:cover; object-position:top center;
+    background:#e8f6ff; border:1.5px solid var(--ice);
+  }
+  .site-foot nav{ display:flex; gap:18px; flex-wrap:wrap; }
+  .site-foot a{ color:#d6e9ff; text-decoration:none; font-weight:600; }
+  .site-foot a:hover{ color:#fff; text-decoration:underline; }
+  .site-foot a:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; border-radius:4px; }
+  @media (max-width:560px){
+    .site-head{ gap:9px; margin-bottom:14px; }
+    .back-btn{ min-height:38px; padding:7px 13px 7px 10px; font-size:14px; }
+    .site-brand{ font-size:17px; }
+    .site-brand img{ width:30px; height:30px; }
+    .profile-pill{ max-width:44vw; min-height:38px; font-size:13px; padding-right:11px; }
+    .profile-pill img{ width:25px; height:25px; }
+  }
+  /* ---------- pixel-ice buttons: saturated ice gradient, chunky pixel
+     facets, a blocky bevel and a hard offset shadow in outline blue.
+     Shared by every button on the page so the whole UI is one family. */
+  .pix{
+    background:var(--facet), linear-gradient(180deg,#8fe8ff 0%,#29c5ff 48%,#0095f2 100%);
+    border:3px solid var(--blue-dark); color:#fff;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+    box-shadow:0 5px 0 var(--blue-dark),
+      inset 0 3px 0 rgba(255,255,255,.9),
+      inset 3px 0 0 rgba(255,255,255,.35),
+      inset -3px 0 0 rgba(0,42,122,.22),
+      inset 0 -7px 0 rgba(0,42,122,.28);
+  }
+  /* Sound: one small round frost icon button, no text pill */
+  .icon-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .icon-btn svg{ width:23px; height:23px; display:block; }
+  .icon-btn .slash{ display:none; }
+  .icon-btn.muted{ color:#dcefff; }
+  .icon-btn.muted .waves{ display:none; }
+  .icon-btn.muted .slash{ display:block; }
+  .icon-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .icon-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* header settings cube */
+  .cube-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .cube-btn svg{ width:23px; height:23px; display:block; }
+  .cube-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .cube-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* Stage wrap: holds the game, the snow-icicle borders on its frame
+     and the ice rocks at its bottom corners */
+  .stage-wrap{ position:relative; z-index:1; margin-top:96px; margin-bottom:62px;
+    width:min(100%, calc((100vh - 340px) * 3 / 4));
+    width:min(100%, calc((100dvh - 340px) * 3 / 4));
+    margin-left:auto; margin-right:auto; }
+  /* Peeking sticker: only Lofi's head and raised paw show above the
+     game's top-right corner, tucked behind the snow ledge. The clip
+     box itself never moves: only the picture inside it bobs, and the
+     picture sits a few px inside the box on every side so its white
+     sticker outline is never clipped. The box's bottom edge lands in
+     the solid snow band of the top ledge, so the cut never shows. */
+  .peek{
+    position:absolute; right:20px; top:-96px; z-index:0;
+    width:108px; height:56px; overflow:hidden; pointer-events:none;
+  }
+  .peek img{
+    display:block; width:100px; height:auto; margin:4px auto 0;
+    transform-origin:50% 100%;
+    animation:peekBob 3.4s ease-in-out infinite;
+    filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 -2px 0 #fff);
+  }
+  @keyframes peekBob{
+    0%,100%{ transform:translateY(7px) rotate(-3deg); }
+    50%{ transform:translateY(0) rotate(-3deg); }
+  }
+  /* snow-icicle borders off the supplied sheet, laid on the game frame */
+  .snow-edge{
+    position:absolute; left:-8px; right:-8px; z-index:3; pointer-events:none;
+    background-repeat:no-repeat; background-size:100% 100%;
+  }
+  .snow-edge-top{ top:-56px; height:58px; background-image:url(/lofigame/assets/snow-86cf839d.webp); }
+  .snow-edge-bottom{ bottom:-48px; height:58px; background-image:url(/lofigame/assets/snow-22495d8e.webp); }
+  /* ice rocks off the supplied sheet, piled at the frame's bottom corners */
+  .stage-rock{
+    position:absolute; bottom:-62px; z-index:3; pointer-events:none;
+    filter:drop-shadow(0 5px 7px rgba(2,20,70,.4));
+  }
+  .rock-bl{ left:-14px; width:138px; }
+  .rock-br{ right:-14px; width:106px; }
+  /* In-game HUD: score chips inside the display corners, like a real game */
+  .hud-in{
+    position:absolute; top:10px; left:10px; right:10px; z-index:4;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+    pointer-events:none;
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  /* Score / XP chips belong to the live run only: they are gone on the
+     start screen and on the Game Over screen, never floating over panels */
+  .hud-in.hud-hidden, .moon-meter.hud-hidden{ opacity:0; visibility:hidden; }
+  .hud-group{ display:flex; gap:6px; flex-wrap:wrap; }
+  .hud-group.right{ justify-content:flex-end; }
+  .chip{
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark); border-radius:10px;
+    box-shadow:0 3px 0 var(--blue-dark);
+    padding:5px 11px; font-size:14px; font-weight:800; line-height:1.15;
+    font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;
+  }
+  .chip .unit{ font-size:11px; font-weight:700; color:var(--muted); }
+  .chip.urgent{ color:#c22e1f; border-color:#8f2d1d; background:#fff1ec; box-shadow:0 3px 0 #8f2d1d; }
+  /* the way-to-the-moon meter: a slim ice track under the HUD chips */
+  .moon-meter{
+    position:absolute; top:52px; left:50%; transform:translateX(-50%); z-index:4;
+    width:min(430px,64%); pointer-events:none; text-align:center;
+    filter:drop-shadow(0 0 7px rgba(89,216,255,.6));
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  .mm-label{
+    display:block; font-size:10px; font-weight:800; letter-spacing:.14em;
+    color:#eaf7ff; text-shadow:0 1px 3px rgba(0,20,70,.65); margin-bottom:4px;
+  }
+  .mm-track{
+    height:11px; border-radius:7px; border:2px solid var(--blue-dark);
+    background:rgba(4,30,87,.55); box-shadow:0 2px 0 rgba(0,42,122,.6), inset 0 1px 2px rgba(0,10,40,.5);
+    overflow:hidden;
+  }
+  .mm-fill{
+    height:100%; width:0%;
+    background:var(--facet), linear-gradient(90deg,#29c5ff,#8fe8ff);
+    border-radius:5px;
+    transition:width .3s ease;
+  }
+  /* the meter spans the whole way to the moon (50,000 m): a tick at
+     every level end, gold once that level is done, and the moon
+     marker at the far right end of the track */
+  .mm-wrap{ position:relative; }
+  .mm-tick{
+    position:absolute; top:-2px; width:2px; height:15px; margin-left:-1px;
+    border-radius:1px; background:rgba(255,255,255,.75);
+    box-shadow:0 1px 2px rgba(0,20,70,.45);
+  }
+  .mm-tick.done{ background:var(--gold); }
+  .mm-moon{
+    position:absolute; top:-15px; transform:translateX(-50%);
+    font-size:12px; line-height:1;
+    filter:drop-shadow(0 1px 2px rgba(0,20,70,.65));
+  }
+  .mm-level{ margin-top:4px; margin-bottom:0; letter-spacing:.07em; }
+  /* start-of-run reminder: a small ice card under the moon meter that
+     opens every run with the goal and the controls, then fades away.
+     It never takes input, so the first bounces play right under it. */
+  .remind{
+    position:absolute; top:96px; left:50%; transform:translateX(-50%); z-index:5;
+    width:min(430px,86%); text-align:center; pointer-events:none;
+    background:rgba(255,255,255,.96); border:2.5px solid var(--blue-dark); border-radius:12px;
+    box-shadow:0 4px 0 var(--blue-dark);
+    padding:10px 14px 9px;
+    opacity:1; transition:opacity .45s ease;
+  }
+  .remind[hidden]{ display:none; }
+  .remind.hide{ opacity:0; }
+  .remind p{ margin:0; }
+  .remind-goal{
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif;
+    font-weight:800; font-size:16.5px; line-height:1.25; color:var(--ink);
+  }
+  .remind-how{ margin-top:3px !important; font-size:12.5px; font-weight:600; line-height:1.4; color:var(--muted); }
+  @media (max-width:560px){
+    .remind{ top:84px; padding:8px 10px 7px; }
+    .remind-goal{ font-size:14.5px; }
+    .remind-how{ font-size:11.5px; }
+  }
+  /* level-up banner: a gold pill that pops under the meter each time
+     a level end is crossed, then fades; it never takes input */
+  .levelup{
+    position:absolute; top:150px; left:50%; transform:translateX(-50%); z-index:6;
+    pointer-events:none; text-align:center; white-space:nowrap;
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d);
+    border:2.5px solid var(--gold-deep); border-radius:999px;
+    box-shadow:0 4px 0 rgba(185,126,6,.8), 0 10px 22px rgba(0,10,40,.35), 0 0 20px rgba(255,211,77,.55);
+    padding:9px 20px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:#7a5200;
+    opacity:1; transition:opacity .3s ease, transform .3s ease;
+  }
+  .levelup[hidden]{ display:none; }
+  .levelup.hide{ opacity:0; transform:translateX(-50%) translateY(-8px); }
+  @media (max-width:560px){
+    .levelup{ top:126px; font-size:14.5px; padding:7px 15px; }
+  }
+  /* Stage: the climb plays in a tall portrait 3:4 frame (600x800),
+     so far more of the vertical climb is visible at once; same ice
+     frame family as the other games */
+  .stage{
+    position:relative; z-index:2;
+    border-radius:18px; overflow:hidden;
+    border:4px solid var(--blue-dark);
+    box-shadow:0 8px 0 var(--blue-dark), 0 26px 44px rgba(0,10,40,.45);
+    background:linear-gradient(180deg,#bfe0f7 0%, #dceefb 60%, #eef7fd 100%);
+  }
+  canvas{ display:block; width:100%; height:auto; aspect-ratio:3/4; touch-action:none; }
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    padding:18px; text-align:center;
+    background:rgba(190,228,255,.45);
+    backdrop-filter:blur(2px);
+  }
+  .overlay[hidden]{ display:none; }
+  .panel{
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:16px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.4);
+    padding:22px 24px; max-width:440px; width:100%;
+  }
+  .panel h2{ margin:0 0 6px; font-size:24px; font-weight:800; letter-spacing:-.01em; }
+  .panel p{ margin:0 0 14px; color:var(--muted); font-size:15px; line-height:1.5; }
+  /* snow-icicle strip laid across a panel's top edge */
+  .panel-snow{
+    position:absolute; top:-17px; left:-10px; right:-10px; height:38px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  /* primary button (Climb again, Resume, …): pixel ice */
+  .btn{
+    appearance:none; cursor:pointer; position:relative;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    min-height:50px; padding:12px 28px; border-radius:12px;
+    font-weight:800; font-size:17px;
+  }
+  .btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* ---------- Game Over + Pause: one simple frost panel. Clean white
+     ice block, the run's numbers in three plain tiles, and the action
+     button flanked by ice rocks off the supplied sheet. ---------- */
+  #overOverlay{ background:rgba(3,22,70,.45); backdrop-filter:blur(3px); }
+  .ice-panel{ position:relative; text-align:center; }
+  .ice-panel h2{ color:var(--ink); }
+  .ice-sub{ margin:0 0 16px; color:var(--muted); font-size:14.5px; line-height:1.45; }
+  /* round pink close button, top-right of the pause panel */
+  .ice-x{
+    position:absolute; top:10px; right:10px; z-index:2;
+    width:34px; height:34px; border-radius:10px; cursor:pointer;
+    border:2.5px solid var(--blue-dark); color:#fff;
+    background:var(--facet), linear-gradient(180deg,#ff8fb8,#f43f7f);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6);
+    font-size:15px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .ice-x:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6); }
+  .ice-x:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .over-panel{ padding:30px 24px 22px; }
+  .over-avatar{
+    width:86px; height:86px; margin:4px auto 10px; border-radius:50%;
+    background:radial-gradient(circle at 50% 30%, #ffffff 0%, #c9f1fc 62%, #59d8ff 100%);
+    border:3px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 -8px 14px rgba(0,149,242,.45);
+    display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
+  }
+  .over-avatar img{ width:78px; height:auto; display:block; transform:translateY(6px); }
+  .over-panel h2{ margin:0 0 4px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .over-sub{ margin:0 0 16px; color:var(--muted); font-size:14px; line-height:1.45; }
+  .result-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:0 0 18px; }
+  .result-grid div{
+    background:var(--ice-soft); border:2px solid #8fd0ff; border-radius:12px; padding:12px 6px 10px;
+    box-shadow:inset 0 2px 0 #fff, inset 0 -6px 10px rgba(0,149,242,.14);
+  }
+  .result-grid small{ display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .result-grid strong{ display:block; font-size:22px; margin-top:3px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .result-grid strong .unit{ font-size:13px; font-weight:700; color:var(--muted); }
+  .newbest{ display:none; margin:0 auto 14px; font-weight:800; color:#7a5200; font-size:13px; }
+  .newbest.show{
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d); border:2px solid var(--gold-deep); border-radius:999px;
+    padding:6px 14px; box-shadow:0 2px 0 rgba(185,126,6,.8);
+  }
+  /* levels finished in the run that just ended, with their XP */
+  .over-levels{
+    margin:0 0 14px; padding:8px 12px;
+    background:#fff8e1; border:2px solid #f0d48a; border-radius:10px;
+    font-size:13.5px; font-weight:700; line-height:1.45; color:#7a5200;
+  }
+  .over-levels[hidden]{ display:none; }
+  /* the action row: ice rocks piled on both sides of the button */
+  .over-actions{ display:flex; align-items:flex-end; justify-content:center; gap:8px; }
+  .mini-rock{ width:58px; height:auto; flex:none; pointer-events:none; filter:drop-shadow(0 3px 4px rgba(0,20,70,.3)); }
+  .mini-rock.flip{ transform:scaleX(-1); }
+  .over-hint{ margin:12px 0 0; font-size:12.5px; color:var(--muted); }
+  /* touch controls: pixel-ice blocks under the game — two hold-to-steer
+     arrows, the rocket and Pause, same family as the other games */
+  .touch{
+    position:relative; z-index:1;
+    display:flex; gap:10px; margin-top:12px;
+    width:min(100%, calc((100vh - 340px) * 3 / 4));
+    width:min(100%, calc((100dvh - 340px) * 3 / 4));
+    margin-left:auto; margin-right:auto;
+  }
+  .touch button{
+    flex:1; min-height:58px; border-radius:12px; cursor:pointer; position:relative; overflow:hidden;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    font-weight:800; font-size:17px; padding-top:9px;
+    user-select:none; -webkit-user-select:none; touch-action:none;
+  }
+  .touch button.steer{ flex:1.35; font-size:22px; }
+  /* snow cap with drips resting on each block's top edge */
+  .touch button::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:12px; pointer-events:none;
+    background:
+      radial-gradient(13px 8px at 14% 100%, #ffffff 98%, transparent),
+      radial-gradient(17px 10px at 40% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 63% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 10px at 88% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eaf7ff);
+  }
+  .touch button:active{ transform:translateY(3px); }
+  .touch button.held{ transform:translateY(3px); filter:brightness(1.12); }
+  /* How to play: one tidy guide under the game */
+  .guide{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 14px;
+  }
+  .guide::before, .ach::before{
+    content:""; position:absolute; top:-15px; left:12px; right:12px; height:26px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  .guide h2{ margin:0 0 4px; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .guide > p{ margin:0 0 14px; color:var(--muted); font-size:14px; }
+  .guide ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px 22px; }
+  .guide li{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #cdeaff; font-size:14px; }
+  .guide li .keys-inline{ flex:none; display:inline-flex; gap:4px; min-width:86px; }
+  .guide kbd{
+    font-family:inherit; background:var(--ice-soft); border:1.5px solid #8fd0ff; border-bottom-width:3px;
+    border-radius:6px; padding:2px 7px; font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .guide li span{ color:var(--ink); font-weight:600; }
+  @media (max-width:560px){
+    .guide ul{ grid-template-columns:1fr; }
+  }
+  /* achievements */
+  .ach{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 20px;
+  }
+  .ach-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .ach-head h2{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .ach ul{ list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .ach li{
+    display:flex; align-items:center; gap:12px;
+    border:2px solid #cdeaff; border-radius:12px; padding:12px 14px; min-height:52px;
+    background:rgba(255,255,255,.65);
+  }
+  .ach li .dot{
+    flex:none; width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); border:2px solid #8fd0ff; color:var(--muted); font-size:16px; font-weight:800;
+  }
+  .ach li.unlocked .dot{ background:#e7f8ef; border-color:#9adbb6; color:#149653; }
+  .ach li .txt{ flex:1; min-width:0; }
+  .ach li .txt strong{ display:block; font-size:15px; }
+  .ach li .txt span{ display:block; font-size:13px; color:var(--muted); margin-top:1px; }
+  .ach li .pts{ flex:none; font-weight:800; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .ach li.unlocked .pts{ color:var(--gold-deep); }
+  .ach li .state{ flex:none; font-size:12px; font-weight:700; color:var(--muted); }
+  .ach li.unlocked .state{ color:#149653; }
+  /* levels panel: same card family as achievements; the next level
+     to finish wears gold, finished levels read like unlocked rows,
+     and levels past the current one sit dimmed */
+  .lvl-total{ font-size:14px; font-weight:800; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .lvl-total strong{ color:var(--gold-deep); }
+  .ach li.current{ border-color:var(--gold-deep); background:linear-gradient(180deg,#fffbe8,#ffedb3); }
+  .ach li.current .dot{ background:#ffe9a3; border-color:var(--gold-deep); color:#7a5200; }
+  .ach li.current .state{ color:#7a5200; }
+  .ach li.locked{ opacity:.62; }
+  /* toast */
+  .toast{
+    position:fixed; left:50%; bottom:22px; transform:translate(-50%, 90px);
+    z-index:20; background:var(--blue-dark); color:#fff; border:2.5px solid var(--ice); border-radius:12px;
+    box-shadow:0 5px 0 rgba(0,10,40,.6);
+    padding:13px 18px; font-size:14px; font-weight:600; max-width:min(92vw,440px); text-align:center;
+    transition:transform .3s ease; pointer-events:none;
+  }
+  .toast.show{ transform:translate(-50%, 0); }
+  .toast b{ color:#ffd34d; }
+  /* chunky game headings */
+  .panel h2, .guide h2, .ach-head h2{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.01em; }
+  /* ---------- start screen: the stacked logo over a big pixel-ice
+     PLAY block with a snow cap and icicles ---------- */
+  .panel.start-panel{
+    background:transparent; border:none; box-shadow:none; padding:4px;
+    max-width:560px;
+  }
+  .start-logo{
+    display:block; margin:0 auto; width:auto;
+    height:clamp(150px, 36vw, 252px);
+    filter:drop-shadow(0 5px 0 rgba(0,42,122,.4)) drop-shadow(0 12px 20px rgba(0,10,40,.35));
+  }
+  .play-pill{
+    position:relative; cursor:pointer; margin-top:16px;
+    min-width:min(240px,74vw); min-height:60px; padding:16px 42px 14px;
+    border-radius:14px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800;
+    font-size:27px; letter-spacing:.16em;
+    display:inline-flex; align-items:center; justify-content:center; gap:13px;
+  }
+  /* snow cap resting on the block, with little drips */
+  .play-pill::before{
+    content:""; position:absolute; top:-3px; left:10px; right:10px; height:15px; pointer-events:none;
+    background:
+      radial-gradient(13px 9px at 12% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 11px at 34% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 55% 100%, #ffffff 98%, transparent),
+      radial-gradient(19px 12px at 76% 100%, #ffffff 98%, transparent),
+      radial-gradient(14px 9px at 93% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eef8ff);
+    border-radius:14px 14px 0 0;
+  }
+  /* icicles hanging off the block's underside */
+  .play-pill::after{
+    content:""; position:absolute; left:22%; right:22%; bottom:-10px; height:11px; pointer-events:none;
+    background:linear-gradient(180deg,#29c5ff,#c9f1fc);
+    clip-path:polygon(0 0, 100% 0, 92% 70%, 84% 12%, 74% 100%, 64% 18%, 54% 78%, 45% 10%, 34% 92%, 25% 16%, 15% 66%, 7% 12%);
+  }
+  .play-pill:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .play-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:3px; }
+  .play-tri{
+    width:25px; height:25px; flex:none; background:#ffffff;
+    clip-path:polygon(24% 16%, 24% 84%, 86% 50%);
+    filter:drop-shadow(0 2px 0 rgba(0,42,122,.45));
+  }
+  /* ---------- settings panel: saturated ice frame, stitched white card ---------- */
+  .settings-overlay{
+    position:fixed; inset:0; z-index:30;
+    background:rgba(3,22,70,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    overflow-y:auto;
+  }
+  .settings-overlay[hidden]{ display:none !important; }
+  .settings-panel{
+    position:relative; width:min(94vw,404px); margin:auto;
+    background:var(--facet), linear-gradient(180deg,#2f9dff 0%,#0057ff 58%,#003ecb 100%);
+    border:3px solid var(--blue-dark); border-radius:20px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.5);
+    padding:16px 14px 14px;
+  }
+  /* snow resting on the panel's top edge */
+  .settings-panel::before{
+    content:""; position:absolute; top:-2px; left:14px; right:14px; height:14px;
+    background:
+      radial-gradient(18px 11px at 10% 0, #ffffff 98%, transparent),
+      radial-gradient(24px 13px at 36% 0, #ffffff 98%, transparent),
+      radial-gradient(20px 12px at 63% 0, #ffffff 98%, transparent),
+      radial-gradient(26px 13px at 90% 0, #ffffff 98%, transparent);
+    pointer-events:none;
+  }
+  .settings-panel h2{
+    margin:2px 0 12px; text-align:center;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-size:30px; font-weight:800; letter-spacing:.06em;
+    color:var(--gold);
+    text-shadow:0 2px 0 #b97e06, 0 4px 0 rgba(0,42,122,.6), 2px 0 0 rgba(0,42,122,.4), -2px 0 0 rgba(0,42,122,.4);
+  }
+  .set-inner{
+    background:#f4fbff; border:2px dashed #7fb2f0; border-radius:14px;
+    padding:18px 16px 16px;
+  }
+  .set-row{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .set-row.split{ justify-content:space-between; gap:8px; flex-wrap:wrap; row-gap:6px; }
+  .set-ico{ flex:none; width:30px; display:flex; align-items:center; justify-content:center; color:var(--blue); }
+  .set-ico svg{ width:26px; height:26px; display:block; }
+  .set-label{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue); }
+  .tips-wrap{ display:inline-flex; align-items:center; gap:9px; }
+  /* icy volume sliders with a chunky ice knob */
+  input[type=range].vol{
+    -webkit-appearance:none; appearance:none; flex:1; min-width:0; height:18px;
+    border-radius:8px; border:2.5px solid var(--blue-dark); background:#bcd9f7; outline:none; cursor:pointer;
+  }
+  input[type=range].vol::-webkit-slider-runnable-track{ background:transparent; }
+  input[type=range].vol::-webkit-slider-thumb{
+    -webkit-appearance:none; width:32px; height:32px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  input[type=range].vol::-moz-range-track{ height:18px; border-radius:8px; background:#bcd9f7; }
+  input[type=range].vol::-moz-range-progress{ height:18px; border-radius:8px; background:var(--cyan); }
+  input[type=range].vol::-moz-range-thumb{
+    width:28px; height:28px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  /* game-tips switch: a chunky ice block with a green check when on */
+  .switch{
+    flex:none; width:42px; height:42px; border-radius:11px; cursor:pointer;
+    color:transparent;
+    background:linear-gradient(180deg,#eef6fb,#c9deee);
+    border:2.5px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    font-size:21px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .switch.on{ color:#149653; background:var(--facet), linear-gradient(180deg,#ffffff,#b8f4d2); }
+  .switch:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 #fff; }
+  .notice-btn{
+    position:relative; cursor:pointer; border:none; background:none; padding:6px 28px 6px 6px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue);
+  }
+  .nbadge{
+    position:absolute; top:-7px; right:2px; min-width:19px; height:19px; padding:0 4px;
+    border-radius:999px; background:#e23c3c; color:#fff; border:1.5px solid #fff;
+    font-size:11px; font-weight:800; line-height:17px; text-align:center;
+  }
+  .notice-text{
+    margin:0 0 14px; background:#fff8e1; border:1px solid #f0d48a; border-radius:12px;
+    padding:10px 12px; font-size:13.5px; line-height:1.5; color:#6b5310;
+  }
+  .wallet-status{ margin:0 0 12px; font-size:13px; line-height:1.5; color:var(--muted); min-height:0; }
+  .wallet-status:empty{ display:none; }
+  .set-actions{ display:flex; gap:12px; }
+  .set-connect, .set-ok{
+    flex:1; min-height:52px; border-radius:12px; cursor:pointer;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:18px; letter-spacing:.02em;
+  }
+  .set-connect{
+    background:var(--facet), linear-gradient(180deg,#ff9a86,#f2604c); color:#fff;
+    border:3px solid #8f2d1d; box-shadow:0 4px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55);
+    text-shadow:0 1px 2px rgba(143,45,29,.45);
+  }
+  .set-connect.connected{ font-size:14.5px; letter-spacing:0; }
+  .set-ok{
+    background:var(--facet), linear-gradient(180deg,#ffd964,#f5b81d); color:#5b3d00;
+    border:3px solid #8a5f04; box-shadow:0 4px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6);
+  }
+  .set-connect:active, .set-ok:active{ transform:translateY(2px); }
+  .set-connect:active{ box-shadow:0 2px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55); }
+  .set-ok:active{ box-shadow:0 2px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6); }
+  @media (max-width:560px){
+    .stage-wrap{ margin-top:80px; margin-bottom:52px; }
+    .peek{ right:10px; top:-78px; width:88px; height:46px; }
+    .peek img{ width:80px; }
+    .snow-edge-top{ top:-46px; height:46px; }
+    .snow-edge-bottom{ bottom:-38px; height:46px; }
+    .stage-rock{ bottom:-50px; }
+    .rock-bl{ left:-8px; width:96px; }
+    .rock-br{ right:-8px; width:76px; }
+    .hud-in{ top:7px; left:7px; right:7px; }
+    .chip{ font-size:12px; padding:4px 8px; gap:4px; }
+    .chip.best{ display:none; }
+    .moon-meter{ top:44px; width:72%; }
+    .mm-label{ font-size:8.5px; letter-spacing:.1em; }
+    .mm-track{ height:9px; }
+    .overlay{ padding:8px; }
+    .panel{ padding:12px 14px; border-radius:14px; }
+    .panel h2{ font-size:18px; margin-bottom:4px; }
+    .panel p{ font-size:13px; line-height:1.4; margin-bottom:8px; }
+    .btn{ min-height:44px; padding:8px 22px; font-size:15px; }
+    .result-grid{ margin-bottom:10px; }
+    .result-grid div{ padding:7px 4px; }
+    .result-grid strong{ font-size:16px; }
+    .over-panel{ padding:20px 14px 14px; }
+    .over-panel h2{ font-size:24px; }
+    .over-avatar{ width:64px; height:64px; margin-bottom:6px; }
+    .over-avatar img{ width:58px; }
+    .over-sub{ font-size:12.5px; margin-bottom:10px; }
+    .over-levels{ margin-bottom:10px; font-size:12.5px; padding:6px 9px; }
+    .over-hint{ display:none; }
+    .mini-rock{ width:42px; }
+    .panel-snow{ height:30px; top:-13px; }
+    .touch{ gap:7px; }
+    .touch button{ min-height:54px; font-size:15px; }
+    .touch button.steer{ font-size:20px; }
+    /* Start screen on phones: the stacked logo and the PLAY block
+       shrink until both sit fully inside the 3:4 portrait frame, clear of the
+       snow border and the corner rocks */
+    #startOverlay{ padding:6px; }
+    .panel.start-panel{ padding:0; }
+    .start-logo{ height:clamp(118px, 33vw, 168px); }
+    .play-pill{
+      margin-top:10px; min-width:0; min-height:50px;
+      padding:12px 30px 11px; font-size:21px; letter-spacing:.13em; gap:10px;
+    }
+    .play-tri{ width:20px; height:20px; }
+  }
+  /* ---------- Game Over on phones: the whole panel has to live inside
+     the stage, so at narrow widths it sheds the avatar medallion and
+     tightens every row until the title, the three result tiles and the
+     Climb again button all sit inside the frame, clear of the ice
+     rocks piled at the frame's bottom corners. When the New best badge
+     shows, the flavour line under the title steps aside for it. */
+  @media (max-width:760px){
+    #overOverlay{ padding:6px; }
+    .over-panel{ padding:11px 16px 10px; }
+    .over-avatar{ display:none; }
+    .over-panel h2{ font-size:22px; margin-bottom:2px; }
+    .over-sub{ font-size:12.5px; margin-bottom:6px; }
+    .over-panel:has(.newbest.show) .over-sub{ display:none; }
+    .newbest{ margin-bottom:6px; padding:5px 12px; font-size:12px; }
+    .result-grid{ gap:6px; margin-bottom:8px; }
+    .result-grid div{ padding:6px 4px 5px; }
+    .result-grid small{ font-size:9.5px; }
+    .result-grid strong{ font-size:15px; margin-top:2px; }
+    .over-actions .btn{ min-height:40px; padding:8px 20px; font-size:15px; }
+    .mini-rock{ width:34px; }
+    .over-hint{ display:none; }
+  }
+  @media (max-width:400px){
+    #overOverlay{ padding:4px; }
+    .over-panel{ padding:10px 12px 8px; }
+    .over-panel h2{ font-size:19px; }
+    .over-sub{ font-size:11.5px; margin-bottom:6px; }
+    .newbest{ margin-bottom:6px; padding:3px 10px; font-size:11.5px; }
+    .result-grid{ margin-bottom:8px; }
+    .result-grid div{ padding:5px 3px 4px; }
+    .result-grid small{ font-size:9px; }
+    .result-grid strong{ font-size:14px; }
+    .over-actions .btn{ min-height:36px; padding:6px 16px; font-size:14px; }
+    .mini-rock{ width:27px; }
+    .panel-snow{ height:24px; top:-10px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .toast{ transition:none; }
+    .remind{ transition:none; }
+    .levelup{ transition:none; }
+    .btn:active{ transform:none; }
+    .peek img{ animation:none; }
+    .mm-fill{ transition:none; }
+  }
+  /* ---------- Mobile header: the wide logo art capped at the same
+     210px as desktop (and as Lofi Rush's mobile logo), and the header
+     rows tightened, so the logo no longer spans the full screen width
+     and the tagline, header buttons and game frame sit near the top
+     of the first screen. Only the header changes here: the stage,
+     controls and panels keep their mobile rules above. ---------- */
+  @media (max-width:760px){
+    .logo{ width:min(210px, 92vw); }
+    .head{ align-items:center; margin-bottom:10px; }
+    .head p{ margin-top:4px; font-size:15px; line-height:1.4; }
+  }
+  /* ---------- Desktop / PC: measured against the live Dogecat site
+     (1920px-wide viewport): its content column is 1280px wide and
+     centered, the block above its stage totals ~176px, its stage is
+     1280x572, and the controls under the stage are 60px, so title +
+     stage + controls end inside one screen. Lofi Climb now uses a
+     tall portrait native 600x800 (3:4) canvas; only the display
+     size changes.
+     This block sits at the end of the stylesheet on purpose: every
+     rule it adjusts is defined earlier, so these win the cascade.
+     One-screen budget, top to bottom (CSS px):
+       wrap top padding 12
+       header: logo 210 wide = ~54 high (2635x681 art) + tagline
+         margin 4 + 15px text at 1.4 line-height = ~79
+       header bottom margin 10
+       stage top margin 48 (the snow strip overhangs 36 of it, the
+         peeking yeti 68, reaching into the header's band above the
+         stage's right corner, clear of the header buttons)
+       stage height = min(800, 100dvh - 260)
+       stage bottom margin 40 (snow strip and corner rocks overhang
+         34 of it)
+       controls row 60 exactly (45 min-height + 9 top padding +
+         2x3px border)
+     Fixed total outside the stage: ~249px; the height formula holds
+     back 260px, leaving ~11px of slack. So at 1280x720 the stage
+     is ~345x460 and everything ends at ~709px; at 1920x1080 the
+     stage is ~600x800 (capped at native) and ends at ~1049px. The page
+     column stays 1280px centered (.wrap above), the controls row
+     matches the stage width and centers under it, and the start
+     logo scales with the stage height so PLAY stays inside the
+     frame. Mobile (<=760px) never matches this block. */
+  @media (min-width:761px){
+    .wrap{ padding-top:12px; }
+    .head{ align-items:center; margin-bottom:10px; }
+    .logo{ width:210px; }
+    .head p{ margin-top:4px; font-size:15px; line-height:1.4; }
+    .stage-wrap{
+      width:min(600px, calc((100vh - 260px) * 3 / 4));
+      width:min(600px, calc((100dvh - 260px) * 3 / 4));
+      margin:48px auto 40px;
+    }
+    .peek{ right:20px; top:-68px; width:96px; height:56px; }
+    .peek img{ width:88px; }
+    /* the top ledge sits ON the frame like a snow cap: its lower
+       6px overlap the frame's top border, flush, never floating */
+    .snow-edge-top{ top:-36px; height:42px; }
+    .snow-edge-bottom{ bottom:-34px; height:42px; }
+    .stage-rock{ bottom:-34px; }
+    .rock-bl{ width:104px; }
+    .rock-br{ width:84px; }
+    .touch{
+      width:min(600px, calc((100vh - 260px) * 3 / 4));
+      width:min(600px, calc((100dvh - 260px) * 3 / 4));
+      margin:0 auto;
+    }
+    .touch button{ min-height:45px; }
+    .start-logo{
+      height:clamp(120px, calc((100vh - 260px) * 0.5), 252px);
+      height:clamp(120px, calc((100dvh - 260px) * 0.5), 252px);
+    }
+    /* Game Over on desktop: the medallion grows (92px), but the rows
+       around it tighten so the whole panel, New best badge included,
+       still sits fully inside the shortest desktop stage (462px at
+       a 720px-tall viewport) with even breathing room on all sides:
+       worst-case panel ~432px, ~15px clear top and bottom, and the
+       panel's own snow strip (13px above the panel here) stays
+       inside the stage too. The retry button keeps clear space
+       below it in the panel. */
+    .overlay{ padding:12px; }
+    .panel-snow{ top:-13px; height:34px; }
+    .over-panel{ padding:20px 24px 14px; }
+    .over-avatar{ width:92px; height:92px; margin:2px auto 8px; }
+    .over-avatar img{ width:84px; }
+    .over-panel h2{ font-size:28px; }
+    .over-sub{ margin-bottom:10px; }
+    .newbest{ margin-bottom:10px; padding-top:5px; padding-bottom:5px; }
+    .result-grid{ margin-bottom:12px; }
+    .result-grid div{ padding:9px 6px 8px; }
+    .result-grid strong{ font-size:20px; }
+    .over-hint{ margin-top:8px; }
+  }
+  /* Short desktop viewports: the portrait stage is only ~345px wide
+     at 720px tall, so the HUD chips shrink (and the Best chip steps
+     aside, as on phones) until all chips fit the narrower frame in
+     one row, with the moon meter tucked just under them. */
+  @media (min-width:761px) and (max-height:860px){
+    .hud-in{ top:7px; left:7px; right:7px; }
+    .chip{ font-size:12px; padding:4px 8px; gap:4px; }
+    .chip.best{ display:none; }
+    .moon-meter{ top:44px; width:72%; }
+    .mm-label{ font-size:8.5px; letter-spacing:.1em; }
+    .mm-track{ height:9px; }
+  }
+</style>
+<style>/* Light entrance animation (repo-only patch, re-applied after each re-export) */
+@keyframes lofi-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body{animation:lofi-fade-in .45s ease-out both}
+@media (prefers-reduced-motion:reduce){body{animation:none}}
+</style>
+</head>
+<body>
+<div class="vapour" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<main class="wrap">
+  <header class="site-head">
+    <a class="back-btn" href="/lofigame/" aria-label="Back to Lofi Games">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 4.5 7 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <a class="site-brand" href="/lofigame/"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /><span>Lofi Games</span></a>
+    <a class="profile-pill" id="profilePill" href="/lofigame/" aria-label="Your Lofi Games profile">
+      <img id="profilePillImg" src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" referrerpolicy="no-referrer" />
+      <span id="profilePillLabel">Loading</span>
+    </a>
+  </header>
+
+  <div class="head">
+    <div>
+      <h1><img class="logo" src="/lofigame/assets/logo-d92c727c.webp" alt="Lofi Climb" /></h1>
+      <p>Bounce all the way to the moon.</p>
+    </div>
+    <div class="head-actions">
+      <button class="cube-btn pix" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+          </g>
+          <g fill="#ffffff" stroke="currentColor" stroke-width="1.7">
+            <circle cx="9" cy="7" r="2.4"/><circle cx="15" cy="12" r="2.4"/><circle cx="8" cy="17" r="2.4"/>
+          </g>
+        </svg>
+      </button>
+      <button class="icon-btn pix" id="soundBtn" type="button" aria-pressed="false" aria-label="Sound on. Tap to mute." title="Sound on / off (M)">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+          <g class="waves" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/>
+            <path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+          </g>
+          <line class="slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke="#d64545" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+  <div class="peek" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+  <div class="snow-edge snow-edge-top" aria-hidden="true"></div>
+  <div class="stage">
+    <canvas id="game" width="600" height="800" aria-label="Lofi Climb game. Lofi the yeti bounces on his own from ice platform to ice platform, climbing toward the moon 50,000 metres up. Steer with the left and right arrow keys or A and D, or hold the on-screen steer buttons. The screen wraps at the edges. Springs launch him higher, rockets wait to be grabbed and fired with Space. Reach the moon at the top of the climb."></canvas>
+
+    <div class="hud-in hud-hidden" id="hudIn" aria-label="Climb stats">
+      <div class="hud-group">
+        <span class="chip">⬆ <span id="hudHeight">0</span><span class="unit">m</span></span>
+        <span class="chip">🚀 <span id="hudRockets">0</span></span>
+      </div>
+      <div class="hud-group right">
+        <span class="chip">⭐ <span id="xpTotal">0</span><span class="unit">XP</span></span>
+        <span class="chip best">🏆 <span id="hudBest">0</span><span class="unit">m</span></span>
+      </div>
+    </div>
+    <div class="moon-meter hud-hidden" id="moonMeter" aria-hidden="true">
+      <span class="mm-label">WAY TO THE MOON · 50,000 M</span>
+      <div class="mm-wrap" id="mmWrap">
+        <div class="mm-track"><div class="mm-fill" id="mmFill"></div></div>
+        <span class="mm-moon" id="mmMoon">🌙</span>
+      </div>
+      <span class="mm-label mm-level" id="mmLevel">Level 1 · 0 / 1,000 m</span>
+    </div>
+
+    <div class="remind" id="remind" hidden aria-hidden="true">
+      <p class="remind-goal">🌙 Reach the moon · 50,000 m up</p>
+      <p class="remind-how">Steer with ◀ ▶, A D or the arrows below · ride the springs &amp; rockets up</p>
+    </div>
+
+    <div class="levelup" id="levelUp" hidden aria-hidden="true"><span id="levelUpText">Level 1 complete! +20 XP</span></div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="panel start-panel">
+        <img class="start-logo" src="/lofigame/assets/start-logo-96bfb920.webp" alt="Lofi Climb" />
+        <button class="play-pill pix" id="startBtn" type="button" aria-label="Start climbing"><span class="play-tri" aria-hidden="true"></span>PLAY</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="pauseOverlay" hidden>
+      <div class="panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <button class="ice-x" id="pauseClose" type="button" aria-label="Close and resume">✕</button>
+        <h2>Paused</h2>
+        <p class="ice-sub">Holding the bounce, high above the snow.</p>
+        <button class="btn pix" id="resumeBtn" type="button">Resume</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="overOverlay" hidden>
+      <div class="panel over-panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <div class="over-avatar" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+        <h2 id="overTitle">Slipped off!</h2>
+        <p class="over-sub" id="overSub">The moon is still up there.</p>
+        <p class="newbest" id="newBest">🏆 New best climb!</p>
+        <div class="result-grid">
+          <div><small>Height</small><strong><span id="resHeight">0</span> <span class="unit">m</span></strong></div>
+          <div><small>Bounces</small><strong id="resBounces">0</strong></div>
+          <div><small>Best</small><strong><span id="resBest">0</span> <span class="unit">m</span></strong></div>
+        </div>
+        <p class="over-levels" id="overLevels" hidden></p>
+        <div class="over-actions">
+          <img class="mini-rock" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+          <button class="btn pix" id="restartBtn" type="button">↻ Climb again</button>
+          <img class="mini-rock flip" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+        </div>
+        <p class="over-hint">or press Enter</p>
+      </div>
+    </div>
+  </div>
+  <div class="snow-edge snow-edge-bottom" aria-hidden="true"></div>
+  <img class="stage-rock rock-bl" src="/lofigame/assets/rock-39b343c2.webp" alt="" aria-hidden="true" />
+  <img class="stage-rock rock-br" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+  </div>
+
+  <div class="touch" aria-label="Touch controls">
+    <button type="button" class="pix steer" id="leftBtn" aria-label="Steer left (hold)">◀</button>
+    <button type="button" class="pix steer" id="rightBtn" aria-label="Steer right (hold)">▶</button>
+    <button type="button" class="pix" id="rocketBtn" aria-label="Ride a collected rocket">🚀 Rocket</button>
+    <button type="button" class="pix" id="pauseBtn">Pause</button>
+  </div>
+
+  <section class="guide" aria-label="How to play">
+    <h2>How to play</h2>
+    <p class="goal">Lofi bounces on his own. Steer him from platform to platform, ride the springs and rockets, and reach the moon 50,000 m up.</p>
+    <ul>
+      <li><span class="keys-inline"><kbd>←</kbd><kbd>→</kbd><kbd>A</kbd><kbd>D</kbd></span><span>Steer Lofi left and right</span></li>
+      <li><span class="keys-inline"><kbd>Bounce</kbd></span><span>Lofi bounces by himself, just aim for the next platform</span></li>
+      <li><span class="keys-inline"><kbd>Edges</kbd></span><span>Fly off one side and Lofi wraps around to the other</span></li>
+      <li><span class="keys-inline"><kbd>Spring</kbd></span><span>Land on a spring and Lofi launches extra high</span></li>
+      <li><span class="keys-inline"><kbd>🚀</kbd><kbd>Space</kbd></span><span>Grab a rocket, then Space or the Rocket button to ride it</span></li>
+      <li><span class="keys-inline"><kbd>🌙</kbd></span><span>The moon waits 50,000 m up, take all the time you need</span></li>
+      <li><span class="keys-inline"><kbd>Ice</kbd></span><span>Pale cracked platforms break away, they give no bounce</span></li>
+      <li><span class="keys-inline"><kbd>Falling</kbd></span><span>Slip below the bottom of the screen and the climb ends</span></li>
+      <li><span class="keys-inline"><kbd>P</kbd><kbd>M</kbd></span><span>Pause · Sound on / off</span></li>
+      <li><span class="keys-inline"><kbd>Touch</kbd></span><span>Hold the steer arrows, tap Rocket to fly</span></li>
+      <li><span class="keys-inline"><kbd>Enter</kbd></span><span>Start · Climb again</span></li>
+    </ul>
+  </section>
+
+  <section class="ach levels" aria-label="Levels">
+    <div class="ach-head">
+      <h2>🗻 Levels</h2>
+      <span class="lvl-total">Level XP earned <strong id="levelXpTotal">0</strong></span>
+    </div>
+    <ul id="levelList"></ul>
+  </section>
+
+  <section class="ach" aria-label="Achievements">
+    <div class="ach-head">
+      <h2>🏆 Achievements</h2>
+    </div>
+    <ul id="achList"></ul>
+  </section>
+
+  <footer class="site-foot">
+    <span class="foot-name"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" />Lofi Games</span>
+    <nav aria-label="Site">
+      <a href="/lofigame/">All games</a>
+      <a href="/lofigame/#/profile">Profile</a>
+      <a href="/lofigame/#/settings">Settings</a>
+    </nav>
+  </footer>
+</main>
+
+<div class="settings-overlay" id="settingsOverlay" hidden>
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle">SETTINGS</h2>
+    <div class="set-inner">
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V6l10-2v11.5"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="16.5" cy="15.5" r="2.6"/>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="musicVol" min="0" max="100" value="55" aria-label="Music volume" />
+      </div>
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+            <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/><path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+            </g>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="soundVol" min="0" max="100" value="80" aria-label="Sound volume" />
+      </div>
+      <div class="set-row split">
+        <span class="tips-wrap">
+          <span class="set-label" id="tipsLabel">Game tips</span>
+          <button class="switch on" id="tipsToggle" type="button" role="switch" aria-checked="true" aria-labelledby="tipsLabel">✓</button>
+        </span>
+        <button class="notice-btn" id="noticeBtn" type="button">Notice<span class="nbadge" id="noticeBadge">1</span></button>
+      </div>
+      <p class="notice-text" id="noticeText" hidden>The moon waits 50,000 m up. Springs and rockets are your best friends on the way. Connect a SUI wallet here and your address shows on the Connect button.</p>
+      <p class="wallet-status" id="walletStatus" role="status"></p>
+      <div class="set-actions">
+        <button class="set-connect" id="connectBtn" type="button">Connect</button>
+        <button class="set-ok" id="settingsOk" type="button">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var W = 600, H = 800;
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var hudHeight = document.getElementById('hudHeight');
+  var hudRockets = document.getElementById('hudRockets');
+  var hudBest = document.getElementById('hudBest');
+  var hudIn = document.getElementById('hudIn');
+  var moonMeter = document.getElementById('moonMeter');
+  var mmFill = document.getElementById('mmFill');
+  var remindEl = document.getElementById('remind');
+  var startOverlay = document.getElementById('startOverlay');
+  var pauseOverlay = document.getElementById('pauseOverlay');
+  var overOverlay = document.getElementById('overOverlay');
+  var toastEl = document.getElementById('toast');
+
+  /* ---------- achievements: the hub card's five, 210 XP in total ---------- */
+  var ACH = [
+    { id:'first',  name:'First bounce',    desc:'Bounce on your first platform',        xp:10  },
+    { id:'m500',   name:'500 m up',        desc:'Climb 500 m above the snow',           xp:25  },
+    { id:'rocket', name:'Ride a rocket',   desc:'Grab a rocket and ride it up',         xp:25  },
+    { id:'m2000',  name:'2,000 m up',      desc:'Climb 2,000 m above the snow',         xp:50  },
+    { id:'moon',   name:'Reach the moon',  desc:'Touch the moon, 50,000 m up',          xp:100 }
+  ];
+  var unlocked = {};
+
+  /* ---------- saved progress (this browser only) ----------
+     Best climb, unlocked achievements and the settings panel's
+     choices survive a reload, kept under one key for this game.
+     Storage can be unavailable (private mode, blocked cookies);
+     every read and write is guarded so the game plays either way. */
+  var SAVE_KEY = 'lofi_climb_save_v1';
+  var saveData = {};
+  try{
+    var rawSave = window.localStorage.getItem(SAVE_KEY);
+    if(rawSave) saveData = JSON.parse(rawSave) || {};
+  }catch(e){ saveData = {}; }
+  if(saveData.unlocked && typeof saveData.unlocked === 'object') unlocked = saveData.unlocked;
+
+  /* ---------- levels: ten consecutive stretches of a single climb,
+     measured from the start of a run. Level n ends at the cumulative
+     sum of the lengths; finishing it pays 20 x n XP, once ever. The
+     moon waits at 50,000 m, beyond all ten levels, so every level
+     can be finished before it is reached. A save written before
+     levels existed simply has no
+     level fields and starts at level 0 / 0 XP, everything else kept. */
+  var LEVEL_LENGTHS = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500];
+  var LEVEL_ENDS = [];
+  (function(){ var s = 0; for(var n = 0; n < LEVEL_LENGTHS.length; n++){ s += LEVEL_LENGTHS[n]; LEVEL_ENDS.push(s); } })();
+  var LEVEL_TOTAL_M = LEVEL_ENDS[LEVEL_ENDS.length - 1]; /* 32,500 */
+  var level = (typeof saveData.level === 'number' ? saveData.level : 0);
+  var levelXP = (typeof saveData.levelXP === 'number' ? saveData.levelXP : 0);
+  var runLevels = [], runLevelXP = 0; /* levels finished in the current run */
+
+  /* ---------- Firebase sync (Lofi Games, project lofi-games) ----------
+     Public client config (not a secret), embedded per the shared spec.
+     Firestore mirror: users/{uid}/games/lofi-climb. localStorage stays
+     the offline fallback: every local write below is unchanged, the
+     local key is never deleted, and a failed cloud write never blocks
+     gameplay (it is retried on the next save or sign-in). Nothing but
+     best / level / levelXP / unlocked / earnedAt / settings is ever
+     written — no wallet address, seed phrase, private key or password. */
+  var firebaseConfig = {
+    apiKey: "AIzaSyBQ5isDVE9nWFXO-3es3OmxVL047HmnE28",
+    authDomain: "winterplay.online",
+    projectId: "lofi-games",
+    storageBucket: "lofi-games.firebasestorage.app",
+    messagingSenderId: "885237508877",
+    appId: "1:885237508877:web:ac09a74ce6a82d8e5c1e44"
+  };
+  var fbUser = null, fbDb = null;
+  var fbApplyingMerge = false;
+  var fbMergeInFlight = false; /* true for the whole async sign-in merge window */
+  var fbPendingUnlocks = {};
+  var fullSyncTimer = null, unlockSyncTimer = null;
+  var localUpdatedAtMs = 0; /* last local save this session, for the settings merge */
+  function fbTs(){
+    try{ return firebase.firestore.FieldValue.serverTimestamp(); }catch(e){ return null; }
+  }
+  function fbDocRef(){
+    if(!fbUser || !fbDb) return null;
+    try{ return fbDb.collection('users').doc(fbUser.uid).collection('games').doc('lofi-climb'); }catch(e){ return null; }
+  }
+  /* current state in the cloud doc's shape: settings nested, volumes
+     kept in this game's native 0-100 integer scale, exactly as saved */
+  function fbSnapshot(){
+    var u = {}, k;
+    for(k in unlocked){ if(Object.prototype.hasOwnProperty.call(unlocked, k) && unlocked[k]) u[k] = true; }
+    return {
+      best: (typeof best === 'number' ? best : (saveData.best || 0)),
+      level: (typeof level === 'number' ? level : (saveData.level || 0)),
+      levelXP: (typeof levelXP === 'number' ? levelXP : (saveData.levelXP || 0)),
+      unlocked: u,
+      settings: {
+        muted: (typeof muted === 'boolean' ? muted : !!saveData.muted),
+        soundVol: (typeof soundVolVal === 'number' ? Math.round(soundVolVal * 100) : (typeof saveData.soundVol === 'number' ? saveData.soundVol : 80)),
+        musicVol: (typeof musicVolVal === 'number' ? Math.round(musicVolVal * 100) : (typeof saveData.musicVol === 'number' ? saveData.musicVol : 55)),
+        tipsOn: (typeof tipsOn === 'boolean' ? tipsOn : saveData.tipsOn !== false)
+      }
+    };
+  }
+  /* full current game doc to Firestore, debounced ~500 ms, merge write */
+  function scheduleFullCloudSync(){
+    if(fbApplyingMerge || fbMergeInFlight || !fbUser || !fbDb) return;
+    if(fullSyncTimer) clearTimeout(fullSyncTimer);
+    fullSyncTimer = setTimeout(function(){
+      fullSyncTimer = null;
+      if(fbMergeInFlight || !fbUser || !fbDb) return; /* a merge in flight writes the full fresh state itself */
+      var ref = fbDocRef(); if(!ref) return;
+      var snap = fbSnapshot();
+      var payload = { best: snap.best, level: snap.level, levelXP: snap.levelXP, unlocked: snap.unlocked, settings: snap.settings, updatedAt: fbTs() };
+      try{
+        var p = ref.set(payload, { merge: true });
+        if(p && typeof p.catch === 'function') p.catch(function(){ /* offline: local save kept; retried on next save/sign-in */ });
+      }catch(e){}
+    }, 500);
+  }
+  /* new-unlock write: unlocked[id] + earnedAt server timestamp, debounced */
+  function scheduleUnlockCloudSync(id){
+    if(!id) return;
+    if(!fbUser || !fbDb) return; /* signed out: the sign-in merge migrates it with earnedAt null */
+    fbPendingUnlocks[id] = true;
+    if(fbMergeInFlight) return; /* merge in flight: stay queued — the merge re-reads live state, so this unlock is in its payload, and the queue flushes when the merge settles */
+    if(unlockSyncTimer) clearTimeout(unlockSyncTimer);
+    unlockSyncTimer = setTimeout(function(){
+      unlockSyncTimer = null;
+      if(!fbUser || !fbDb){ fbPendingUnlocks = {}; return; }
+      var ref = fbDocRef(); if(!ref){ fbPendingUnlocks = {}; return; }
+      var ids = Object.keys(fbPendingUnlocks); fbPendingUnlocks = {};
+      if(!ids.length) return;
+      var u = {}, ea = {}, i;
+      for(i = 0; i < ids.length; i++){ u[ids[i]] = true; ea[ids[i]] = fbTs(); }
+      try{
+        var p = ref.set({ unlocked: u, earnedAt: ea, updatedAt: fbTs() }, { merge: true });
+        if(p && typeof p.catch === 'function') p.catch(function(){ /* offline: local save kept; retried on next save/sign-in */ });
+      }catch(e){}
+    }, 500);
+  }
+  /* load merged state into the game exactly as the local load does:
+     best, unlocked, volumes, mute and tips, then refresh the UI */
+  function fbApplyMerged(merged){
+    fbApplyingMerge = true;
+    try{
+      if(typeof merged.best === 'number') best = Math.max((typeof best === 'number' ? best : 0), merged.best);
+      /* levels merge by max, exactly like best: the further-along
+         side wins and a merge can never un-complete a level */
+      if(typeof merged.level === 'number') level = Math.max(level || 0, merged.level);
+      if(typeof merged.levelXP === 'number') levelXP = Math.max(levelXP || 0, merged.levelXP);
+      /* achievements merge additively: union the merged keys into the
+         live unlocked set, never wholesale-replace it, so an unlock
+         recorded after the merge snapshot was taken survives */
+      var mu = {}, mk;
+      for(mk in unlocked){ if(Object.prototype.hasOwnProperty.call(unlocked, mk) && unlocked[mk]) mu[mk] = true; }
+      if(merged.unlocked && typeof merged.unlocked === 'object'){
+        for(mk in merged.unlocked){ if(Object.prototype.hasOwnProperty.call(merged.unlocked, mk) && merged.unlocked[mk]) mu[mk] = true; }
+      }
+      unlocked = mu;
+      if(merged.settings){
+        muted = !!merged.settings.muted;
+        if(typeof merged.settings.soundVol === 'number') soundVolVal = merged.settings.soundVol / 100;
+        if(typeof merged.settings.musicVol === 'number') musicVolVal = merged.settings.musicVol / 100;
+        if(typeof merged.settings.tipsOn === 'boolean') tipsOn = merged.settings.tipsOn;
+      }
+      saveData = {
+        best: (typeof best === 'number' ? best : 0),
+        level: level,
+        levelXP: levelXP,
+        unlocked: unlocked,
+        muted: muted,
+        musicVol: Math.round(musicVolVal * 100),
+        soundVol: Math.round(soundVolVal * 100),
+        tipsOn: tipsOn
+      };
+      try{ window.localStorage.setItem(SAVE_KEY, JSON.stringify(saveData)); }catch(e){}
+      try{ applyVolumes(); }catch(e){}
+      if(typeof soundBtn !== 'undefined' && soundBtn){
+        soundBtn.classList.toggle('muted', muted);
+        soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+        soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+      }
+      if(merged.settings && typeof musicVolEl !== 'undefined' && musicVolEl && typeof soundVolEl !== 'undefined' && soundVolEl){
+        if(typeof merged.settings.musicVol === 'number') musicVolEl.value = merged.settings.musicVol;
+        if(typeof merged.settings.soundVol === 'number') soundVolEl.value = merged.settings.soundVol;
+        try{ paintRange(musicVolEl); paintRange(soundVolEl); }catch(e){}
+      }
+      if(typeof tipsToggle !== 'undefined' && tipsToggle){
+        tipsToggle.classList.toggle('on', tipsOn);
+        tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+      }
+      renderAch();
+      renderLevels();
+      try{ updateHud(); }catch(e){}
+    }catch(e){}
+    fbApplyingMerge = false;
+  }
+  /* the freshest local state: live in-memory state unioned with the
+     persisted localStorage save (either one may be ahead) */
+  function fbLiveLocal(){
+    var live = fbSnapshot();
+    try{
+      var raw = window.localStorage.getItem(SAVE_KEY);
+      if(raw){
+        var p = JSON.parse(raw) || {};
+        if(typeof p.best === 'number') live.best = Math.max(live.best || 0, p.best);
+        if(typeof p.level === 'number') live.level = Math.max(live.level || 0, p.level);
+        if(typeof p.levelXP === 'number') live.levelXP = Math.max(live.levelXP || 0, p.levelXP);
+        if(p.unlocked && typeof p.unlocked === 'object'){
+          for(var k in p.unlocked){ if(Object.prototype.hasOwnProperty.call(p.unlocked, k) && p.unlocked[k]) live.unlocked[k] = true; }
+        }
+      }
+    }catch(e){}
+    return live;
+  }
+  /* unlock writes queued while a merge is in flight, retried once it settles */
+  function fbFlushPendingUnlocks(){
+    var ids = Object.keys(fbPendingUnlocks);
+    for(var i = 0; i < ids.length; i++) scheduleUnlockCloudSync(ids[i]);
+  }
+  /* on sign-in: merge local + cloud, write the merged doc back, load it.
+     The local side is re-read when the cloud read resolves, not when the
+     merge starts, so an achievement unlocked or a best set while the
+     read was in flight is never erased by the merge. The merged state
+     is applied locally only after the cloud write succeeds. */
+  function fbMergeOnSignIn(){
+    if(fbMergeInFlight) return;
+    var ref = fbDocRef(); if(!ref) return;
+    fbMergeInFlight = true;
+    ref.get().then(function(snapDoc){
+      var local = fbLiveLocal();
+      var cloud = (snapDoc && snapDoc.exists) ? (snapDoc.data() || {}) : null;
+      var mergedBest = Math.max(local.best || 0, (cloud && typeof cloud.best === 'number') ? cloud.best : 0);
+      var mergedLevel = Math.max(local.level || 0, (cloud && typeof cloud.level === 'number') ? cloud.level : 0);
+      var mergedLevelXP = Math.max(local.levelXP || 0, (cloud && typeof cloud.levelXP === 'number') ? cloud.levelXP : 0);
+      var mergedUnlocked = {}, k;
+      for(k in local.unlocked){ if(Object.prototype.hasOwnProperty.call(local.unlocked, k) && local.unlocked[k]) mergedUnlocked[k] = true; }
+      if(cloud && cloud.unlocked && typeof cloud.unlocked === 'object'){
+        for(k in cloud.unlocked){ if(Object.prototype.hasOwnProperty.call(cloud.unlocked, k) && cloud.unlocked[k]) mergedUnlocked[k] = true; }
+      }
+      /* earnedAt: keep cloud values; locally-unlocked IDs missing from
+         cloud get null — a migrated unlock's date is never invented */
+      var mergedEarned = {};
+      if(cloud && cloud.earnedAt && typeof cloud.earnedAt === 'object'){
+        for(k in cloud.earnedAt){ if(Object.prototype.hasOwnProperty.call(cloud.earnedAt, k)) mergedEarned[k] = cloud.earnedAt[k]; }
+      }
+      for(k in mergedUnlocked){ if(!Object.prototype.hasOwnProperty.call(mergedEarned, k)) mergedEarned[k] = null; }
+      /* settings: prefer the most recently updated (cloud updatedAt vs
+         this session's last local save; no local change this session
+         means the cloud write is the more recent one) */
+      var mergedSettings = local.settings;
+      if(cloud && cloud.settings && typeof cloud.settings === 'object'){
+        var cloudMs = 0;
+        try{
+          if(cloud.updatedAt && typeof cloud.updatedAt.toMillis === 'function') cloudMs = cloud.updatedAt.toMillis();
+          else if(cloud.updatedAt && typeof cloud.updatedAt.seconds === 'number') cloudMs = cloud.updatedAt.seconds * 1000;
+        }catch(e){}
+        if(!localUpdatedAtMs || cloudMs >= localUpdatedAtMs){
+          mergedSettings = {
+            muted: (typeof cloud.settings.muted === 'boolean' ? cloud.settings.muted : local.settings.muted),
+            soundVol: (typeof cloud.settings.soundVol === 'number' ? cloud.settings.soundVol : local.settings.soundVol),
+            musicVol: (typeof cloud.settings.musicVol === 'number' ? cloud.settings.musicVol : local.settings.musicVol),
+            tipsOn: (typeof cloud.settings.tipsOn === 'boolean' ? cloud.settings.tipsOn : local.settings.tipsOn)
+          };
+        }
+      }
+      var merged = { best: mergedBest, level: mergedLevel, levelXP: mergedLevelXP, unlocked: mergedUnlocked, earnedAt: mergedEarned, settings: mergedSettings };
+      var payload = { best: mergedBest, level: mergedLevel, levelXP: mergedLevelXP, unlocked: mergedUnlocked, earnedAt: mergedEarned, settings: mergedSettings, migratedFromLocal: true, updatedAt: fbTs() };
+      var finish = function(){ fbMergeInFlight = false; fbFlushPendingUnlocks(); };
+      try{
+        var wp = ref.set(payload, { merge: true });
+        if(wp && typeof wp.then === 'function'){
+          wp.then(function(){ fbApplyMerged(merged); finish(); }, function(err){
+            /* write failed: do not apply the merged state locally — the
+               local save still holds everything, and unlock writes
+               queued during the merge flush on their own */
+            try{ console.error('[lofi-climb] sign-in merge write failed', err); }catch(e){}
+            finish();
+          });
+        } else { fbApplyMerged(merged); finish(); }
+      }catch(e){
+        try{ console.error('[lofi-climb] sign-in merge write failed', e); }catch(e2){}
+        finish();
+      }
+    }).catch(function(err){
+      /* read failed: keep the local save untouched; retried on next sign-in */
+      try{ console.error('[lofi-climb] sign-in merge read failed', err); }catch(e){}
+      fbMergeInFlight = false;
+      fbFlushPendingUnlocks();
+    });
+  }
+  /* ---------- header profile pill: mirrors the hub header, driven by
+     the same Firebase auth state. Signed in shows the account's photo
+     and name and links to the player page; signed out shows the yeti
+     and "Sign in" and links to the hub, where sign-in lives. Until
+     auth resolves the pill reads "Loading", never a wrong state. */
+  var pillEl = document.getElementById('profilePill');
+  var pillImg = document.getElementById('profilePillImg');
+  var pillLabel = document.getElementById('profilePillLabel');
+  function updateAuthPill(user){
+    if(!pillEl || !pillImg || !pillLabel) return;
+    if(user){
+      var name = user.displayName || (user.email ? user.email.split('@')[0] : 'Player');
+      pillLabel.textContent = name;
+      /* Google profile photo, matching the hub: the signed-in user's
+         photoURL (firebase.auth().currentUser.photoURL) is the pill
+         avatar when one exists; otherwise the preset avatar, exactly
+         as before. Guarded so a missing Firebase SDK never throws. */
+      var photo = null;
+      try{
+        if(typeof firebase !== 'undefined' && firebase.auth){
+          var cu = firebase.auth().currentUser;
+          if(cu && cu.photoURL) photo = cu.photoURL;
+        }
+      }catch(e){}
+      if(!photo && user.photoURL) photo = user.photoURL;
+      pillImg.referrerPolicy = 'no-referrer';
+      pillImg.src = photo ? photo : '/lofigame/assets/lofi-face-a1b88584.webp';
+      pillEl.setAttribute('href', '/lofigame/#/profile');
+      pillEl.setAttribute('aria-label', 'Signed in as ' + name + '. Open your player page.');
+    } else {
+      pillLabel.textContent = 'Sign in';
+      pillImg.referrerPolicy = 'no-referrer';
+      pillImg.src = '/lofigame/assets/lofi-face-a1b88584.webp';
+      pillEl.setAttribute('href', '/lofigame/');
+      pillEl.setAttribute('aria-label', 'Sign in on Lofi Games');
+    }
+  }
+  try{
+    if(typeof firebase !== 'undefined' && firebase){
+      var fbApp = (firebase.apps && firebase.apps.length) ? firebase.app() : firebase.initializeApp(firebaseConfig);
+      fbDb = firebase.firestore();
+      firebase.auth().onAuthStateChanged(function(user){
+        updateAuthPill(user);
+        if(user){
+          fbUser = user;
+          fbMergeOnSignIn();
+        } else {
+          /* sign-out: stop Firestore writes; localStorage play continues */
+          fbUser = null;
+          fbMergeInFlight = false;
+          if(fullSyncTimer){ clearTimeout(fullSyncTimer); fullSyncTimer = null; }
+          if(unlockSyncTimer){ clearTimeout(unlockSyncTimer); unlockSyncTimer = null; }
+          fbPendingUnlocks = {};
+        }
+      });
+    } else {
+      updateAuthPill(null);
+    }
+  }catch(e){ fbUser = null; fbDb = null; updateAuthPill(null); }
+
+  function persistSave(){
+    try{
+      var d = {
+        best: (typeof best === 'number' ? best : (saveData.best || 0)),
+        level: level,
+        levelXP: levelXP,
+        unlocked: unlocked,
+        muted: (typeof muted === 'boolean' ? muted : !!saveData.muted),
+        musicVol: (typeof musicVolVal === 'number' ? Math.round(musicVolVal * 100) : saveData.musicVol),
+        soundVol: (typeof soundVolVal === 'number' ? Math.round(soundVolVal * 100) : saveData.soundVol),
+        tipsOn: (typeof tipsOn === 'boolean' ? tipsOn : saveData.tipsOn !== false)
+      };
+      saveData = d;
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(d));
+      localUpdatedAtMs = Date.now();
+      scheduleFullCloudSync();
+    }catch(e){}
+  }
+
+  var achList = document.getElementById('achList');
+  var xpTotal = document.getElementById('xpTotal');
+
+  function renderAch(){
+    achList.innerHTML = '';
+    var total = 0;
+    ACH.forEach(function(a){
+      var on = !!unlocked[a.id];
+      if(on) total += a.xp;
+      var li = document.createElement('li');
+      if(on) li.className = 'unlocked';
+      li.innerHTML =
+        '<span class="dot" aria-hidden="true">' + (on ? '✓' : '·') + '</span>' +
+        '<span class="txt"><strong></strong><span></span></span>' +
+        '<span class="pts">' + a.xp + ' XP</span>' +
+        '<span class="state">' + (on ? 'Unlocked' : 'Locked') + '</span>';
+      li.querySelector('.txt strong').textContent = a.name;
+      li.querySelector('.txt span').textContent = a.desc;
+      achList.appendChild(li);
+    });
+    xpTotal.textContent = total + levelXP;
+  }
+
+  var toastTimer = null;
+  function toast(html){
+    toastEl.innerHTML = html;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+  function unlock(id){
+    if(unlocked[id]) return;
+    unlocked[id] = true;
+    persistSave();
+    renderAch();
+    var a = ACH.filter(function(x){ return x.id===id; })[0];
+    if(a) toast('Achievement unlocked: <b>' + a.name + '</b> · +' + a.xp + ' XP');
+    sfx.unlock();
+    burstSparks();
+    scheduleUnlockCloudSync(id);
+  }
+  renderAch();
+
+  /* ---------- levels panel (menu screen) ----------
+     Ten rows in the achievements card family: a finished level reads
+     like an unlocked row with a checkmark, the next level to finish
+     wears gold as Current, and the rest sit dimmed as Locked. */
+  var levelList = document.getElementById('levelList');
+  var levelXpTotalEl = document.getElementById('levelXpTotal');
+  function fmtLvl(m){ return m.toLocaleString('en-US'); }
+  function renderLevels(){
+    if(levelList){
+      levelList.innerHTML = '';
+      for(var i = 0; i < LEVEL_LENGTHS.length; i++){
+        var n = i + 1;
+        var done = n <= level;
+        var current = n === level + 1;
+        var li = document.createElement('li');
+        li.className = done ? 'unlocked' : (current ? 'current' : 'locked');
+        var sub = 'Ends at ' + fmtLvl(LEVEL_ENDS[i]) + ' m';
+        if(n === 10) sub += ' · 🌙 Moon beyond at 50,000 m';
+        li.innerHTML =
+          '<span class="dot" aria-hidden="true">' + (done ? '✓' : n) + '</span>' +
+          '<span class="txt"><strong></strong><span></span></span>' +
+          '<span class="pts">+' + (20 * n) + ' XP</span>' +
+          '<span class="state">' + (done ? 'Done' : (current ? 'Current' : 'Locked')) + '</span>';
+        li.querySelector('.txt strong').textContent = 'Level ' + n + ' · ' + fmtLvl(LEVEL_LENGTHS[i]) + ' m';
+        li.querySelector('.txt span').textContent = sub;
+        levelList.appendChild(li);
+      }
+    }
+    if(levelXpTotalEl) levelXpTotalEl.textContent = fmtLvl(levelXP) + ' XP';
+  }
+  renderLevels();
+
+  /* ---------- moon meter: level ticks + the moon marker ----------
+     The track spans the whole way to the moon (50,000 m); a tick
+     stands at each level end and turns gold once that level is done,
+     and the moon marker sits at the far right end of the track. */
+  var mmWrap = document.getElementById('mmWrap');
+  var mmMoonEl = document.getElementById('mmMoon');
+  var mmLevelEl = document.getElementById('mmLevel');
+  var mmTickEls = [];
+  if(mmWrap){
+    for(var ti = 0; ti < LEVEL_ENDS.length; ti++){
+      var tick = document.createElement('span');
+      tick.className = 'mm-tick';
+      tick.style.left = (LEVEL_ENDS[ti] / 50000 * 100) + '%';
+      mmWrap.appendChild(tick);
+      mmTickEls.push(tick);
+    }
+  }
+  if(mmMoonEl) mmMoonEl.style.left = '100%';
+
+  /* ---------- level-up banner + spark burst ----------
+     Each crossed level end queues its own banner, so a run that
+     finishes several levels shows them one after another, each with
+     the unlock chime and a burst of sparks around Lofi. */
+  var levelUpEl = document.getElementById('levelUp');
+  var levelUpText = document.getElementById('levelUpText');
+  var bannerQueue = [], bannerTimer = null, bannerHideTimer = null;
+  function showNextBanner(){
+    var b = bannerQueue.shift();
+    if(!b){ bannerTimer = null; return; }
+    if(levelUpText) levelUpText.textContent = 'Level ' + b.n + ' complete! +' + b.xp + ' XP';
+    if(levelUpEl){ levelUpEl.hidden = false; levelUpEl.classList.remove('hide'); }
+    bannerTimer = setTimeout(function(){
+      bannerTimer = null;
+      if(levelUpEl) levelUpEl.classList.add('hide');
+      bannerHideTimer = setTimeout(function(){
+        bannerHideTimer = null;
+        if(levelUpEl) levelUpEl.hidden = true;
+        showNextBanner();
+      }, reduced ? 60 : 320);
+    }, 2100);
+  }
+  function queueLevelBanner(n, xp){
+    bannerQueue.push({ n: n, xp: xp });
+    if(!bannerTimer && !bannerHideTimer) showNextBanner();
+  }
+  function clearLevelBanner(){
+    bannerQueue = [];
+    clearTimeout(bannerTimer); bannerTimer = null;
+    clearTimeout(bannerHideTimer); bannerHideTimer = null;
+    if(levelUpEl){ levelUpEl.hidden = true; levelUpEl.classList.remove('hide'); }
+  }
+  function burstSparks(){
+    var cols = ['#ffd34d', '#59d8ff', '#ff5c8a', '#ffffff'];
+    for(var i = 0; i < 26; i++){
+      var ang = Math.random() * 6.283, sp = 60 + Math.random() * 190;
+      particles.push({
+        x: player.x, y: player.y - 20,
+        vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 60,
+        t: 0, life: 0.55 + Math.random() * 0.35, r: 2 + Math.random() * 2.6,
+        kind: 'spark', color: cols[i % 4]
+      });
+    }
+  }
+  /* light confetti + a drift of snow, let off when a level completes */
+  function burstConfetti(){
+    var cols = ['#ff5c8a', '#ffd34d', '#59d8ff', '#7be495', '#ffffff'];
+    for(var i = 0; i < 16; i++){
+      particles.push({
+        x: player.x + (Math.random() * 60 - 30), y: player.y - 30,
+        vx: (Math.random() * 2 - 1) * 130, vy: -60 - Math.random() * 130,
+        t: 0, life: 0.8 + Math.random() * 0.5, r: 3 + Math.random() * 2.4,
+        kind: 'confetti', color: cols[i % 5],
+        rot: Math.random() * 6.28, vr: (Math.random() * 2 - 1) * 9
+      });
+    }
+  }
+  function burstSnow(){
+    for(var i = 0; i < 14; i++){
+      particles.push({
+        x: player.x + (Math.random() * 90 - 45), y: player.y - 44 + Math.random() * 20,
+        vx: (Math.random() * 50 - 25), vy: 24 + Math.random() * 46,
+        t: 0, life: 0.7 + Math.random() * 0.4, r: 1.6 + Math.random() * 2.2,
+        kind: 'snow'
+      });
+    }
+  }
+  /* a level completes the moment the run's height passes its end;
+     levels finish strictly in order, each paying out once ever */
+  function checkLevels(){
+    while(level < LEVEL_ENDS.length && heightM >= LEVEL_ENDS[level]){
+      level++;
+      var xp = 20 * level;
+      levelXP += xp;
+      runLevels.push({ n: level, xp: xp });
+      runLevelXP += xp;
+      persistSave();
+      renderAch();
+      renderLevels();
+      queueLevelBanner(level, xp);
+      sfx.unlock();
+      burstSparks();
+      burstSparks();
+      burstConfetti();
+      burstSnow();
+    }
+  }
+
+  /* ---------- sticker art ----------
+     Every picture is drawn as a flat sticker in its original shape:
+     a dark edge, a thick white border, then the artwork itself.
+     Silhouettes are pre-rendered once each image loads. */
+  function makeSilhouette(img, color){
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    var g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = color;
+    g.fillRect(0, 0, c.width, c.height);
+    return c;
+  }
+  function loadSticker(src){
+    var o = { img: new Image(), ready: false, silWhite: null, silDark: null };
+    o.img.onload = function(){
+      o.silWhite = makeSilhouette(o.img, '#ffffff');
+      o.silDark = makeSilhouette(o.img, '#14304d');
+      o.ready = true;
+    };
+    o.img.src = src;
+    return o;
+  }
+  function drawSticker(o, x, y, w, h){
+    if(!o.ready) return;
+    var d, k, dirs = [[1,0],[-1,0],[0,1],[0,-1],[0.7,0.7],[-0.7,0.7],[0.7,-0.7],[-0.7,-0.7]];
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silDark, x + d[0]*5.5, y + d[1]*5.5, w, h); }
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silWhite, x + d[0]*3.5, y + d[1]*3.5, w, h); }
+    ctx.drawImage(o.img, x, y, w, h);
+  }
+
+  /* Lofi: the user's own yeti art, kept whole in its original shape */
+  var yetiSticker = loadSticker('/lofigame/assets/yeti-ca776e9d.webp');
+
+  /* ---------- sound effects (synthesised, no audio files) ---------- */
+  var AC = null, muted = !!saveData.muted, sfxGain = null, musicGain = null;
+  var soundVolVal = (typeof saveData.soundVol === 'number' ? saveData.soundVol / 100 : 0.8);
+  var musicVolVal = (typeof saveData.musicVol === 'number' ? saveData.musicVol / 100 : 0.55);
+  function applyVolumes(){
+    if(!AC || !sfxGain || !musicGain) return;
+    var s = muted ? 0 : soundVolVal, m = muted ? 0 : musicVolVal;
+    sfxGain.gain.value = s*s*0.9;
+    musicGain.gain.value = m*m*0.45;
+  }
+  function audio(){
+    if(!AC){
+      try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ AC = null; }
+      if(AC){
+        sfxGain = AC.createGain(); sfxGain.connect(AC.destination);
+        musicGain = AC.createGain(); musicGain.connect(AC.destination);
+        applyVolumes();
+      }
+    }
+    if(AC && AC.state === 'suspended') AC.resume();
+    return AC;
+  }
+  function tone(f0, f1, dur, type, vol, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(sfxGain || ac.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noiseHit(dur, vol, freq, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var len = Math.max(1, Math.floor(ac.sampleRate * dur));
+    var buf = ac.createBuffer(1, len, ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var n=0;n<len;n++) d[n] = (Math.random()*2 - 1) * (1 - n/len);
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq;
+    var g = ac.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(sfxGain || ac.destination);
+    src.start(t0);
+  }
+  var sfx = {
+    click:  function(){ tone(620, 520, 0.07, 'triangle', 0.12); },
+    start:  function(){ tone(440, 440, 0.09, 'triangle', 0.14); tone(660, 660, 0.09, 'triangle', 0.14, 0.09); tone(880, 880, 0.14, 'triangle', 0.15, 0.18); },
+    bounce: function(){ tone(280, 560, 0.11, 'sine', 0.13); noiseHit(0.04, 0.025, 2600); },
+    spring: function(){ tone(380, 1020, 0.18, 'square', 0.07); tone(760, 1440, 0.16, 'sine', 0.1, 0.02); },
+    crack:  function(){ noiseHit(0.16, 0.16, 1200); tone(220, 90, 0.14, 'triangle', 0.1); },
+    pickup: function(){ tone(880, 880, 0.09, 'sine', 0.12); tone(1318, 1318, 0.15, 'sine', 0.12, 0.07); },
+    rocket: function(){ noiseHit(0.7, 0.2, 900); tone(160, 880, 0.7, 'sawtooth', 0.06); },
+    /* slipped: a soft descending jingle that settles low */
+    gameOver: function(){
+      noiseHit(0.2, 0.18, 700); tone(160, 46, 0.26, 'sine', 0.18);
+      tone(392, 392, 0.17, 'triangle', 0.15, 0.14);
+      tone(330, 330, 0.17, 'triangle', 0.15, 0.32);
+      tone(262, 262, 0.2, 'triangle', 0.15, 0.5);
+      tone(196, 165, 0.46, 'sine', 0.17, 0.7);
+    },
+    /* the moon: a bright little fanfare, four notes climbing */
+    win: function(){
+      tone(523, 523, 0.12, 'triangle', 0.15);
+      tone(659, 659, 0.12, 'triangle', 0.15, 0.1);
+      tone(784, 784, 0.12, 'triangle', 0.15, 0.2);
+      tone(1046, 1046, 0.2, 'triangle', 0.16, 0.3);
+      tone(1318, 1318, 0.34, 'sine', 0.14, 0.42);
+    },
+    unlock: function(){ tone(660, 660, 0.1, 'triangle', 0.14); tone(880, 880, 0.1, 'triangle', 0.14, 0.09); tone(1100, 1100, 0.18, 'triangle', 0.15, 0.18); }
+  };
+  var soundBtn = document.getElementById('soundBtn');
+  function setMuted(m){
+    muted = m;
+    applyVolumes();
+    persistSave();
+    soundBtn.classList.toggle('muted', muted);
+    soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+  }
+  if(muted) setMuted(true);
+  soundBtn.addEventListener('click', function(){
+    setMuted(!muted);
+    if(!muted) sfx.click();
+  });
+
+  /* ---------- background music: a small cheerful loop, synthesised live.
+     An eighth-note sequencer at ~116 BPM: a bouncy triangle lead over a
+     soft sine bass, routed through its own gain so the Settings music
+     slider (and the mute button) control it separately from effects. */
+  var musicTimer = null, musicStep = 0, musicNext = 0, musicStarted = false;
+  var LEAD = [72,0,76,0,79,0,76,0, 81,0,79,0,76,0,72,0, 74,0,76,0,79,0,81,0, 79,0,76,0,74,0,71,0];
+  var BASS = [48,53,55,48];
+  function midiHz(m){ return 440*Math.pow(2,(m-69)/12); }
+  function musicNote(midi, t0, dur, type, vol){
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = midiHz(midi);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(musicGain);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function scheduleMusic(){
+    if(!AC || !musicGain) return;
+    while(musicNext < AC.currentTime + 0.24){
+      var step = musicStep, t0 = musicNext;
+      var lead = LEAD[step % LEAD.length];
+      if(lead) musicNote(lead, t0, 0.26, 'triangle', 0.16);
+      if(step % 8 === 0) musicNote(BASS[Math.floor(step/8) % 4], t0, 0.5, 'sine', 0.15);
+      if(step % 8 === 4) musicNote(BASS[Math.floor(step/8) % 4] + 7, t0, 0.3, 'sine', 0.07);
+      musicStep++;
+      musicNext += 0.2586;
+    }
+  }
+  function startMusic(){
+    if(musicStarted) return;
+    var ac = audio(); if(!ac || !musicGain) return;
+    musicStarted = true;
+    musicStep = 0;
+    musicNext = ac.currentTime + 0.08;
+    musicTimer = setInterval(scheduleMusic, 84);
+  }
+
+  /* No decorative text pops inside the stage: the only writing in
+     the stage is functional — the HUD chips, the moon meter and
+     the start-of-run reminder. The
+     Settings Game tips switch state is kept for the panel only. */
+  var tipsOn = saveData.tipsOn !== false;
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+  function hash(n){ var x = Math.sin(n*127.1)*43758.5453; return x - Math.floor(x); }
+  function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+  function lerp(a, b, t){ return a + (b - a) * t; }
+
+  /* ---------- the climb ----------
+     Lofi bounces on his own; the player only steers. World y grows
+     downward: the snow sits at START_Y and the moon 50,000 m up at
+     START_Y - MOON_PX. The camera only ever rises. Platforms are ice,
+     moving ice, cracked ice (breaks, no bounce) and spring platforms;
+     rockets wait above some platforms to be grabbed and fired. */
+  var M_PER_PX = 6;
+  var MOON_M = 50000;
+  var MOON_PX = MOON_M / M_PER_PX;         /* ≈ 8333 px of climbing */
+  var START_Y = 748;                      /* Lofi's feet at the start, on the snow (H - 52) */
+  var GROUND_Y = 748;                     /* top of the snow bank */
+  var GRAV = 1500, BOUNCE_V = 740, SPRING_V = 1200, MOVE_V = 345;
+
+  var state = 'ready'; // ready | playing | paused | over | won
+  var camY = 0;
+  var bounces = 0, best = (typeof saveData.best === 'number' ? saveData.best : 0), heightM = 0, maxAltPx = 0;
+  var bestStandY = START_Y; /* highest surface Lofi has bounced off */
+  var charges = 0, rocketT = 0;
+  var squashT = 0;
+  var keys = { left:false, right:false };
+  var player = { x: W/2, y: START_Y, vx: 0, vy: 0 };
+  var platforms = [], pickups = [], lanterns = [], particles = [];
+  var nextPlatY = 0, nextRocketY = 0, nextLanternY = 0;
+
+  function altPx(){ return Math.max(0, START_Y - player.y); }
+  function fmtM(m){ return Math.round(m).toLocaleString('en-US'); }
+
+  /* The climb is generated as a chain: every platform in the chain is
+     placed within one bounce of the previous one, so there is always
+     a reachable platform ahead and never a dead zone. A plain bounce
+     rises ~182 px (740^2 / (2*1500)) and Lofi steers ~288 px sideways
+     during it, so the chain keeps each step to at most 92 px up and
+     170 px sideways, straight-line, no wrap needed. Chain platforms are always
+     solid; cracked ice only ever appears as a bonus platform beside
+     the chain, never as the only way up. */
+  var lastPlatCx = W / 2;
+  function makePlatform(y, chained){
+    var alt = (START_Y - y) * M_PER_PX;
+    var w = Math.max(76, 118 - alt / 260) + Math.random() * 14;
+    var x;
+    if(chained){
+      var off = (Math.random() * 2 - 1) * 170;
+      var cx = clamp(lastPlatCx + off, w / 2 + 10, W - w / 2 - 10);
+      x = cx - w / 2;
+    } else {
+      x = 12 + Math.random() * (W - w - 24);
+    }
+    var r = Math.random();
+    var type = 'ice';
+    if(!chained && alt > 2600 && r < 0.5) type = 'crack';
+    else if(alt > 500 && r < 0.30) type = 'move';
+    var p = {
+      x: x, baseX: x, y: y, w: w, h: 16, type: type,
+      phase: Math.random() * 6.28,
+      range: type === 'move' ? 26 + Math.random() * 26 : 0,
+      speed: 0.7 + Math.random() * 0.7,
+      spring: false, springDx: 0, springT: 0,
+      broken: false, fallV: 0, seed: Math.random() * 100
+    };
+    if(type === 'ice' && alt > 350 && Math.random() < 0.13){
+      p.spring = true;
+      p.springDx = 22 + Math.random() * (w - 44);
+    }
+    return p;
+  }
+
+  function genWorld(uptoY){
+    while(nextPlatY > uptoY){
+      var alt = (START_Y - nextPlatY) * M_PER_PX;
+      var step = makePlatform(nextPlatY, true);
+      platforms.push(step);
+      lastPlatCx = step.x + step.w / 2;
+      /* sometimes a bonus platform floats near the chain step: an
+         extra landing, or cracked ice to beware of, never required */
+      if(Math.random() < 0.16){
+        platforms.push(makePlatform(nextPlatY - 6 - Math.random() * 30, false));
+      }
+      var gap = 60 + Math.random() * 24 + Math.min(8, alt / 1800);
+      nextPlatY -= gap;
+    }
+    while(nextRocketY > uptoY){
+      pickups.push({ x: 60 + Math.random() * (W - 120), y: nextRocketY - 26, taken: false, ph: Math.random() * 6.28 });
+      nextRocketY -= 620 + Math.random() * 320;
+    }
+    while(nextLanternY > uptoY){
+      lanterns.push({ x: 30 + Math.random() * (W - 60), y: nextLanternY, ph: Math.random() * 6.28 });
+      nextLanternY -= 430 + Math.random() * 260;
+    }
+  }
+
+  function reset(){
+    camY = 0;
+    bounces = 0; heightM = 0; maxAltPx = 0; bestStandY = START_Y;
+    runLevels = []; runLevelXP = 0;
+    clearLevelBanner();
+    charges = 0; rocketT = 0; squashT = 0;
+    player.x = W/2; player.y = START_Y; player.vx = 0; player.vy = 0;
+    platforms = []; pickups = []; lanterns = []; particles = [];
+    /* the first platforms are hand-placed so the opening bounces are kind */
+    platforms.push({ x: W/2 - 90, baseX: W/2 - 90, y: GROUND_Y - 74, w: 120, h: 16, type:'ice', phase:0, range:0, speed:0, spring:false, springDx:0, springT:0, broken:false, fallV:0, seed:3 });
+    platforms.push({ x: W/2 + 60, baseX: W/2 + 60, y: GROUND_Y - 148, w: 112, h: 16, type:'ice', phase:0, range:0, speed:0, spring:false, springDx:0, springT:0, broken:false, fallV:0, seed:5 });
+    platforms.push({ x: W/2 - 190, baseX: W/2 - 190, y: GROUND_Y - 222, w: 112, h: 16, type:'ice', phase:0, range:0, speed:0, spring:true, springDx:56, springT:0, broken:false, fallV:0, seed:8 });
+    nextPlatY = GROUND_Y - 300;
+    lastPlatCx = (W / 2 - 190) + 56; /* centre of the last hand-placed platform */
+    nextRocketY = START_Y - 520;
+    nextLanternY = START_Y - 300;
+    genWorld(-H);
+  }
+
+  function fireRocket(){
+    if(state !== 'playing' || rocketT > 0 || charges <= 0) return;
+    charges--;
+    rocketT = 1.15;
+    sfx.rocket();
+    unlock('rocket');
+    updateHud();
+  }
+
+  function doBounce(p){
+    var onSpring = p.spring && Math.abs(player.x - (p.x + p.springDx)) < 27;
+    player.y = p.y;
+    if(p.y < bestStandY) bestStandY = p.y;
+    if(onSpring){
+      player.vy = -SPRING_V;
+      p.springT = 0.22;
+      sfx.spring();
+    } else {
+      player.vy = -BOUNCE_V;
+      sfx.bounce();
+    }
+    squashT = 0.14;
+    bounces++;
+    unlock('first');
+    /* a little puff of snow where the boots land */
+    for(var i = 0; i < 5; i++){
+      particles.push({
+        x: player.x + (Math.random() * 36 - 18), y: p.y + 2,
+        vx: (Math.random() * 70 - 35), vy: -20 - Math.random() * 40,
+        t: 0, life: 0.45, r: 2 + Math.random() * 2.6, kind: 'snow'
+      });
+    }
+    updateHud();
+  }
+
+  var overTitle = document.getElementById('overTitle');
+  var overSub = document.getElementById('overSub');
+  function endGame(kind){
+    var prevBest = best;
+    if(heightM > best) best = heightM;
+    persistSave();
+    state = kind === 'moon' ? 'won' : 'over';
+    if(kind === 'moon'){
+      overTitle.textContent = 'You reached the moon! 🌙';
+      overSub.textContent = 'Touched down on the moon. What a climb!';
+      unlock('moon');
+      sfx.win();
+    } else if(kind === 'fall'){
+      overTitle.textContent = 'Slipped off!';
+      overSub.textContent = 'Lofi slipped off the ice at ' + fmtM(heightM) + ' m. The moon is still up there.';
+      sfx.gameOver();
+    }
+    document.getElementById('resHeight').textContent = fmtM(heightM);
+    document.getElementById('resBounces').textContent = bounces;
+    document.getElementById('resBest').textContent = fmtM(best);
+    document.getElementById('newBest').className = 'newbest' + (heightM > prevBest && heightM > 0 ? ' show' : '');
+    var overLevelsEl = document.getElementById('overLevels');
+    if(overLevelsEl){
+      if(runLevels.length){
+        overLevelsEl.hidden = false;
+        overLevelsEl.textContent = 'Levels completed this run: ' + runLevels.map(function(r){ return 'Level ' + r.n + ' (+' + r.xp + ' XP)'; }).join(' · ') + ' · +' + runLevelXP + ' XP in total';
+      } else {
+        overLevelsEl.hidden = true;
+        overLevelsEl.textContent = '';
+      }
+    }
+    clearLevelBanner();
+    hudIn.classList.add('hud-hidden');
+    moonMeter.classList.add('hud-hidden');
+    hideReminder();
+    overOverlay.hidden = false;
+    updateHud();
+  }
+  /* ---------- start-of-run reminder ----------
+     Every run opens with the goal and the controls on a small card;
+     it fades on its own after a few seconds and never blocks play. */
+  var remindTimer = null, remindHideTimer = null;
+  function showReminder(){
+    clearTimeout(remindTimer);
+    clearTimeout(remindHideTimer);
+    remindEl.hidden = false;
+    remindEl.classList.remove('hide');
+    remindTimer = setTimeout(function(){
+      remindEl.classList.add('hide');
+      remindHideTimer = setTimeout(function(){ remindEl.hidden = true; }, reduced ? 60 : 480);
+    }, 2900);
+  }
+  function hideReminder(){
+    clearTimeout(remindTimer);
+    clearTimeout(remindHideTimer);
+    remindEl.hidden = true;
+    remindEl.classList.remove('hide');
+  }
+
+  function startGame(){
+    reset();
+    state = 'playing';
+    player.vy = -BOUNCE_V;
+    hudIn.classList.remove('hud-hidden');
+    moonMeter.classList.remove('hud-hidden');
+    startOverlay.hidden = true;
+    overOverlay.hidden = true;
+    pauseOverlay.hidden = true;
+    showReminder();
+    sfx.start();
+    startMusic();
+    updateHud();
+  }
+  function togglePause(){
+    if(state === 'playing'){ state = 'paused'; pauseOverlay.hidden = false; sfx.click(); }
+    else if(state === 'paused'){ state = 'playing'; pauseOverlay.hidden = true; sfx.click(); }
+  }
+
+  /* ---------- update ---------- */
+  function update(dt, t){
+    if(state === 'ready'){
+      return;
+    }
+    if(state !== 'playing') return;
+
+    /* steering: velocity eases toward the held direction */
+    var dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    var target = dir * MOVE_V * (rocketT > 0 ? 0.72 : 1);
+    var ease = 1 - Math.pow(0.0001, dt);
+    player.vx += (target - player.vx) * Math.min(1, ease);
+
+    if(rocketT > 0){
+      rocketT -= dt;
+      player.vy = -1290;
+      if(Math.random() < 0.9){
+        particles.push({
+          x: player.x + (Math.random() * 16 - 8), y: player.y + 26,
+          vx: (Math.random() * 30 - 15), vy: 190 + Math.random() * 90,
+          t: 0, life: 0.32 + Math.random() * 0.2, r: 4 + Math.random() * 5, kind: 'flame'
+        });
+      }
+    } else {
+      player.vy += GRAV * dt;
+      if(player.vy > 980) player.vy = 980;
+    }
+
+    var prevFeet = player.y;
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+    /* the screen wraps at the edges */
+    if(player.x < -30) player.x = W + 30;
+    if(player.x > W + 30) player.x = -30;
+
+    /* platforms drift; cracked ones fall away once broken */
+    var i, p;
+    for(i = 0; i < platforms.length; i++){
+      p = platforms[i];
+      if(p.range) p.x = p.baseX + Math.sin(t * p.speed + p.phase) * p.range;
+      if(p.springT > 0) p.springT -= dt;
+      if(p.broken){ p.fallV += 1400 * dt; p.y += p.fallV * dt; }
+    }
+
+    /* landing: only while falling, feet crossing a platform top */
+    if(player.vy >= 0 && rocketT <= 0){
+      var feet = player.y, prev = prevFeet;
+      /* the snow bank itself, before the camera has risen */
+      if(camY === 0 && feet >= GROUND_Y && prev <= GROUND_Y + 4){
+        player.y = GROUND_Y;
+        player.vy = -BOUNCE_V;
+        squashT = 0.14; bounces++;
+        sfx.bounce();
+      }
+      for(i = 0; i < platforms.length; i++){
+        p = platforms[i];
+        if(p.broken) continue;
+        if(feet >= p.y && prev <= p.y + 6 && player.x > p.x - 20 && player.x < p.x + p.w + 20){
+          if(p.type === 'crack'){
+            p.broken = true; p.fallV = 30;
+            sfx.crack();
+            continue;
+          }
+          doBounce(p);
+          break;
+        }
+      }
+    }
+
+    /* rocket pickups */
+    for(i = 0; i < pickups.length; i++){
+      var pk = pickups[i];
+      if(pk.taken) continue;
+      var dx = player.x - pk.x, dy = (player.y - 24) - pk.y;
+      if(dx * dx + dy * dy < 36 * 36){
+        pk.taken = true;
+        charges++;
+        sfx.pickup();
+        updateHud();
+      }
+    }
+
+    /* the camera only rises, keeping Lofi around 42% down the frame */
+    var targetCam = player.y - H * 0.42;
+    if(targetCam < camY) camY = targetCam;
+    genWorld(camY - 140);
+    platforms = platforms.filter(function(pl){ return pl.y < camY + H + 90; });
+    pickups = pickups.filter(function(pk2){ return !pk2.taken && pk2.y < camY + H + 60; });
+    lanterns = lanterns.filter(function(l){ return l.y < camY + H + 60 && l.y > camY - 200; });
+
+    /* Height counts only where Lofi has actually bounced: the apex of
+       a plain snow-bank bounce would otherwise hand out free metres. */
+    maxAltPx = START_Y - bestStandY;
+    heightM = Math.floor(maxAltPx * M_PER_PX);
+    if(heightM >= 500) unlock('m500');
+    if(heightM >= 2000) unlock('m2000');
+    checkLevels();
+    if(altPx() >= MOON_PX){ endGame('moon'); return; }
+
+    /* slipped below the screen */
+    if(player.y - camY > H + 120){ endGame('fall'); return; }
+
+    if(squashT > 0) squashT -= dt;
+    for(i = particles.length - 1; i >= 0; i--){
+      var pt = particles[i];
+      pt.t += dt;
+      if(pt.kind === 'confetti'){ pt.vy += 320 * dt; pt.rot += pt.vr * dt; }
+      pt.x += pt.vx * dt; pt.y += pt.vy * dt;
+      if(pt.t >= pt.life) particles.splice(i, 1);
+    }
+    updateHud();
+  }
+
+  function updateHud(){
+    hudHeight.textContent = fmtM(heightM);
+    hudRockets.textContent = charges;
+    hudBest.textContent = fmtM(best);
+    mmFill.style.width = clamp(heightM / MOON_M * 100, 0, 100) + '%';
+    if(mmLevelEl){
+      if(level >= LEVEL_ENDS.length) mmLevelEl.textContent = 'ALL 10 LEVELS COMPLETE · ' + fmtM(heightM) + ' M';
+      else mmLevelEl.textContent = 'Level ' + (level + 1) + ' · ' + fmtM(heightM) + ' / ' + fmtM(LEVEL_ENDS[level]) + ' m';
+    }
+    for(var ti2 = 0; ti2 < mmTickEls.length; ti2++) mmTickEls[ti2].classList.toggle('done', ti2 < level);
+  }
+
+  /* ---------- drawing ---------- */
+  var snow = [];
+  for(var si = 0; si < 34; si++){
+    snow.push({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 1.6, s: 10 + Math.random() * 18, ph: Math.random() * 6.28 });
+  }
+  var stars = [];
+  for(var sti = 0; sti < 90; sti++){
+    stars.push({ x: Math.random() * W, y: Math.random() * 4600, r: 0.7 + Math.random() * 1.4, ph: Math.random() * 6.28 });
+  }
+  function skyColors(){
+    var a = maxAltPx;
+    var dusk = clamp(a / 1300, 0, 1);
+    var night = clamp((a - 1300) / 1700, 0, 1);
+    function mix(c1, c2, c3){
+      return [
+        Math.round(lerp(lerp(c1[0], c2[0], dusk), c3[0], night)),
+        Math.round(lerp(lerp(c1[1], c2[1], dusk), c3[1], night)),
+        Math.round(lerp(lerp(c1[2], c2[2], dusk), c3[2], night))
+      ];
+    }
+    /* each finished level also nudges the sky a little duskier and
+       bluer, and lets the night (and its stars) creep in slightly
+       sooner, so the climb deepens level by level as well as by height */
+    var lvlT = clamp(level / LEVEL_ENDS.length, 0, 1);
+    function deepen(c, target, t){
+      return [
+        Math.round(lerp(c[0], target[0], t)),
+        Math.round(lerp(c[1], target[1], t)),
+        Math.round(lerp(c[2], target[2], t))
+      ];
+    }
+    return {
+      top: deepen(mix([140, 196, 240], [84, 118, 208], [7, 18, 62]), [26, 54, 142], lvlT * 0.3),
+      bot: deepen(mix([238, 247, 253], [196, 178, 232], [38, 62, 140]), [96, 116, 196], lvlT * 0.3),
+      night: clamp(night + lvlT * 0.35, 0, 1)
+    };
+  }
+  function rgb(c){ return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+
+  /* soft glow sprite, pre-rendered once and drawn under the rocket
+     pickups so they glow without any per-frame shadowBlur */
+  var glowSprite = (function(){
+    var c = document.createElement('canvas');
+    c.width = 96; c.height = 96;
+    var gg = c.getContext('2d');
+    var gr = gg.createRadialGradient(48, 48, 2, 48, 48, 48);
+    gr.addColorStop(0, 'rgba(255,196,80,0.55)');
+    gr.addColorStop(1, 'rgba(255,196,80,0)');
+    gg.fillStyle = gr;
+    gg.fillRect(0, 0, 96, 96);
+    return c;
+  })();
+
+  function drawPine(x, baseY, s){
+    ctx.fillStyle = '#7c4f2a';
+    ctx.fillRect(x - 2 * s, baseY - 8 * s, 4 * s, 8 * s);
+    ctx.fillStyle = '#2f8f4e';
+    for(var i = 0; i < 3; i++){
+      var wdt = (17 - i * 3.5) * s, ty = baseY - (9 + i * 7) * s;
+      ctx.beginPath();
+      ctx.moveTo(x - wdt / 2, ty); ctx.lineTo(x + wdt / 2, ty); ctx.lineTo(x, ty - 9 * s);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(x - 3 * s, baseY - 29 * s); ctx.lineTo(x + 3 * s, baseY - 29 * s); ctx.lineTo(x, baseY - 35 * s);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawPlatform(p){
+    var y = p.y - camY;
+    if(y < -30 || y > H + 30) return;
+    var x = p.x;
+    ctx.save();
+    if(p.broken) ctx.globalAlpha = clamp(1 - p.fallV / 500, 0.25, 1);
+    if(p.type === 'crack'){
+      var g0 = ctx.createLinearGradient(0, y, 0, y + p.h);
+      g0.addColorStop(0, '#eef7fb'); g0.addColorStop(1, '#b9d4e8');
+      ctx.fillStyle = g0;
+      roundRect(x, y, p.w, p.h, 6); ctx.fill();
+      ctx.strokeStyle = 'rgba(90,130,170,0.65)'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(x + p.w * 0.3, y + 2); ctx.lineTo(x + p.w * 0.42, y + 8); ctx.lineTo(x + p.w * 0.36, y + p.h - 2);
+      ctx.moveTo(x + p.w * 0.62, y + 3); ctx.lineTo(x + p.w * 0.55, y + 9); ctx.lineTo(x + p.w * 0.68, y + p.h - 3);
+      ctx.stroke();
+    } else {
+      var g = ctx.createLinearGradient(0, y, 0, y + p.h);
+      g.addColorStop(0, '#7fe0ff'); g.addColorStop(0.55, '#29b6f6'); g.addColorStop(1, '#0288d1');
+      ctx.fillStyle = g;
+      roundRect(x, y, p.w, p.h, 6); ctx.fill();
+      /* pixel facets */
+      ctx.save();
+      roundRect(x, y, p.w, p.h, 6); ctx.clip();
+      ctx.fillStyle = 'rgba(255,255,255,0.13)';
+      for(var fx = x + 4; fx < x + p.w; fx += 14) ctx.fillRect(fx, y, 6, p.h);
+      ctx.fillStyle = 'rgba(0,42,122,0.16)';
+      ctx.fillRect(x, y + p.h - 5, p.w, 5);
+      ctx.restore();
+      ctx.strokeStyle = '#002a7a'; ctx.lineWidth = 2.4;
+      roundRect(x, y, p.w, p.h, 6); ctx.stroke();
+      /* snow cap */
+      ctx.fillStyle = '#ffffff';
+      roundRect(x + 2, y - 3, p.w - 4, 8, 4); ctx.fill();
+    }
+    if(p.spring){
+      var sx = x + p.springDx, sy = y;
+      var squash = p.springT > 0 ? 0.45 : 1;
+      var coilH = 12 * squash;
+      ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(sx - 8, sy - 2);
+      ctx.lineTo(sx + 8, sy - 2 - coilH * 0.33);
+      ctx.lineTo(sx - 8, sy - 2 - coilH * 0.66);
+      ctx.lineTo(sx + 8, sy - 2 - coilH);
+      ctx.stroke();
+      ctx.fillStyle = '#e8452c';
+      roundRect(sx - 13, sy - 6 - coilH, 26, 6, 3); ctx.fill();
+      ctx.strokeStyle = '#8f2d1d'; ctx.lineWidth = 1.6;
+      roundRect(sx - 13, sy - 6 - coilH, 26, 6, 3); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawRocketShape(x, y, ang, scale){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(ang);
+    ctx.scale(scale, scale);
+    /* flame */
+    ctx.fillStyle = '#ff9a3c';
+    ctx.beginPath();
+    ctx.moveTo(-4, 14); ctx.lineTo(0, 24 + Math.random() * 5); ctx.lineTo(4, 14);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffd34d';
+    ctx.beginPath();
+    ctx.moveTo(-2, 14); ctx.lineTo(0, 19 + Math.random() * 3); ctx.lineTo(2, 14);
+    ctx.closePath(); ctx.fill();
+    /* body */
+    ctx.fillStyle = '#e8452c';
+    roundRect(-8, -16, 16, 30, 8); ctx.fill();
+    ctx.fillStyle = '#f4fbff';
+    roundRect(-8, -6, 16, 12, 4); ctx.fill();
+    ctx.fillStyle = '#29b6f6';
+    ctx.beginPath(); ctx.arc(0, -9, 3.6, 0, 6.29); ctx.fill();
+    /* fins */
+    ctx.fillStyle = '#c22e1f';
+    ctx.beginPath();
+    ctx.moveTo(-8, 6); ctx.lineTo(-14, 15); ctx.lineTo(-8, 15);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(8, 6); ctx.lineTo(14, 15); ctx.lineTo(8, 15);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawLofi(t){
+    var cx = player.x, cy = player.y - camY - 26;
+    var tilt = clamp(player.vx * 0.00055, -0.26, 0.26);
+    var sq = squashT > 0 ? 1 - Math.sin((squashT / 0.14) * Math.PI) * 0.16 : 1;
+    var bob = (state === 'ready' && !reduced) ? Math.sin(t * 2.4) * 1.6 : 0;
+    if(rocketT > 0) drawRocketShape(cx, cy + 40, 0, 0.9);
+    ctx.save();
+    ctx.translate(cx, cy + bob);
+    ctx.rotate(reduced ? 0 : tilt);
+    ctx.scale(2 - sq > 1.14 ? 1.14 : 2 - sq, sq);
+    if(!yetiSticker.ready){
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(0, 0, 28, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#4aa3e0';
+      ctx.beginPath(); ctx.arc(-9, -5, 3.8, 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.arc(9, -5, 3.8, 0, 6.29); ctx.fill();
+    } else {
+      /* 68px across (was 58): drawn higher so the feet still land
+         at the same point and the bounce/landing maths is untouched */
+      drawSticker(yetiSticker, -34, -38, 68, 68);
+    }
+    ctx.restore();
+  }
+
+  function draw(t){
+    ctx.clearRect(0, 0, W, H);
+    var sky = skyColors();
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, rgb(sky.top));
+    g.addColorStop(1, rgb(sky.bot));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    /* stars fade in as the sky darkens */
+    if(sky.night > 0.03){
+      ctx.save();
+      ctx.globalAlpha = sky.night * 0.9;
+      ctx.fillStyle = '#ffffff';
+      for(var i = 0; i < stars.length; i++){
+        var st = stars[i];
+        var sy = ((st.y + camY * 0.92) % (H + 40) + H + 40) % (H + 40) - 20;
+        var tw = 0.55 + 0.45 * Math.sin(t * 1.7 + st.ph);
+        ctx.globalAlpha = sky.night * 0.9 * tw;
+        ctx.beginPath(); ctx.arc(st.x, sy, st.r, 0, 6.29); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    /* the moon, waiting at the top of the climb */
+    var moonWY = START_Y - MOON_PX - 210;
+    var moonSY = moonWY - camY;
+    if(moonSY > -190){
+      var mx = W * 0.68, mr = 74;
+      ctx.save();
+      var halo = ctx.createRadialGradient(mx, moonSY, mr * 0.4, mx, moonSY, mr * 2.1);
+      halo.addColorStop(0, 'rgba(255,240,190,' + (0.45 + 0.45 * sky.night).toFixed(3) + ')');
+      halo.addColorStop(1, 'rgba(255,240,190,0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(mx - mr * 2.1, moonSY - mr * 2.1, mr * 4.2, mr * 4.2);
+      ctx.fillStyle = '#f7e7b0';
+      ctx.beginPath(); ctx.arc(mx, moonSY, mr, 0, 6.29); ctx.fill();
+      ctx.fillStyle = 'rgba(214,186,110,0.5)';
+      ctx.beginPath(); ctx.arc(mx - 24, moonSY - 16, 11, 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.arc(mx + 18, moonSY + 22, 8, 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.arc(mx + 30, moonSY - 30, 6, 0, 6.29); ctx.fill();
+      ctx.fillStyle = rgb(sky.top);
+      ctx.beginPath(); ctx.arc(mx + 44, moonSY - 26, mr * 0.86, 0, 6.29); ctx.fill();
+      ctx.restore();
+    }
+
+    /* distant ridge, slow parallax */
+    ctx.fillStyle = sky.night > 0.5 ? 'rgba(16,34,92,0.55)' : 'rgba(120,170,220,0.5)';
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    var ridgeOff = (camY * 0.24) % 260;
+    for(var rx = -260; rx <= W + 260; rx += 130){
+      var peakY = H - 60 - ((hash(rx * 0.37 + Math.floor((camY * 0.24) / 260) * 13) * 70));
+      ctx.lineTo(rx + ridgeOff % 130, peakY + 60);
+      ctx.lineTo(rx + 65 + ridgeOff % 130, peakY);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+
+    /* lanterns drifting in the mid-sky */
+    for(var li = 0; li < lanterns.length; li++){
+      var l = lanterns[li];
+      var ly = l.y - camY + Math.sin(t * 0.9 + l.ph) * 5;
+      if(ly < -20 || ly > H + 20) continue;
+      ctx.save();
+      var lg = ctx.createRadialGradient(l.x, ly, 1, l.x, ly, 17);
+      lg.addColorStop(0, 'rgba(255,205,90,0.85)');
+      lg.addColorStop(1, 'rgba(255,205,90,0)');
+      ctx.fillStyle = lg;
+      ctx.fillRect(l.x - 17, ly - 17, 34, 34);
+      ctx.fillStyle = '#ffb52e';
+      roundRect(l.x - 4.5, ly - 6, 9, 12, 3); ctx.fill();
+      ctx.fillStyle = '#8a5f04';
+      ctx.fillRect(l.x - 3, ly - 8.5, 6, 2.6);
+      ctx.restore();
+    }
+
+    /* the snow bank at the bottom of the world */
+    var gy = GROUND_Y - camY;
+    if(gy < H + 60){
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, gy, W, H - gy + 60);
+      ctx.fillStyle = '#dceefb';
+      ctx.fillRect(0, gy, W, 7);
+      drawPine(74, gy + 4, 1.15);
+      drawPine(W - 84, gy + 4, 0.95);
+      drawPine(W - 190, gy + 4, 0.7);
+    }
+
+    for(var pi = 0; pi < platforms.length; pi++) drawPlatform(platforms[pi]);
+
+    /* rocket pickups bobbing above the platforms */
+    for(var ri = 0; ri < pickups.length; ri++){
+      var pk = pickups[ri];
+      var py = pk.y - camY + Math.sin(t * 2 + pk.ph) * 4;
+      if(py < -40 || py > H + 40) continue;
+      ctx.drawImage(glowSprite, pk.x - 36, py - 36, 72, 72);
+      drawRocketShape(pk.x, py, Math.sin(t * 1.4 + pk.ph) * 0.14, 0.95);
+    }
+
+    /* particles: snow puffs and rocket flames */
+    for(var qi = 0; qi < particles.length; qi++){
+      var pt = particles[qi];
+      var pa = 1 - pt.t / pt.life;
+      ctx.save();
+      ctx.globalAlpha = pa * 0.9;
+      if(pt.kind === 'flame'){
+        ctx.fillStyle = pt.t / pt.life < 0.4 ? '#ff9a3c' : '#e86a2c';
+      } else if(pt.kind === 'spark'){
+        ctx.fillStyle = pt.color || '#ffd34d';
+      } else if(pt.kind === 'confetti'){
+        ctx.fillStyle = pt.color || '#ff5c8a';
+      } else {
+        ctx.fillStyle = '#ffffff';
+      }
+      if(pt.kind === 'confetti'){
+        ctx.translate(pt.x, pt.y - camY);
+        ctx.rotate(pt.rot || 0);
+        ctx.fillRect(-pt.r, -pt.r * 0.55, pt.r * 2, pt.r * 1.1);
+      } else {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y - camY, pt.r * (pt.kind === 'flame' ? pa : 1), 0, 6.29);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    drawLofi(t);
+
+    /* light snowfall over everything */
+    if(!reduced){
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      snow.forEach(function(s){
+        var y = (s.y + t * s.s) % H;
+        var x = s.x + Math.sin(t * 0.6 + s.ph) * 8;
+        ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.29); ctx.fill();
+      });
+    }
+  }
+
+  /* ---------- loop ---------- */
+  var last = 0, elapsed = 0;
+  function loop(ts){
+    var t = ts / 1000;
+    var dt = Math.min(0.033, last ? t - last : 0.016);
+    last = t;
+    elapsed = t;
+    update(dt, elapsed);
+    draw(elapsed);
+    requestAnimationFrame(loop);
+  }
+  reset();
+  updateHud();
+  requestAnimationFrame(loop);
+
+  /* ---------- input ---------- */
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+  document.getElementById('resumeBtn').addEventListener('click', togglePause);
+  document.getElementById('pauseClose').addEventListener('click', togglePause);
+  document.getElementById('pauseBtn').addEventListener('click', function(){
+    if(state === 'playing' || state === 'paused') togglePause();
+  });
+  document.getElementById('rocketBtn').addEventListener('click', function(){
+    if(state === 'ready'){ startGame(); return; }
+    fireRocket();
+  });
+
+  function bindSteer(id, key){
+    var el = document.getElementById(id);
+    function on(e){
+      e.preventDefault();
+      if(state === 'ready'){ startGame(); }
+      keys[key] = true;
+      el.classList.add('held');
+    }
+    function off(e){
+      if(e) e.preventDefault();
+      keys[key] = false;
+      el.classList.remove('held');
+    }
+    el.addEventListener('pointerdown', on);
+    el.addEventListener('pointerup', off);
+    el.addEventListener('pointerleave', off);
+    el.addEventListener('pointercancel', off);
+    el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  }
+  bindSteer('leftBtn', 'left');
+  bindSteer('rightBtn', 'right');
+
+  document.addEventListener('keydown', function(e){
+    var code = e.code;
+    if(code === 'Escape' && settingsOverlay && !settingsOverlay.hidden){
+      e.preventDefault();
+      closeSettings();
+      return;
+    }
+    if(code === 'ArrowLeft' || code === 'KeyA'){
+      e.preventDefault();
+      if(state === 'ready') startGame();
+      keys.left = true;
+    } else if(code === 'ArrowRight' || code === 'KeyD'){
+      e.preventDefault();
+      if(state === 'ready') startGame();
+      keys.right = true;
+    } else if(code === 'ArrowUp' || code === 'KeyW'){
+      e.preventDefault();
+      fireRocket();
+    } else if(code === 'Space'){
+      e.preventDefault();
+      if(state === 'ready' || state === 'over' || state === 'won') startGame();
+      else fireRocket();
+    } else if(code === 'KeyP' || code === 'Escape'){
+      if(state === 'playing' || state === 'paused') togglePause();
+    } else if(code === 'KeyM'){
+      setMuted(!muted);
+      if(!muted) sfx.click();
+    } else if(code === 'Enter'){
+      if(state === 'over' || state === 'won' || state === 'ready') startGame();
+    }
+  });
+  document.addEventListener('keyup', function(e){
+    if(e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+    if(e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+  });
+  window.addEventListener('blur', function(){ keys.left = false; keys.right = false; });
+
+  /* touch on the sky: drag steers, a clean tap fires a rocket */
+  var tX = null;
+  canvas.addEventListener('touchstart', function(e){
+    tX = e.changedTouches[0].clientX;
+  }, { passive: true });
+  canvas.addEventListener('touchmove', function(e){
+    if(tX === null || state !== 'playing') return;
+    var rect = canvas.getBoundingClientRect();
+    var cx = (e.changedTouches[0].clientX - rect.left) / rect.width * W;
+    keys.left = cx < player.x - 14;
+    keys.right = cx > player.x + 14;
+  }, { passive: true });
+  canvas.addEventListener('touchend', function(e){
+    var wasTap = tX !== null && Math.abs(e.changedTouches[0].clientX - tX) < 14;
+    tX = null;
+    keys.left = false; keys.right = false;
+    if(wasTap){
+      if(state === 'ready') startGame();
+      else fireRocket();
+    }
+  }, { passive: true });
+  canvas.addEventListener('mousedown', function(){
+    if(state === 'ready') startGame();
+    else fireRocket();
+  });
+
+  /* ---------- settings panel ---------- */
+  var settingsOverlay = document.getElementById('settingsOverlay');
+  var settingsBtn = document.getElementById('settingsBtn');
+  var musicVolEl = document.getElementById('musicVol');
+  var soundVolEl = document.getElementById('soundVol');
+  var tipsToggle = document.getElementById('tipsToggle');
+  var noticeBtn = document.getElementById('noticeBtn');
+  var noticeText = document.getElementById('noticeText');
+  var noticeBadge = document.getElementById('noticeBadge');
+  var connectBtn = document.getElementById('connectBtn');
+  var walletStatus = document.getElementById('walletStatus');
+
+  function paintRange(el){
+    var p = Number(el.value);
+    el.style.background = 'linear-gradient(90deg,#4aa8e8 ' + p + '%,#c3dcee ' + p + '%)';
+  }
+  function syncVolumes(){
+    soundVolVal = Number(soundVolEl.value) / 100;
+    musicVolVal = Number(musicVolEl.value) / 100;
+    applyVolumes();
+    paintRange(soundVolEl);
+    paintRange(musicVolEl);
+    persistSave();
+  }
+  musicVolEl.addEventListener('input', function(){ syncVolumes(); startMusic(); });
+  soundVolEl.addEventListener('input', syncVolumes);
+  /* restore the saved slider positions before the first sync */
+  if(typeof saveData.musicVol === 'number') musicVolEl.value = saveData.musicVol;
+  if(typeof saveData.soundVol === 'number') soundVolEl.value = saveData.soundVol;
+  syncVolumes();
+  /* restore the saved Game tips switch state */
+  tipsToggle.classList.toggle('on', tipsOn);
+  tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+
+  function openSettings(){
+    settingsOverlay.hidden = false;
+    if(state === 'playing') togglePause();
+    sfx.click();
+  }
+  function closeSettings(){
+    settingsOverlay.hidden = true;
+    sfx.click();
+  }
+  settingsBtn.addEventListener('click', openSettings);
+  document.getElementById('settingsOk').addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', function(e){
+    if(e.target === settingsOverlay) closeSettings();
+  });
+
+  tipsToggle.addEventListener('click', function(){
+    tipsOn = !tipsOn;
+    tipsToggle.classList.toggle('on', tipsOn);
+    tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+    persistSave();
+    sfx.click();
+  });
+  noticeBtn.addEventListener('click', function(){
+    var show = noticeText.hidden;
+    noticeText.hidden = !show;
+    if(show && noticeBadge) noticeBadge.style.display = 'none';
+    sfx.click();
+  });
+
+  /* ---------- SUI wallet: Wallet Standard discovery + connect ----------
+     Wallets register themselves with the page; Connect asks the first
+     SUI wallet found to connect and shows the account on the button.
+     With no wallet installed the panel says so, plainly. */
+  var suiWallets = [], connectedWallet = null, connectedAddress = '';
+  var wsApi = { registerWallet: function(w){ if(w && suiWallets.indexOf(w) < 0) suiWallets.push(w); } };
+  try{
+    window.addEventListener('wallet-standard:register-wallet', function(e){
+      if(e.detail && typeof e.detail.register === 'function'){
+        try{ e.detail.register(wsApi); }catch(err){}
+      }
+    });
+    window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: wsApi }));
+  }catch(e){}
+  function shortAddr(a){ return a ? a.slice(0, 6) + '…' + a.slice(-4) : ''; }
+  connectBtn.addEventListener('click', function(){
+    if(connectedAddress){
+      if(connectedWallet && connectedWallet.features && connectedWallet.features['standard:disconnect']){
+        try{ connectedWallet.features['standard:disconnect'].disconnect(); }catch(e){}
+      }
+      connectedWallet = null; connectedAddress = '';
+      connectBtn.textContent = 'Connect';
+      connectBtn.classList.remove('connected');
+      walletStatus.textContent = 'Wallet disconnected.';
+      return;
+    }
+    var w = null;
+    for(var i = 0; i < suiWallets.length; i++){
+      var cand = suiWallets[i];
+      if(cand.features && cand.features['standard:connect'] &&
+         (cand.chains || []).some(function(c){ return String(c).indexOf('sui:') === 0; })){ w = cand; break; }
+    }
+    if(!w){
+      walletStatus.textContent = 'No SUI wallet found in this browser. Install a SUI wallet extension, then tap Connect again.';
+      return;
+    }
+    walletStatus.textContent = 'Connecting… approve it in your wallet.';
+    w.features['standard:connect'].connect().then(function(res){
+      var acc = res && res.accounts && res.accounts[0];
+      if(acc && acc.address){
+        connectedWallet = w; connectedAddress = acc.address;
+        connectBtn.textContent = shortAddr(acc.address);
+        connectBtn.classList.add('connected');
+        walletStatus.textContent = 'Connected with ' + (w.name || 'SUI wallet') + ' · ' + shortAddr(acc.address);
+        sfx.click();
+      } else {
+        walletStatus.textContent = 'The wallet returned no account.';
+      }
+    }).catch(function(){
+      walletStatus.textContent = 'Connection cancelled in the wallet.';
+    });
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden && state === 'playing') togglePause();
+  });
+})();
+</script>
+</body>
+</html>

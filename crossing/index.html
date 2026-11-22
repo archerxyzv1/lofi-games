@@ -1,0 +1,3506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/png" href="/lofigame/assets/favicon.png" />
+<title>Frozen Crossing</title>
+<style>
+  :root{
+    /* the logo's own stock: saturated ice blue, electric cyan, deep outline blue */
+    --blue:#0057ff;
+    --blue-deep:#003ecb;
+    --blue-dark:#002a7a;
+    --navy:#041e57;
+    --cyan:#00b7ff;
+    --ice:#59d8ff;
+    --ice-pale:#c9f1fc;
+    --ice-soft:#e8f6ff;
+    --ink:#0a2a5e;
+    --muted:#3d5a8a;
+    --gold:#ffc21f;
+    --gold-deep:#b97e06;
+    --pink:#ff5c8a;
+    --radius:16px;
+    /* chunky pixel facets laid over every ice button */
+    --facet:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 7px, rgba(255,255,255,0) 7px 14px),
+      repeating-linear-gradient(0deg, rgba(0,42,122,.08) 0 7px, rgba(0,42,122,0) 7px 14px);
+  }
+  html{ background:var(--navy); }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(760px 300px at 10% -60px, rgba(89,216,255,.5), transparent 70%),
+      radial-gradient(860px 340px at 92% -40px, rgba(0,183,255,.38), transparent 70%),
+      radial-gradient(600px 500px at 50% 115%, rgba(0,87,255,.5), transparent 70%),
+      linear-gradient(180deg,#031a4f 0%, #06389f 34%, #0057d9 62%, #0083e8 100%);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* one centered column for the whole page: header, stage, controls,
+     guide and achievements all share it, so on a PC the game sits in
+     the middle of the screen with the page background on both sides.
+     992 = the stage's native 960px canvas plus the side padding. */
+  .wrap{ max-width:992px; margin:0 auto; padding:20px 16px 44px; position:relative; }
+  /* vapour wisps */
+  .vapour{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .vapour span{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(190,235,255,.5), rgba(190,235,255,0));
+    filter:blur(6px);
+  }
+  .vapour span:nth-child(1){ width:420px;height:120px; left:-80px; top:16%; animation:drift 26s linear infinite; }
+  .vapour span:nth-child(2){ width:520px;height:140px; left:55%; top:52%; animation:drift 34s linear infinite reverse; }
+  .vapour span:nth-child(3){ width:340px;height:100px; left:30%; top:78%; animation:drift 30s linear infinite; }
+  @keyframes drift{ from{ transform:translateX(-30px);} to{ transform:translateX(70px);} }
+  @media (prefers-reduced-motion: reduce){
+    .vapour span{ animation:none !important; }
+  }
+  .head{ position:relative; z-index:1; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .head h1{ margin:0; line-height:0; }
+  /* The game's own logo art: icy bubble letters, transparency kept.
+     Frozen Crossing's wordmark is one long line, so it runs wider
+     than Lofi Dash's to stay readable. */
+  .logo{ width:min(480px,92vw); height:auto; display:block; filter:drop-shadow(0 4px 0 rgba(0,42,122,.45)) drop-shadow(0 12px 20px rgba(0,10,40,.4)); }
+  .head p{ margin:8px 0 0; color:#d6e9ff; font-size:16px; font-weight:600; line-height:1.45; max-width:560px; text-shadow:0 1px 3px rgba(0,20,70,.5); }
+  .head-actions{ flex:none; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  /* ---------- pixel-ice buttons: saturated ice gradient, chunky pixel
+     facets, a blocky bevel and a hard offset shadow in outline blue.
+     Shared by every button on the page so the whole UI is one family. */
+  .pix{
+    background:var(--facet), linear-gradient(180deg,#8fe8ff 0%,#29c5ff 48%,#0095f2 100%);
+    border:3px solid var(--blue-dark); color:#fff;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+    box-shadow:0 5px 0 var(--blue-dark),
+      inset 0 3px 0 rgba(255,255,255,.9),
+      inset 3px 0 0 rgba(255,255,255,.35),
+      inset -3px 0 0 rgba(0,42,122,.22),
+      inset 0 -7px 0 rgba(0,42,122,.28);
+  }
+  /* Sound: one small round frost icon button, no text pill */
+  .icon-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .icon-btn svg{ width:23px; height:23px; display:block; }
+  .icon-btn .slash{ display:none; }
+  .icon-btn.muted{ color:#dcefff; }
+  .icon-btn.muted .waves{ display:none; }
+  .icon-btn.muted .slash{ display:block; }
+  .icon-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .icon-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* header settings cube */
+  .cube-btn{
+    flex:none; width:46px; height:46px; border-radius:12px; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:inherit;
+  }
+  .cube-btn svg{ width:23px; height:23px; display:block; }
+  .cube-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9); }
+  .cube-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  /* Stage wrap: holds the game, the snow-icicle borders on its frame
+     and the ice rocks at its bottom corners */
+  .stage-wrap{ position:relative; z-index:1; margin-top:96px; margin-bottom:62px; }
+  /* Peeking sticker: only Lofi's head and raised paw show above the
+     game's top-right corner, tucked behind the snow ledge */
+  .peek{
+    position:absolute; right:24px; top:-98px; z-index:0;
+    width:112px; height:60px; overflow:hidden; pointer-events:none;
+    transform-origin:50% 100%;
+    animation:peekBob 3.4s ease-in-out infinite;
+  }
+  .peek img{
+    display:block; width:112px; height:auto;
+    filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 -2px 0 #fff);
+  }
+  @keyframes peekBob{
+    0%,100%{ transform:translateY(7px) rotate(-3deg); }
+    50%{ transform:translateY(0) rotate(-3deg); }
+  }
+  /* snow-icicle borders off the supplied sheet, laid on the game frame */
+  .snow-edge{
+    position:absolute; left:-8px; right:-8px; z-index:3; pointer-events:none;
+    background-repeat:no-repeat; background-size:100% 100%;
+  }
+  .snow-edge-top{ top:-56px; height:58px; background-image:url(/lofigame/assets/snow-86cf839d.webp); }
+  .snow-edge-bottom{ bottom:-48px; height:58px; background-image:url(/lofigame/assets/snow-22495d8e.webp); }
+  /* ice rocks off the supplied sheet, piled at the frame's bottom corners */
+  .stage-rock{
+    position:absolute; bottom:-62px; z-index:3; pointer-events:none;
+    filter:drop-shadow(0 5px 7px rgba(2,20,70,.4));
+  }
+  .rock-bl{ left:-14px; width:138px; }
+  .rock-br{ right:-14px; width:106px; }
+  /* In-game HUD: score chips inside the display corners, like a real game */
+  .hud-in{
+    position:absolute; top:8px; left:8px; right:8px; z-index:4;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+    pointer-events:none;
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  /* Score / XP chips belong to the live run only: they are gone on the
+     start screen and on the Game Over screen, never floating over panels */
+  .hud-in.hud-hidden{ opacity:0; visibility:hidden; }
+  .hud-group{ display:flex; gap:5px; flex-wrap:wrap; }
+  .hud-group.right{ justify-content:flex-end; }
+  /* compact chips: small text, tight padding, thin border, so the
+     whole HUD row stays a slim strip and never crowds the far bank */
+  .chip{
+    display:inline-flex; align-items:center; gap:4px;
+    background:rgba(255,255,255,.96); border:2px solid var(--blue-dark); border-radius:9px;
+    box-shadow:0 2px 0 var(--blue-dark);
+    padding:2px 8px; font-size:12px; font-weight:800; line-height:1.05;
+    font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;
+  }
+  .chip .unit{ font-size:10px; font-weight:700; color:var(--muted); }
+  .chip .hearts{ font-size:11px; letter-spacing:1px; }
+  /* soft glow on key HUD elements: gold and XP chips glow gently */
+  .hud-group.right .chip:nth-child(1){ box-shadow:0 2px 0 var(--blue-dark), 0 0 10px rgba(255,195,31,.45), 0 0 18px rgba(255,195,31,.18); }
+  .hud-group.right .chip:nth-child(3){ box-shadow:0 2px 0 var(--blue-dark), 0 0 10px rgba(255,195,31,.55), 0 0 20px rgba(255,170,0,.22); }
+  .levels-xp{ box-shadow:0 0 10px rgba(255,195,31,.35), inset 0 0 0 1px rgba(255,255,255,.6); }
+  .newbest.show{ box-shadow:0 2px 0 rgba(185,126,6,.8), 0 0 14px rgba(255,195,31,.55); }
+  /* Stage */
+  .stage{
+    position:relative; z-index:2;
+    border-radius:18px; overflow:hidden;
+    border:4px solid var(--blue-dark);
+    box-shadow:0 8px 0 var(--blue-dark), 0 26px 44px rgba(0,10,40,.45);
+    background:linear-gradient(180deg,#bfe0f7 0%, #dceefb 60%, #eef7fd 100%);
+  }
+  canvas{ display:block; width:100%; height:auto; aspect-ratio:16/9; touch-action:none; }
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    padding:18px; text-align:center;
+    background:rgba(190,228,255,.45);
+    backdrop-filter:blur(2px);
+  }
+  .overlay[hidden]{ display:none; }
+  .panel{
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:16px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.4);
+    padding:22px 24px; max-width:440px; width:100%;
+  }
+  .panel h2{ margin:0 0 6px; font-size:24px; font-weight:800; letter-spacing:-.01em; }
+  .panel p{ margin:0 0 14px; color:var(--muted); font-size:15px; line-height:1.5; }
+  /* snow-icicle strip laid across a panel's top edge */
+  .panel-snow{
+    position:absolute; top:-17px; left:-10px; right:-10px; height:38px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  /* primary button (Cross again, Resume, …): pixel ice */
+  .btn{
+    appearance:none; cursor:pointer; position:relative;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    min-height:50px; padding:12px 28px; border-radius:12px;
+    font-weight:800; font-size:17px;
+  }
+  .btn{ transition:transform .16s ease, box-shadow .16s ease, filter .16s ease; }
+  .btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  @media (hover:hover) and (prefers-reduced-motion: no-preference){
+    .btn:hover, .play-pill:hover{ transform:translateY(-2px); filter:brightness(1.06); }
+    .icon-btn:hover, .cube-btn:hover, .back-btn:hover{ transform:translateY(-2px); filter:brightness(1.07); }
+    .touch button:hover{ transform:translateY(-2px); filter:brightness(1.05); }
+    .profile-pill:hover{ transform:translateY(-1px); box-shadow:0 4px 0 var(--blue-dark), 0 0 12px rgba(89,216,255,.45); }
+    .ach li, .level-row{ transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+    .ach li:hover, .level-row:hover{ transform:translateY(-2px); box-shadow:0 4px 0 rgba(0,42,122,.12), 0 8px 18px rgba(0,60,140,.10); }
+    .guide, .ach, .levels{ transition:box-shadow .2s ease; }
+    .guide:hover, .ach:hover, .levels:hover{ box-shadow:0 6px 0 var(--blue-dark), 0 10px 24px rgba(0,40,110,.14); }
+    .set-connect:hover, .set-ok:hover, .switch:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+  }
+  .icon-btn, .cube-btn, .back-btn, .touch button, .profile-pill, .set-connect, .set-ok, .switch{ transition:transform .16s ease, box-shadow .16s ease, filter .16s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .btn, .icon-btn, .cube-btn, .back-btn, .touch button, .profile-pill, .ach li, .level-row{ transition:none !important; }
+    .btn:hover, .play-pill:hover, .icon-btn:hover, .cube-btn:hover, .touch button:hover, .ach li:hover, .level-row:hover{ transform:none !important; }
+  }
+  /* ---------- Game Over + Pause: one simple frost panel. Clean white
+     ice block, the run's numbers in three plain tiles, and the action
+     button flanked by ice rocks off the supplied sheet. ---------- */
+  #overOverlay{ background:rgba(3,22,70,.45); backdrop-filter:blur(3px); }
+  .ice-panel{ position:relative; text-align:center; }
+  .ice-panel h2{ color:var(--ink); }
+  .ice-sub{ margin:0 0 16px; color:var(--muted); font-size:14.5px; line-height:1.45; }
+  /* round pink close button, top-right of the pause panel */
+  .ice-x{
+    position:absolute; top:10px; right:10px; z-index:2;
+    width:34px; height:34px; border-radius:10px; cursor:pointer;
+    border:2.5px solid var(--blue-dark); color:#fff;
+    background:var(--facet), linear-gradient(180deg,#ff8fb8,#f43f7f);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6);
+    font-size:15px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .ice-x:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 rgba(255,255,255,.6); }
+  .ice-x:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+  .over-panel{ padding:30px 24px 22px; }
+  .over-avatar{
+    width:100px; height:100px; margin:4px auto 10px; border-radius:50%;
+    background:radial-gradient(circle at 50% 30%, #ffffff 0%, #c9f1fc 62%, #59d8ff 100%);
+    border:3px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 -8px 14px rgba(0,149,242,.45);
+    display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
+  }
+  .over-avatar img{ width:90px; height:auto; display:block; transform:translateY(6px); }
+  .over-panel h2{ margin:0 0 4px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .over-sub{ margin:0 0 16px; color:var(--muted); font-size:14px; line-height:1.45; }
+  .result-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:0 0 18px; }
+  .result-grid div{
+    background:var(--ice-soft); border:2px solid #8fd0ff; border-radius:12px; padding:12px 6px 10px;
+    box-shadow:inset 0 2px 0 #fff, inset 0 -6px 10px rgba(0,149,242,.14);
+  }
+  .result-grid small{ display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .result-grid strong{ display:block; font-size:22px; margin-top:3px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .result-grid strong .unit{ font-size:13px; font-weight:700; color:var(--muted); }
+  .newbest{ display:none; margin:0 auto 14px; font-weight:800; color:#7a5200; font-size:13px; }
+  .newbest.show{
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d); border:2px solid var(--gold-deep); border-radius:999px;
+    padding:6px 14px; box-shadow:0 2px 0 rgba(185,126,6,.8);
+  }
+  /* the action row: ice rocks piled on both sides of the button */
+  .over-actions{ display:flex; align-items:flex-end; justify-content:center; gap:8px; }
+  .mini-rock{ width:58px; height:auto; flex:none; pointer-events:none; filter:drop-shadow(0 3px 4px rgba(0,20,70,.3)); }
+  .mini-rock.flip{ transform:scaleX(-1); }
+  .over-hint{ margin:12px 0 0; font-size:12.5px; color:var(--muted); }
+  /* touch controls: five pixel-ice blocks under the game — four hop
+     arrows and Pause, same family as Lofi Dash's control row */
+  .touch{
+    position:relative; z-index:1;
+    display:flex; gap:10px; margin-top:12px;
+  }
+  .touch button{
+    flex:1; min-height:58px; border-radius:12px; cursor:pointer; position:relative; overflow:hidden;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.02em;
+    font-weight:800; font-size:17px; padding-top:9px;
+  }
+  .touch button.arrow{ font-size:22px; }
+  /* snow cap with drips resting on each block's top edge */
+  .touch button::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:12px; pointer-events:none;
+    background:
+      radial-gradient(13px 8px at 14% 100%, #ffffff 98%, transparent),
+      radial-gradient(17px 10px at 40% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 63% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 10px at 88% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eaf7ff);
+  }
+  .touch button:active{ transform:translateY(3px); }
+  /* How to play: one tidy guide under the game */
+  .guide{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 14px;
+  }
+  .guide::before, .ach::before{
+    content:""; position:absolute; top:-15px; left:12px; right:12px; height:26px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  .guide h2{ margin:0 0 4px; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .guide > p{ margin:0 0 14px; color:var(--muted); font-size:14px; }
+  .guide ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px 22px; }
+  .guide li{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #cdeaff; font-size:14px; }
+  .guide li .keys-inline{ flex:none; display:inline-flex; gap:4px; min-width:86px; }
+  .guide kbd{
+    font-family:inherit; background:var(--ice-soft); border:1.5px solid #8fd0ff; border-bottom-width:3px;
+    border-radius:6px; padding:2px 7px; font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .guide li span{ color:var(--ink); font-weight:600; }
+  @media (max-width:560px){
+    .guide ul{ grid-template-columns:1fr; }
+  }
+  /* achievements */
+  .ach{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 20px;
+  }
+  .ach-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .ach-head h2{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .ach ul{ list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .ach li{
+    display:flex; align-items:center; gap:12px;
+    border:2px solid #cdeaff; border-radius:12px; padding:12px 14px; min-height:52px;
+    background:rgba(255,255,255,.65);
+  }
+  .ach li .dot{
+    flex:none; width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); border:2px solid #8fd0ff; color:var(--muted); font-size:16px; font-weight:800;
+  }
+  .ach li.unlocked .dot{ background:#e7f8ef; border-color:#9adbb6; color:#149653; }
+  .ach li .txt{ flex:1; min-width:0; }
+  .ach li .txt strong{ display:block; font-size:15px; }
+  .ach li .txt span{ display:block; font-size:13px; color:var(--muted); margin-top:1px; }
+  .ach li .pts{ flex:none; font-weight:800; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .ach li.unlocked .pts{ color:var(--gold-deep); }
+  .ach li .state{ flex:none; font-size:12px; font-weight:700; color:var(--muted); }
+  .ach li.unlocked .state{ color:#149653; }
+  /* ---------- levels panel (menu) ---------- */
+  .levels{
+    position:relative; z-index:1; margin-top:26px;
+    background:linear-gradient(180deg,#ffffff,#e8f6ff);
+    border:3px solid var(--blue-dark); border-radius:var(--radius);
+    box-shadow:0 6px 0 var(--blue-dark);
+    padding:22px 20px 20px;
+  }
+  .levels::before{
+    content:""; position:absolute; top:-15px; left:12px; right:12px; height:26px;
+    background:url(/lofigame/assets/snow-86cf839d.webp) no-repeat; background-size:100% 100%;
+    pointer-events:none;
+  }
+  .levels-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .levels-head h2{ margin:0; font-size:20px; font-weight:800; letter-spacing:-.01em; font-family:'Baloo 2','Arial Black',Arial,sans-serif; }
+  .levels-xp{ font-weight:800; font-size:14px; color:var(--gold-deep); font-variant-numeric:tabular-nums; background:#fff8e1; border:2px solid #f0d48a; border-radius:999px; padding:5px 12px; }
+  .level-list{ list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .level-row{
+    display:flex; align-items:center; gap:12px;
+    border:2px solid #cdeaff; border-radius:12px; padding:10px 14px; min-height:46px;
+    background:rgba(255,255,255,.65);
+  }
+  .level-row .lvl-num{
+    flex:none; width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); border:2px solid #8fd0ff; color:var(--muted); font-size:15px; font-weight:800;
+  }
+  .level-row .lvl-txt{ flex:1; min-width:0; }
+  .level-row .lvl-txt strong{ display:block; font-size:15px; }
+  .level-row .lvl-txt span{ display:block; font-size:13px; color:var(--muted); margin-top:1px; }
+  .level-row .lvl-xp{ flex:none; font-weight:800; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .level-row .lvl-state{ flex:none; font-size:12px; font-weight:700; color:var(--muted); min-width:74px; text-align:right; }
+  .level-row.completed{ border-color:#9adbb6; }
+  .level-row.completed .lvl-num{ background:#e7f8ef; border-color:#9adbb6; color:#149653; }
+  .level-row.completed .lvl-xp{ color:var(--gold-deep); }
+  .level-row.completed .lvl-state{ color:#149653; }
+  .level-row.current{ border-color:var(--gold-deep); background:linear-gradient(180deg,#fff8e1,#ffeec2); box-shadow:0 2px 0 rgba(185,126,6,.6); }
+  .level-row.current .lvl-num{ background:linear-gradient(180deg,#ffe9a3,#ffd34d); border-color:var(--gold-deep); color:#7a5200; }
+  .level-row.current .lvl-state{ color:#7a5200; }
+  .level-row.locked{ opacity:.72; }
+  /* level-up banner inside the stage */
+  .level-banner{
+    position:absolute; top:52px; left:50%; transform:translate(-50%,-8px) scale(.94);
+    z-index:6; pointer-events:none;
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d); color:#7a5200;
+    border:3px solid var(--gold-deep); border-radius:999px;
+    box-shadow:0 4px 0 rgba(185,126,6,.8), 0 14px 28px rgba(0,10,40,.35);
+    padding:9px 20px; font-family:'Baloo 2','Arial Black',Arial,sans-serif;
+    font-size:17px; font-weight:800; letter-spacing:.01em; white-space:nowrap;
+    opacity:0; visibility:hidden; transition:opacity .22s ease, transform .22s ease, visibility .22s ease;
+  }
+  .level-banner.show{ opacity:1; visibility:visible; transform:translate(-50%,0) scale(1); }
+  .level-banner[hidden]{ display:none; }
+  @media (max-width:560px){
+    .level-banner{ top:44px; font-size:14px; padding:7px 14px; max-width:92%; white-space:normal; text-align:center; }
+    .level-row .lvl-state{ min-width:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .level-banner{ transition:none; }
+  }
+  /* levels completed in the finished run, on the game-over panel */
+  .run-levels{ margin:0 0 14px; font-size:13.5px; font-weight:700; color:var(--muted); line-height:1.5; }
+  .run-levels:empty{ display:none; }
+  .run-levels b{ color:var(--gold-deep); }
+  /* toast */
+  .toast{
+    position:fixed; left:50%; bottom:22px; transform:translate(-50%, 90px);
+    z-index:20; background:var(--blue-dark); color:#fff; border:2.5px solid var(--ice); border-radius:12px;
+    box-shadow:0 5px 0 rgba(0,10,40,.6);
+    padding:13px 18px; font-size:14px; font-weight:600; max-width:min(92vw,440px); text-align:center;
+    transition:transform .3s ease; pointer-events:none;
+  }
+  .toast.show{ transform:translate(-50%, 0); }
+  .toast b{ color:#ffd34d; }
+  /* chunky game headings */
+  .panel h2, .guide h2, .ach-head h2{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; letter-spacing:.01em; }
+  /* ---------- start screen: the stacked logo over a big pixel-ice
+     PLAY block with a snow cap and icicles ---------- */
+  .panel.start-panel{
+    background:transparent; border:none; box-shadow:none; padding:4px;
+    max-width:560px;
+  }
+  .start-logo{
+    display:block; margin:0 auto; width:auto;
+    height:clamp(118px, 30vw, 196px);
+    filter:drop-shadow(0 5px 0 rgba(0,42,122,.4)) drop-shadow(0 12px 20px rgba(0,10,40,.35));
+  }
+  .play-pill{
+    position:relative; cursor:pointer; margin-top:16px;
+    min-width:min(240px,74vw); min-height:60px; padding:16px 42px 14px;
+    border-radius:14px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800;
+    font-size:27px; letter-spacing:.16em;
+    display:inline-flex; align-items:center; justify-content:center; gap:13px;
+  }
+  /* snow cap resting on the block, with little drips */
+  .play-pill::before{
+    content:""; position:absolute; top:-3px; left:10px; right:10px; height:15px; pointer-events:none;
+    background:
+      radial-gradient(13px 9px at 12% 100%, #ffffff 98%, transparent),
+      radial-gradient(18px 11px at 34% 100%, #ffffff 98%, transparent),
+      radial-gradient(12px 8px at 55% 100%, #ffffff 98%, transparent),
+      radial-gradient(19px 12px at 76% 100%, #ffffff 98%, transparent),
+      radial-gradient(14px 9px at 93% 100%, #ffffff 98%, transparent),
+      linear-gradient(180deg,#ffffff,#eef8ff);
+    border-radius:14px 14px 0 0;
+  }
+  /* icicles hanging off the block's underside */
+  .play-pill::after{
+    content:""; position:absolute; left:22%; right:22%; bottom:-10px; height:11px; pointer-events:none;
+    background:linear-gradient(180deg,#29c5ff,#c9f1fc);
+    clip-path:polygon(0 0, 100% 0, 92% 70%, 84% 12%, 74% 100%, 64% 18%, 54% 78%, 45% 10%, 34% 92%, 25% 16%, 15% 66%, 7% 12%);
+  }
+  .play-pill:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .play-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:3px; }
+  .play-tri{
+    width:25px; height:25px; flex:none; background:#ffffff;
+    clip-path:polygon(24% 16%, 24% 84%, 86% 50%);
+    filter:drop-shadow(0 2px 0 rgba(0,42,122,.45));
+  }
+  /* ---------- settings panel: saturated ice frame, stitched white card ---------- */
+  .settings-overlay{
+    position:fixed; inset:0; z-index:30;
+    background:rgba(3,22,70,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    overflow-y:auto;
+  }
+  .settings-overlay[hidden]{ display:none !important; }
+  .settings-panel{
+    position:relative; width:min(94vw,404px); margin:auto;
+    background:var(--facet), linear-gradient(180deg,#2f9dff 0%,#0057ff 58%,#003ecb 100%);
+    border:3px solid var(--blue-dark); border-radius:20px;
+    box-shadow:0 7px 0 var(--blue-dark), 0 24px 48px rgba(0,10,40,.5);
+    padding:16px 14px 14px;
+  }
+  /* snow resting on the panel's top edge */
+  .settings-panel::before{
+    content:""; position:absolute; top:-2px; left:14px; right:14px; height:14px;
+    background:
+      radial-gradient(18px 11px at 10% 0, #ffffff 98%, transparent),
+      radial-gradient(24px 13px at 36% 0, #ffffff 98%, transparent),
+      radial-gradient(20px 12px at 63% 0, #ffffff 98%, transparent),
+      radial-gradient(26px 13px at 90% 0, #ffffff 98%, transparent);
+    pointer-events:none;
+  }
+  .settings-panel h2{
+    margin:2px 0 12px; text-align:center;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-size:30px; font-weight:800; letter-spacing:.06em;
+    color:var(--gold);
+    text-shadow:0 2px 0 #b97e06, 0 4px 0 rgba(0,42,122,.6), 2px 0 0 rgba(0,42,122,.4), -2px 0 0 rgba(0,42,122,.4);
+  }
+  .set-inner{
+    background:#f4fbff; border:2px dashed #7fb2f0; border-radius:14px;
+    padding:18px 16px 16px;
+  }
+  .set-row{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .set-row.split{ justify-content:space-between; gap:8px; flex-wrap:wrap; row-gap:6px; }
+  .set-ico{ flex:none; width:30px; display:flex; align-items:center; justify-content:center; color:var(--blue); }
+  .set-ico svg{ width:26px; height:26px; display:block; }
+  .set-label{ font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue); }
+  .tips-wrap{ display:inline-flex; align-items:center; gap:9px; }
+  /* icy volume sliders with a chunky ice knob */
+  input[type=range].vol{
+    -webkit-appearance:none; appearance:none; flex:1; min-width:0; height:18px;
+    border-radius:8px; border:2.5px solid var(--blue-dark); background:#bcd9f7; outline:none; cursor:pointer;
+  }
+  input[type=range].vol::-webkit-slider-runnable-track{ background:transparent; }
+  input[type=range].vol::-webkit-slider-thumb{
+    -webkit-appearance:none; width:32px; height:32px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  input[type=range].vol::-moz-range-track{ height:18px; border-radius:8px; background:#bcd9f7; }
+  input[type=range].vol::-moz-range-progress{ height:18px; border-radius:8px; background:var(--cyan); }
+  input[type=range].vol::-moz-range-thumb{
+    width:28px; height:28px; border-radius:9px;
+    border:2.5px solid var(--blue-dark);
+    background:var(--facet), linear-gradient(180deg,#ffffff,#8fe8ff 60%,#29c5ff);
+    box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    cursor:pointer;
+  }
+  /* game-tips switch: a chunky ice block with a green check when on */
+  .switch{
+    flex:none; width:42px; height:42px; border-radius:11px; cursor:pointer;
+    color:transparent;
+    background:linear-gradient(180deg,#eef6fb,#c9deee);
+    border:2.5px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark), inset 0 2px 0 #fff;
+    font-size:21px; font-weight:800; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .switch.on{ color:#149653; background:var(--facet), linear-gradient(180deg,#ffffff,#b8f4d2); }
+  .switch:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark), inset 0 2px 0 #fff; }
+  .notice-btn{
+    position:relative; cursor:pointer; border:none; background:none; padding:6px 28px 6px 6px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:17px; color:var(--blue);
+  }
+  .nbadge{
+    position:absolute; top:-7px; right:2px; min-width:19px; height:19px; padding:0 4px;
+    border-radius:999px; background:#e23c3c; color:#fff; border:1.5px solid #fff;
+    font-size:11px; font-weight:800; line-height:17px; text-align:center;
+  }
+  .notice-text{
+    margin:0 0 14px; background:#fff8e1; border:1px solid #f0d48a; border-radius:12px;
+    padding:10px 12px; font-size:13.5px; line-height:1.5; color:#6b5310;
+  }
+  .wallet-status{ margin:0 0 12px; font-size:13px; line-height:1.5; color:var(--muted); min-height:0; }
+  .wallet-status:empty{ display:none; }
+  .set-actions{ display:flex; gap:12px; }
+  .set-connect, .set-ok{
+    flex:1; min-height:52px; border-radius:12px; cursor:pointer;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:18px; letter-spacing:.02em;
+  }
+  .set-connect{
+    background:var(--facet), linear-gradient(180deg,#ff9a86,#f2604c); color:#fff;
+    border:3px solid #8f2d1d; box-shadow:0 4px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55);
+    text-shadow:0 1px 2px rgba(143,45,29,.45);
+  }
+  .set-connect.connected{ font-size:14.5px; letter-spacing:0; }
+  .set-ok{
+    background:var(--facet), linear-gradient(180deg,#ffd964,#f5b81d); color:#5b3d00;
+    border:3px solid #8a5f04; box-shadow:0 4px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6);
+  }
+  .set-connect:active, .set-ok:active{ transform:translateY(2px); }
+  .set-connect:active{ box-shadow:0 2px 0 #8f2d1d, inset 0 2px 0 rgba(255,255,255,.55); }
+  .set-ok:active{ box-shadow:0 2px 0 #8a5f04, inset 0 2px 0 rgba(255,255,255,.6); }
+  @media (max-width:560px){
+    .stage-wrap{ margin-top:80px; margin-bottom:52px; }
+    .peek{ right:14px; top:-82px; width:90px; height:50px; }
+    .peek img{ width:90px; }
+    .snow-edge-top{ top:-46px; height:46px; }
+    .snow-edge-bottom{ bottom:-38px; height:46px; }
+    .stage-rock{ bottom:-50px; }
+    .rock-bl{ left:-8px; width:96px; }
+    .rock-br{ right:-8px; width:76px; }
+    .hud-in{ top:5px; left:6px; right:6px; }
+    .chip{ font-size:10.5px; padding:2px 6px; gap:3px; }
+    .chip .unit{ font-size:9px; }
+    .chip .hearts{ font-size:10px; letter-spacing:.5px; }
+    .chip.speed{ display:none; }
+    .overlay{ padding:8px; }
+    .panel{ padding:12px 14px; border-radius:14px; }
+    .panel h2{ font-size:18px; margin-bottom:4px; }
+    .panel p{ font-size:13px; line-height:1.4; margin-bottom:8px; }
+    .btn{ min-height:44px; padding:8px 22px; font-size:15px; }
+    .result-grid{ margin-bottom:10px; }
+    .result-grid div{ padding:7px 4px; }
+    .result-grid strong{ font-size:16px; }
+    .over-panel{ padding:20px 14px 14px; }
+    .over-panel h2{ font-size:24px; }
+    .over-avatar{ width:76px; height:76px; margin-bottom:6px; }
+    .over-avatar img{ width:68px; }
+    .over-sub{ font-size:12.5px; margin-bottom:10px; }
+    .over-hint{ display:none; }
+    .mini-rock{ width:42px; }
+    .panel-snow{ height:30px; top:-13px; }
+    .touch{ gap:7px; }
+    .touch button{ min-height:54px; font-size:15px; }
+    .touch button.arrow{ font-size:20px; }
+    /* Start screen on phones: the 16:9 frame is short, so the stacked
+       logo and the PLAY block shrink until both sit fully inside the
+       frame, clear of the snow border and the corner rocks */
+    #startOverlay{ padding:6px; }
+    .panel.start-panel{ padding:0; }
+    .start-logo{ height:clamp(84px, 26.5vw, 118px); }
+    .play-pill{
+      margin-top:10px; min-width:0; min-height:50px;
+      padding:12px 30px 11px; font-size:21px; letter-spacing:.13em; gap:10px;
+    }
+    .play-tri{ width:20px; height:20px; }
+  }
+  /* ---------- Game Over on phones: the whole panel has to live inside
+     the 16:9 stage, so at narrow widths it sheds the avatar medallion
+     and tightens every row until the title, the three result tiles and
+     the Cross again button all sit inside the frame, clear of the ice
+     rocks piled at the frame's bottom corners. When the New best badge
+     shows, the flavour line under the title steps aside for it. */
+  @media (max-width:760px){
+    #overOverlay{ padding:6px; }
+    .over-panel{ padding:11px 16px 10px; }
+    .over-avatar{ display:none; }
+    .over-panel h2{ font-size:22px; margin-bottom:2px; }
+    .over-sub{ font-size:12.5px; margin-bottom:6px; }
+    .over-panel:has(.newbest.show) .over-sub{ display:none; }
+    .newbest{ margin-bottom:6px; padding:5px 12px; font-size:12px; }
+    .result-grid{ gap:6px; margin-bottom:8px; }
+    .result-grid div{ padding:6px 4px 5px; }
+    .result-grid small{ font-size:9.5px; }
+    .result-grid strong{ font-size:15px; margin-top:2px; }
+    .over-actions .btn{ min-height:40px; padding:8px 20px; font-size:15px; }
+    .mini-rock{ width:34px; }
+    .over-hint{ display:none; }
+  }
+  /* On narrow phones the 16:9 stage is short: with the two-line
+     flavour line shown, the Game Over panel stood ~6px taller
+     than the frame and poked past its top and bottom edges. The
+     flavour line steps aside at these widths (the same trade the
+     panel already makes for the New best badge), and every row
+     tightens a touch, so the whole panel — title, result tiles,
+     stamps and the Cross again button — sits inside the frame. */
+  @media (max-width:480px){
+    .over-panel .over-sub{ display:none; }
+  }
+  @media (max-width:400px){
+    #overOverlay{ padding:4px; }
+    .over-panel{ padding:8px 12px 7px; }
+    .over-panel h2{ font-size:19px; }
+    .over-sub{ font-size:11.5px; margin-bottom:6px; }
+    .newbest{ margin-bottom:6px; padding:3px 10px; font-size:11.5px; }
+    .result-grid{ margin-bottom:6px; }
+    .result-grid div{ padding:4px 3px 3px; }
+    .result-grid small{ font-size:8.5px; letter-spacing:.02em; }
+    .result-grid strong{ font-size:14px; }
+    .stamps-row{ margin-bottom:4px; }
+    .over-actions .btn{ min-height:33px; padding:6px 16px; font-size:14px; }
+    .mini-rock{ width:27px; }
+    .panel-snow{ height:24px; top:-10px; }
+  }
+  /* ---------- Game Over on small phones (401-480px and below):
+     the short 16:9 frame leaves the New best panel only a few
+     pixels of air at 390px and none at all on narrower or
+     wider-but-short phone frames, so the whole panel compacts
+     a step further across this range: tighter padding and
+     margins, smaller stamp dots and a shorter Cross again
+     button, until the title, badge, tiles, stamps and button
+     all sit inside the frame with clear air above and below,
+     clear of the bottom snow strip and the corner rocks. The
+     design, colours and content are unchanged. ---------- */
+  @media (max-width:480px){
+    .over-panel{ padding:7px 9px 6px; }
+    .over-panel h2{ font-size:18px; }
+    .newbest{ padding:2px 10px; font-size:11px; }
+    .over-panel .newbest{ margin-bottom:4px; }
+    .result-grid{ margin-bottom:4px; gap:3px; }
+    .result-grid strong{ white-space:nowrap; }
+    .result-grid div{ padding:3px 3px 2px; }
+    .result-grid small{ font-size:8.5px; letter-spacing:.02em; }
+    .result-grid strong{ font-size:14px; }
+    .over-panel .stamps-row{ margin-bottom:4px; }
+    .over-panel .stamp-dot{ width:20px; height:20px; font-size:10px; }
+    .over-actions .btn{ min-height:30px; padding:5px 16px; font-size:14px; }
+    .mini-rock{ width:25px; }
+  }
+  /* ---------- crossing breakdown + stamps ---------- */
+  #crossOverlay{ background:rgba(3,22,70,.45); backdrop-filter:blur(3px); }
+  #crossOverlay .panel{ padding:18px 22px; }
+  .cross-list{ margin:0 0 12px; text-align:left; }
+  .cross-list div{
+    display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+    padding:7px 2px; border-bottom:1px solid #cdeaff;
+    font-size:15px; font-weight:600; color:var(--ink);
+  }
+  .cross-list div span{ color:var(--muted); font-weight:600; }
+  .cross-list div strong{ font-variant-numeric:tabular-nums; }
+  .cross-list .cross-total{ border-bottom:none; border-top:2px solid var(--blue-dark); padding-top:9px; font-size:16px; }
+  .cross-next{ margin:0; font-size:13px; color:var(--muted); }
+  .stamps-row{ display:flex; justify-content:center; gap:8px; margin:0 0 14px; }
+  .stamp-dot{
+    width:32px; height:32px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--ice-soft); border:2px solid #8fd0ff; color:var(--muted);
+    font-size:14px; font-weight:800;
+  }
+  .stamp-dot.on{
+    background:linear-gradient(180deg,#ffe9a3,#ffd34d); border-color:var(--gold-deep); color:#7a5200;
+    box-shadow:0 2px 0 rgba(185,126,6,.8);
+  }
+  .result-grid.four{ grid-template-columns:repeat(4,1fr); }
+  @media (max-width:760px){
+    .stamps-row{ margin-bottom:6px; gap:6px; }
+    .stamp-dot{ width:24px; height:24px; font-size:11px; }
+    #crossOverlay{ padding:6px; }
+    #crossOverlay .panel{ padding:12px 14px; }
+    #crossOverlay .ice-sub{ display:none; }
+    .cross-list{ margin-bottom:8px; }
+    .cross-list div{ padding:4px 2px; font-size:13px; }
+    .cross-list .cross-total{ font-size:14px; }
+    .cross-next{ font-size:12px; }
+  }
+  /* the crossing-complete panel at these widths: five breakdown
+     rows plus title and the Next line stood taller than the
+     short 16:9 frame and poked ~6px past its top and bottom
+     edges. The rows tighten, and the Next line steps aside (the
+     toast that follows the panel announces the next crossing
+     anyway), so the whole panel sits inside the frame. */
+  @media (max-width:400px){
+    #crossOverlay .panel{ padding:8px 12px; }
+    .cross-list{ margin-bottom:6px; }
+    .cross-list div{ padding:2px 2px; font-size:12.5px; line-height:1.3; }
+    .cross-next{ display:none; }
+  }
+  /* ---------- desktop stage sizing (PC) ----------
+     On a big screen the game is a centered card, never a full-bleed
+     stretch: the stage is capped at its native canvas width (960px)
+     AND at the width whose 16:9 height leaves room on screen for the
+     header above and the touch controls below (stage height stays
+     under ~85vh, and under 100vh minus the page chrome), so the whole
+     board, the start screen and the controls are on screen together
+     even on a zoomed or short display. The touch row matches the
+     stage width so the column reads as one placed card. The start
+     logo is sized in stage-relative units (cqw against the stage as
+     container), so it scales with the stage itself and can never
+     balloon over the board the way a viewport-sized logo did.
+     Below 761px none of this applies: phones keep the full-width
+     stage exactly as they have it now. */
+  @media (min-width:761px){
+    .stage-wrap{
+      width:min(960px, max(440px, calc((100vh - 320px) * 16 / 9)), calc(85vh * 16 / 9));
+      margin-left:auto; margin-right:auto;
+    }
+    .touch{
+      width:min(960px, max(440px, calc((100vh - 320px) * 16 / 9)), calc(85vh * 16 / 9));
+      margin-left:auto; margin-right:auto;
+    }
+    .stage{ container-type:inline-size; }
+    .start-logo{ height:min(196px, 21cqw); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .toast{ transition:none; }
+    .btn:active{ transform:none; }
+    .peek{ animation:none; }
+  }
+  /* ---------- FINAL desktop sizing, matched to the wide frame the
+     user marked out (about three quarters of the screen wide, like
+     Dogecat's So Fast stage at 1280x572, a 2.24:1 ratio): a compact
+     header (logo ~210px wide, whole block short) and a WIDE, short
+     stage in the 1280/572 ratio, capped near 74% of the viewport
+     width and sized from the viewport height so header + stage +
+     touch controls fit on ONE screen. The snow ledge and peeking
+     yeti above the stage are tightened to match. These rules sit
+     LAST in the stylesheet so they win the cascade over every
+     earlier desktop rule. Phones (760px and under) keep their
+     existing layout untouched. ---------- */
+  @media (min-width:761px){
+    .wrap{ max-width:1456px; padding-top:12px; }
+    .head{ margin-bottom:8px; }
+    .logo{ width:210px; }
+    .head p{ margin-top:4px; font-size:14px; }
+    .stage-wrap{
+      width:min(1420px, 74vw, 100%, calc((100vh - 328px) * 1280 / 572));
+      width:min(1420px, 74vw, 100%, calc((100dvh - 328px) * 1280 / 572));
+      margin:82px auto 56px;
+    }
+    /* the wide view itself: on desktop the canvas shows the world at
+       1280x572 (2.24:1); phones keep the original 16:9 frame */
+    canvas{ aspect-ratio:1280/572; }
+    .touch{
+      width:min(1420px, 74vw, 100%, calc((100vh - 328px) * 1280 / 572));
+      width:min(1420px, 74vw, 100%, calc((100dvh - 328px) * 1280 / 572));
+      margin-left:auto; margin-right:auto;
+    }
+    /* peeking yeti: the clip box never moves, only the picture
+       inside it bobs, so no cut edge can ever show; the box's
+       bottom edge lands deep in the snow ledge's solid band, and
+       the picture's white outline keeps clear air at the top and
+       sides of the box */
+    .peek{ animation:none; width:118px; height:78px; top:-92px; right:21px; }
+    .peek img{
+      width:102px; margin:6px 8px 0;
+      transform-origin:50% 100%;
+      animation:peekBob 3.4s ease-in-out infinite;
+    }
+    /* the top ledge sits ON the frame: flush with its sides and
+       overlapping its top edge by 6px, icicle tips resting on the
+       frame's border instead of floating above it */
+    .snow-edge-top{ top:-36px; height:42px; left:0; right:0; }
+    .snow-edge-bottom{ bottom:-44px; height:44px; left:0; right:0; }
+    .stage-rock{ bottom:-52px; }
+    .rock-bl{ width:110px; }
+    .rock-br{ width:86px; }
+  }
+  @media (min-width:761px) and (prefers-reduced-motion: reduce){
+    .peek img{ animation:none; }
+  }
+  /* ---------- Panel fit fix (desktop): the Game Over, Pause and
+     crossing-complete panels scale with the stage itself, in
+     container units (the stage is a container and its height is a
+     fixed 572/1280 of its width), so each whole panel — title,
+     subtitle, result tiles, stamps and the action button — always
+     sits inside the frame with clear air on every side, at any
+     window size or zoom, clear of the snow ledge above and the
+     ice rocks and snow border below. Phones (760px and under)
+     keep their layout untouched. ---------- */
+  @media (min-width:761px){
+    #overOverlay, #pauseOverlay, #crossOverlay{ padding:3cqw 18px 4cqw; }
+    #overOverlay{ padding:3.8cqw 18px 3.6cqw; }
+    .ice-panel .panel-snow{ height:2.6cqw; top:-1.2cqw; }
+    /* Game Over, sized up: a wide frost panel filling most of the
+       frame, like Lofi Dash's — big title, roomy result tiles, a
+       large Cross again button, and the yeti medallion seated on
+       the panel's top edge, half above it and never clipped. The
+       px floors keep every row readable on a short desktop stage;
+       the cqw sizes grow it on a tall one. */
+    .over-panel{
+      max-width:min(700px, 76cqw);
+      padding:4.1cqw 3.2cqw 2.2cqw;
+    }
+    .over-avatar{
+      position:absolute; left:50%; top:-3.4cqw; z-index:2;
+      transform:translateX(-50%);
+      width:7.3cqw; height:7.3cqw; margin:0;
+    }
+    /* when the golden New best badge shows, the flavour line and
+       the Enter hint step aside for it (the same trade the phone
+       panel makes), so the taller panel still centres with the
+       medallion clear of the frame's top edge */
+    .over-panel:has(.newbest.show) .over-sub,
+    .over-panel:has(.newbest.show) .over-hint{ display:none; }
+    .over-avatar img{ width:6.6cqw; }
+    .over-panel h2{ font-size:max(23px, 2.9cqw); margin-bottom:.35cqw; }
+    .over-sub{ font-size:max(13px, 1.08cqw); margin-bottom:1cqw; }
+    .newbest{ font-size:max(12.5px, .95cqw); padding:.4cqw 1.1cqw; margin-bottom:1cqw; }
+    .result-grid{ gap:.7cqw; margin-bottom:1.1cqw; }
+    .result-grid div{ padding:.95cqw .5cqw .8cqw; }
+    .result-grid small{ font-size:max(10.5px, .78cqw); }
+    .result-grid strong{ font-size:max(19px, 1.95cqw); margin-top:.25cqw; }
+    .result-grid strong .unit{ font-size:max(13px, .95cqw); }
+    .stamps-row{ gap:.7cqw; margin-bottom:1.1cqw; }
+    .stamp-dot{ width:max(26px, 2.4cqw); height:max(26px, 2.4cqw); font-size:max(12px, 1.05cqw); }
+    .mini-rock{ width:4.6cqw; }
+    .over-hint{ margin-top:.85cqw; font-size:max(11.5px, .9cqw); }
+    /* px floors on every row (the same treatment the Game Over
+       panel already has), so on a short desktop stage — a 720p
+       window, where 1cqw is under 9px — the Pause title, the
+       crossing breakdown and the Resume button stay full-size
+       and readable instead of shrinking with the frame */
+    #pauseOverlay .panel{ padding:max(15px, 1.7cqw) max(16px, 1.8cqw); }
+    #pauseOverlay .panel h2{ font-size:max(21px, 1.8cqw); margin-bottom:max(4px, .4cqw); }
+    .ice-sub{ font-size:max(13px, .95cqw); margin-bottom:max(10px, 1cqw); }
+    #crossOverlay .panel{
+      max-width:min(440px, 62cqw);
+      padding:max(14px, 1.5cqw) max(16px, 1.8cqw);
+    }
+    #crossOverlay .panel h2{ font-size:max(20px, 1.7cqw); margin-bottom:max(3px, .3cqw); }
+    .cross-list{ margin-bottom:max(9px, .9cqw); }
+    .cross-list div{ padding:max(5px, .45cqw) 2px; font-size:max(13.5px, 1.05cqw); }
+    .cross-list .cross-total{ font-size:max(15px, 1.15cqw); padding-top:max(7px, .6cqw); }
+    .cross-next{ font-size:max(12px, .9cqw); }
+    #overOverlay .btn{
+      min-height:max(46px, 3.9cqw); font-size:max(15.5px, 1.35cqw); padding:.85cqw 2.4cqw;
+    }
+    #pauseOverlay .btn{
+      min-height:max(42px, 3.2cqw); font-size:max(15px, 1.15cqw); padding:max(8px, .8cqw) max(18px, 1.9cqw);
+    }
+  }
+  /* ---------- site chrome: a compact hub-style header (back button,
+     brand, profile pill) above the game header, and a slim footer
+     below the achievements. Both live outside the stage and never
+     touch the canvas, its size, or the controls. ---------- */
+  .site-head{
+    position:relative; z-index:2;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:16px;
+  }
+  .site-head-left{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .back-btn{
+    flex:none; display:inline-flex; align-items:center; gap:7px;
+    min-height:40px; padding:8px 16px 8px 12px; border-radius:999px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15px;
+    text-decoration:none; cursor:pointer;
+  }
+  .back-btn svg{ width:17px; height:17px; display:block; flex:none; }
+  .back-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 var(--blue-dark), inset 0 3px 0 rgba(255,255,255,.9), inset 0 -7px 0 rgba(0,42,122,.28); }
+  .back-btn:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .brand{ display:inline-flex; align-items:center; gap:9px; text-decoration:none; min-width:0; }
+  .brand img{
+    width:34px; height:34px; flex:none; border-radius:50%;
+    object-fit:cover; object-position:top center;
+    background:#e8f6ff; border:2px solid var(--ice);
+    box-shadow:0 2px 0 rgba(0,42,122,.5);
+  }
+  .brand span{
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:19px;
+    color:#fff; letter-spacing:.01em; white-space:nowrap;
+    text-shadow:0 2px 0 rgba(0,42,122,.55);
+  }
+  .brand:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; border-radius:999px; }
+  .profile-pill{
+    flex:none; display:inline-flex; align-items:center; gap:8px;
+    max-width:46vw; min-height:40px; padding:4px 14px 4px 5px; border-radius:999px;
+    background:rgba(255,255,255,.96); border:2px solid var(--blue-dark);
+    box-shadow:0 3px 0 var(--blue-dark);
+    color:var(--ink); text-decoration:none;
+    font-size:14px; font-weight:800;
+  }
+  .profile-pill img{
+    width:30px; height:30px; flex:none; border-radius:50%;
+    object-fit:cover; object-position:top center;
+    background:var(--ice-soft); border:1.5px solid #8fd0ff;
+  }
+  .profile-pill span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .profile-pill:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--blue-dark); }
+  .profile-pill:focus-visible{ outline:3px solid var(--ice); outline-offset:2px; }
+  .site-foot{
+    position:relative; z-index:1; margin-top:30px; padding-top:16px;
+    border-top:1.5px solid rgba(201,241,252,.35);
+    display:flex; align-items:center; justify-content:space-between; gap:8px 18px; flex-wrap:wrap;
+    color:#d6e9ff; font-size:13.5px;
+  }
+  .site-foot .foot-brand{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Baloo 2','Arial Black',Arial,sans-serif; font-weight:800; font-size:15px; color:#fff;
+    text-shadow:0 1px 0 rgba(0,42,122,.55);
+  }
+  .site-foot .foot-brand img{
+    width:24px; height:24px; flex:none; border-radius:50%;
+    object-fit:cover; object-position:top center;
+    background:#e8f6ff; border:1.5px solid var(--ice);
+  }
+  .site-foot nav{ display:flex; gap:18px; flex-wrap:wrap; }
+  .site-foot a{ color:#d6e9ff; text-decoration:none; font-weight:600; }
+  .site-foot a:hover{ color:#fff; text-decoration:underline; }
+  .site-foot a:focus-visible{ outline:2px solid var(--ice); outline-offset:2px; border-radius:4px; }
+  @media (max-width:560px){
+    .site-head{ margin-bottom:12px; }
+    .brand span{ font-size:17px; }
+    .brand img{ width:30px; height:30px; }
+    .back-btn{ min-height:38px; padding:7px 13px 7px 10px; font-size:14px; }
+    .profile-pill{ font-size:13px; padding-right:11px; }
+  }
+</style>
+<style>/* Light entrance animation (repo-only patch, re-applied after each re-export) */
+@keyframes lofi-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body{animation:lofi-fade-in .45s ease-out both}
+@media (prefers-reduced-motion:reduce){body{animation:none}}
+</style>
+</head>
+<body>
+<div class="vapour" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<main class="wrap">
+  <header class="site-head">
+    <div class="site-head-left">
+      <a class="back-btn pix" href="/lofigame/">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 4.5 7 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </a>
+      <a class="brand" href="/lofigame/">
+        <img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" />
+        <span>Lofi Games</span>
+      </a>
+    </div>
+    <a class="profile-pill" id="profilePill" href="/lofigame/">
+      <img id="pillAvatar" src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" referrerpolicy="no-referrer" />
+      <span id="pillLabel">Loading</span>
+    </a>
+  </header>
+
+  <div class="head">
+    <div>
+      <h1><img class="logo" src="/lofigame/assets/logo-e5636014.webp" alt="Frozen Crossing" /></h1>
+      <p>Ride the floes. Dodge the ships. Fifty crossings to the gold.</p>
+    </div>
+    <div class="head-actions">
+      <button class="cube-btn pix" id="settingsBtn" type="button" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g stroke="currentColor" stroke-width="2.1" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>
+          </g>
+          <g fill="#ffffff" stroke="currentColor" stroke-width="1.7">
+            <circle cx="9" cy="7" r="2.4"/><circle cx="15" cy="12" r="2.4"/><circle cx="8" cy="17" r="2.4"/>
+          </g>
+        </svg>
+      </button>
+      <button class="icon-btn pix" id="soundBtn" type="button" aria-pressed="false" aria-label="Sound on. Tap to mute." title="Sound on / off (M)">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+          <g class="waves" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/>
+            <path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+          </g>
+          <line class="slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke="#d64545" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+  <div class="peek" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+  <div class="snow-edge snow-edge-top" aria-hidden="true"></div>
+  <div class="stage">
+    <canvas id="game" width="1280" height="572" aria-label="Frozen Crossing game. Lofi the yeti hops one step at a time across a frozen river, riding drifting ice floes and boats to the far bank and its gold. Ships are hazards that must never be touched, and open water with no floe underfoot costs a life. Control with the arrow keys or W A S D, or swipe. Three lives, fifty crossings."></canvas>
+
+    <div class="level-banner" id="levelBanner" hidden role="status"></div>
+
+    <div class="hud-in hud-hidden" id="hudIn" aria-label="Crossing stats">
+      <div class="hud-group">
+        <span class="chip">🌊 <span id="hudCross">0</span><span class="unit">/ 50</span></span>
+        <span class="chip" id="hudLevelChip">🏔️ <span id="hudLevel">Level 1 · Crossing 1 of 5</span></span>
+        <span class="chip"><span class="hearts" id="hudLives">❤️❤️❤️</span></span>
+      </div>
+      <div class="hud-group right">
+        <span class="chip">⭐ <span id="xpTotal">0</span><span class="unit">XP</span></span>
+        <span class="chip">🏆 <span id="hudBest">0</span></span>
+        <span class="chip">🪙 <span id="hudGold">0</span></span>
+      </div>
+    </div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="panel start-panel">
+        <img class="start-logo" src="/lofigame/assets/start-logo-e36f560e.webp" alt="Frozen Crossing" />
+        <button class="play-pill pix" id="startBtn" type="button" aria-label="Start crossing"><span class="play-tri" aria-hidden="true"></span>PLAY</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="pauseOverlay" hidden>
+      <div class="panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <button class="ice-x" id="pauseClose" type="button" aria-label="Close and resume">✕</button>
+        <h2>Paused</h2>
+        <p class="ice-sub">Waiting on the snow bank.</p>
+        <button class="btn pix" id="resumeBtn" type="button">Resume</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="crossOverlay" hidden>
+      <div class="panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <h2 id="crossTitle">Crossing 1 · Calm Canal</h2>
+        <p class="ice-sub">Far bank reached. The gold is yours.</p>
+        <div class="cross-list">
+          <div><span>Crossing</span><strong>+100</strong></div>
+          <div><span>Time bonus</span><strong id="crossBonus">+600</strong></div>
+          <div><span>Gold · <span id="crossGoldN">0</span> coins</span><strong id="crossGold">+0</strong></div>
+          <div><span>Paw close calls</span><strong id="crossPaw">+0</strong></div>
+          <div class="cross-total"><span>Score</span><strong id="crossScore">0</strong></div>
+        </div>
+        <p class="cross-next" id="crossNext">Next: Crossing 2 · Lantern River</p>
+      </div>
+    </div>
+
+    <div class="overlay" id="overOverlay" hidden>
+      <div class="panel over-panel ice-panel">
+        <div class="panel-snow" aria-hidden="true"></div>
+        <div class="over-avatar" aria-hidden="true"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" /></div>
+        <h2 id="overTitle">Game Over</h2>
+        <p class="over-sub" id="overSub">Lofi went under in the Calm Canal.</p>
+        <p class="newbest" id="newBest">🏆 New best score!</p>
+        <div class="result-grid four">
+          <div><small>Score</small><strong id="resScore">0</strong></div>
+          <div><small>Best</small><strong id="resBest">0</strong></div>
+          <div><small>Crossings</small><strong><span id="resCross">0</span> <span class="unit">/ 50</span></strong></div>
+          <div><small>Best chain</small><strong id="resChain">0</strong></div>
+        </div>
+        <div class="stamps-row" id="stampRow" aria-label="Stamps earned"></div>
+        <p class="run-levels" id="runLevels"></p>
+        <div class="over-actions">
+          <img class="mini-rock" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+          <button class="btn pix" id="restartBtn" type="button">↻ Cross again</button>
+          <img class="mini-rock flip" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+        </div>
+        <p class="over-hint">or press Enter</p>
+      </div>
+    </div>
+  </div>
+  <div class="snow-edge snow-edge-bottom" aria-hidden="true"></div>
+  <img class="stage-rock rock-bl" src="/lofigame/assets/rock-39b343c2.webp" alt="" aria-hidden="true" />
+  <img class="stage-rock rock-br" src="/lofigame/assets/rock-18f68e8f.webp" alt="" aria-hidden="true" />
+  </div>
+
+  <div class="touch" aria-label="Touch controls">
+    <button type="button" class="pix arrow" id="leftBtn" aria-label="Step left">◀</button>
+    <button type="button" class="pix arrow" id="upBtn" aria-label="Hop forward">▲</button>
+    <button type="button" class="pix arrow" id="downBtn" aria-label="Step back">▼</button>
+    <button type="button" class="pix arrow" id="rightBtn" aria-label="Step right">▶</button>
+    <button type="button" class="pix" id="pauseBtn">Pause</button>
+  </div>
+
+  <section class="guide" id="howto" aria-label="How to play">
+    <h2>How to play</h2>
+    <p class="goal">Ride the ice floes and boats across fifty frozen rivers to the far bank and its gold. Ships are hazards: never touch one. You have three lives.</p>
+    <ul>
+      <li><span class="keys-inline"><kbd>↑</kbd><kbd>W</kbd></span><span>Hop forward, one step at a time</span></li>
+      <li><span class="keys-inline"><kbd>←</kbd><kbd>→</kbd><kbd>A</kbd><kbd>D</kbd></span><span>Step sideways along the bank</span></li>
+      <li><span class="keys-inline"><kbd>↓</kbd><kbd>S</kbd></span><span>Step back to safety</span></li>
+      <li><span class="keys-inline"><kbd>🧊</kbd></span><span>Ice floes and boats carry you with the current</span></li>
+      <li><span class="keys-inline"><kbd>🚢</kbd></span><span>Ships are hazards: cross the channel between them</span></li>
+      <li><span class="keys-inline"><kbd>💧</kbd></span><span>Open water with no floe underfoot costs a life</span></li>
+      <li><span class="keys-inline"><kbd>🪙</kbd></span><span>Gold coins are worth 25 points, on floes and the far bank</span></li>
+      <li><span class="keys-inline"><kbd>🏝️</kbd></span><span>Banks and the middle island are safe ground</span></li>
+      <li><span class="keys-inline"><kbd>P</kbd><kbd>M</kbd></span><span>Pause · Sound on / off</span></li>
+      <li><span class="keys-inline"><kbd>Touch</kbd></span><span>Swipe to hop, or use the arrow buttons</span></li>
+      <li><span class="keys-inline"><kbd>Enter</kbd></span><span>Start · Cross again</span></li>
+    </ul>
+  </section>
+
+  <section class="levels" id="levels" aria-label="Levels">
+    <div class="levels-head">
+      <h2>🏔️ Levels</h2>
+      <span class="levels-xp" id="levelXpTotal">0 XP from levels</span>
+    </div>
+    <ul class="level-list" id="levelList"></ul>
+  </section>
+
+  <section class="ach" id="achievements" aria-label="Achievements">
+    <div class="ach-head">
+      <h2>🏆 Achievements</h2>
+    </div>
+    <ul id="achList"></ul>
+  </section>
+
+  <footer class="site-foot">
+    <span class="foot-brand"><img src="/lofigame/assets/lofi-face-a1b88584.webp" alt="" />Lofi Games</span>
+    <nav aria-label="Footer">
+      <a href="/lofigame/">All games</a>
+      <a href="#howto">How to play</a>
+      <a href="#achievements">Achievements</a>
+    </nav>
+  </footer>
+</main>
+
+<div class="settings-overlay" id="settingsOverlay" hidden>
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle">SETTINGS</h2>
+    <div class="set-inner">
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V6l10-2v11.5"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="16.5" cy="15.5" r="2.6"/>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="musicVol" min="0" max="100" value="55" aria-label="Music volume" />
+      </div>
+      <div class="set-row">
+        <span class="set-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M3.5 9.2v5.6c0 .6.4 1 1 1H8l5.2 4c.6.5 1.6.1 1.6-.8V5c0-.9-1-1.3-1.6-.8L8 8.2H4.5c-.6 0-1 .4-1 1z"/>
+            <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M16.8 9.1a4.4 4.4 0 0 1 0 5.8"/><path d="M19.2 6.6a7.8 7.8 0 0 1 0 10.8"/>
+            </g>
+          </svg>
+        </span>
+        <input type="range" class="vol" id="soundVol" min="0" max="100" value="80" aria-label="Sound volume" />
+      </div>
+      <div class="set-row split">
+        <span class="tips-wrap">
+          <span class="set-label" id="tipsLabel">Game tips</span>
+          <button class="switch on" id="tipsToggle" type="button" role="switch" aria-checked="true" aria-labelledby="tipsLabel">✓</button>
+        </span>
+        <button class="notice-btn" id="noticeBtn" type="button">Notice<span class="nbadge" id="noticeBadge">1</span></button>
+      </div>
+      <p class="notice-text" id="noticeText" hidden>Fifty crossings over a frozen river. Ride the ice floes and boats, keep clear of the ships, and land on the far bank gold. Connect a SUI wallet here and your address shows on the Connect button.</p>
+      <p class="wallet-status" id="walletStatus" role="status"></p>
+      <div class="set-actions">
+        <button class="set-connect" id="connectBtn" type="button">Connect</button>
+        <button class="set-ok" id="settingsOk" type="button">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  "use strict";
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var W = 960, H = 540;
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var hudCross = document.getElementById('hudCross');
+  var hudLives = document.getElementById('hudLives');
+  var hudBest = document.getElementById('hudBest');
+  var hudGold = document.getElementById('hudGold');
+  var hudIn = document.getElementById('hudIn');
+  var startOverlay = document.getElementById('startOverlay');
+  var pauseOverlay = document.getElementById('pauseOverlay');
+  var overOverlay = document.getElementById('overOverlay');
+  var crossOverlay = document.getElementById('crossOverlay');
+  var toastEl = document.getElementById('toast');
+
+  /* ---------- achievements: the hub card's five, 210 XP in total ---------- */
+  var ACH = [
+    { id:'first',    name:'First crossing',      desc:'Finish a crossing',                   xp:10  },
+    { id:'station',  name:'Through the station', desc:'Finish 6 crossings in one run',       xp:25  },
+    { id:'commuter', name:'Commuter',            desc:'Finish 30 crossings across runs',     xp:25  },
+    { id:'wholeway', name:'The whole way',       desc:'Reach the end of all fifty crossings',  xp:50  },
+    { id:'scratch',  name:'Not a scratch',       desc:'Reach the end without losing a life', xp:100 }
+  ];
+  /* ---------- local save: best, lifetime crossings, achievements
+     and settings survive a reload. One key for this game only,
+     local to this browser, and mirrored to Firestore when signed
+     in (see the Firebase sync block below). Wrapped in try/catch
+     so private mode or a blocked store never breaks play. ------ */
+  var SAVE_KEY = 'frozen-crossing-save-v1';
+  var persisted = { best:0, totalCrossings:0, unlocked:{}, musicVol:55, soundVol:80, muted:false, tips:true, level:0, levelXP:0 };
+  try{
+    var rawSave = localStorage.getItem(SAVE_KEY);
+    if(rawSave){
+      var parsedSave = JSON.parse(rawSave);
+      if(parsedSave && typeof parsedSave === 'object'){
+        if(typeof parsedSave.best === 'number' && isFinite(parsedSave.best)) persisted.best = Math.max(0, Math.floor(parsedSave.best));
+        if(typeof parsedSave.totalCrossings === 'number' && isFinite(parsedSave.totalCrossings)) persisted.totalCrossings = Math.max(0, Math.floor(parsedSave.totalCrossings));
+        if(parsedSave.unlocked && typeof parsedSave.unlocked === 'object') persisted.unlocked = parsedSave.unlocked;
+        if(typeof parsedSave.musicVol === 'number') persisted.musicVol = Math.max(0, Math.min(100, parsedSave.musicVol));
+        if(typeof parsedSave.soundVol === 'number') persisted.soundVol = Math.max(0, Math.min(100, parsedSave.soundVol));
+        if(typeof parsedSave.muted === 'boolean') persisted.muted = parsedSave.muted;
+        if(typeof parsedSave.tips === 'boolean') persisted.tips = parsedSave.tips;
+        if(typeof parsedSave.level === 'number' && isFinite(parsedSave.level)) persisted.level = Math.max(0, Math.min(10, Math.floor(parsedSave.level)));
+        if(typeof parsedSave.levelXP === 'number' && isFinite(parsedSave.levelXP)) persisted.levelXP = Math.max(0, Math.floor(parsedSave.levelXP));
+      }
+    }
+  }catch(e){}
+  /* ---------- Firebase sync (Lofi Games project) ----------
+     localStorage stays the offline fallback: every local write
+     below is unchanged, the local key is never deleted, and the
+     game behaves exactly as before when signed out or offline.
+     When a Firebase user is signed in (sign-in itself lives in
+     the hub), the save mirrors to Firestore at
+     users/{uid}/games/frozen-crossing. The config is the
+     project's public client config, not a secret. No wallet
+     address, seed phrase, private key or password is ever
+     written to Firestore. ---------- */
+  var firebaseConfig = {
+    apiKey: "AIzaSyBQ5isDVE9nWFXO-3es3OmxVL047HmnE28",
+    authDomain: "winterplay.online",
+    projectId: "lofi-games",
+    storageBucket: "lofi-games.firebasestorage.app",
+    messagingSenderId: "885237508877",
+    appId: "1:885237508877:web:ac09a74ce6a82d8e5c1e44"
+  };
+  var fbDb = null, fbUser = null;
+  var cloudEarnedAt = {}; /* last known Firestore earnedAt values */
+  var pendingStamp = {};  /* ids unlocked this session: earnedAt still needs a server timestamp */
+  var pendingNull = {};   /* local-only ids not yet in Firestore: earnedAt must migrate as null */
+  var cloudTimer = null;
+  var hadLocalSave = false;
+  try{ hadLocalSave = !!localStorage.getItem(SAVE_KEY); }catch(e){}
+
+  function fbGameRef(){
+    if(!fbDb || !fbUser) return null;
+    return fbDb.collection('users').doc(fbUser.uid).collection('games').doc('frozen-crossing');
+  }
+  function fbServerTs(){
+    return firebase.firestore.FieldValue.serverTimestamp();
+  }
+  /* Firestore settings shape: the local "tips" field is stored
+     as "tipsOn"; volumes stay 0-100 integers, as locally. */
+  function cloudSettings(){
+    return {
+      muted: !!persisted.muted,
+      soundVol: Math.max(0, Math.min(100, Math.round(persisted.soundVol || 0))),
+      musicVol: Math.max(0, Math.min(100, Math.round(persisted.musicVol || 0))),
+      tipsOn: !!persisted.tips
+    };
+  }
+  function applyCloudSettings(s){
+    if(!s || typeof s !== 'object') return;
+    if(typeof s.muted === 'boolean') persisted.muted = s.muted;
+    if(typeof s.soundVol === 'number' && isFinite(s.soundVol)) persisted.soundVol = Math.max(0, Math.min(100, Math.round(s.soundVol)));
+    if(typeof s.musicVol === 'number' && isFinite(s.musicVol)) persisted.musicVol = Math.max(0, Math.min(100, Math.round(s.musicVol)));
+    if(typeof s.tipsOn === 'boolean') persisted.tips = s.tipsOn;
+  }
+  /* Build the Firestore game doc from the live save. With
+     includeFullEarnedAt the earnedAt map is complete (used for
+     the sign-in migration write); otherwise earnedAt carries
+     only the pending deltas, so routine writes never overwrite
+     a server-stamped date with a local guess. */
+  function buildCloudData(includeFullEarnedAt){
+    var unl = {};
+    ACH.forEach(function(a){ if(unlocked[a.id]) unl[a.id] = true; });
+    var data = {
+      best: persisted.best,
+      totalCrossings: persisted.totalCrossings,
+      level: persisted.level || 0,
+      levelXP: persisted.levelXP || 0,
+      unlocked: unl,
+      settings: cloudSettings(),
+      migratedFromLocal: true,
+      updatedAt: fbServerTs()
+    };
+    var earned = {}, hasEarned = false, id;
+    if(includeFullEarnedAt){
+      ACH.forEach(function(a){
+        if(!unl[a.id]) return;
+        if(pendingStamp[a.id]) earned[a.id] = fbServerTs();
+        else if(Object.prototype.hasOwnProperty.call(cloudEarnedAt, a.id)) earned[a.id] = cloudEarnedAt[a.id];
+        else earned[a.id] = null; /* migrated from local: date unknown, never invented */
+        hasEarned = true;
+      });
+    } else {
+      for(id in pendingStamp){ if(pendingStamp.hasOwnProperty(id) && unl[id]){ earned[id] = fbServerTs(); hasEarned = true; } }
+      for(id in pendingNull){ if(pendingNull.hasOwnProperty(id) && unl[id] && !pendingStamp[id]){ earned[id] = null; hasEarned = true; } }
+    }
+    if(hasEarned) data.earnedAt = earned;
+    return data;
+  }
+  function writeCloud(includeFullEarnedAt){
+    var ref = fbGameRef();
+    if(!ref) return;
+    var stampIds = Object.keys(pendingStamp), nullIds = Object.keys(pendingNull);
+    ref.set(buildCloudData(includeFullEarnedAt), { merge:true }).then(function(){
+      stampIds.forEach(function(id){ delete pendingStamp[id]; });
+      nullIds.forEach(function(id){
+        delete pendingNull[id];
+        if(!Object.prototype.hasOwnProperty.call(cloudEarnedAt, id)) cloudEarnedAt[id] = null;
+      });
+    }).catch(function(){
+      /* Offline or rejected: the local save stands, the pending
+         flags stay set, and the next save or sign-in retries.
+         A failed sync never blocks gameplay. */
+    });
+  }
+  /* Debounced ~500 ms so rapid changes batch into one write. */
+  function scheduleCloudSave(){
+    if(!fbUser || !fbDb) return;
+    if(cloudTimer) clearTimeout(cloudTimer);
+    cloudTimer = setTimeout(function(){ cloudTimer = null; writeCloud(false); }, 500);
+  }
+  /* Load merged state into the game: the same fields the local
+     load at the top fills, plus their runtime twins and the
+     settings UI, then repaint achievements and the HUD. */
+  function loadMergedIntoGame(){
+    persisted.unlocked = unlocked;
+    bestScore = persisted.best;
+    totalCrossings = persisted.totalCrossings;
+    muted = persisted.muted;
+    tipsOn = persisted.tips;
+    soundVolVal = persisted.soundVol / 100;
+    musicVolVal = persisted.musicVol / 100;
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(persisted)); }catch(e){}
+    renderAch();
+    if(typeof renderLevels === 'function') renderLevels();
+    if(typeof updateHud === 'function') updateHud();
+    if(typeof applyVolumes === 'function') applyVolumes();
+    if(typeof soundBtn !== 'undefined' && soundBtn){
+      soundBtn.classList.toggle('muted', muted);
+      soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+    }
+    var mvEl = document.getElementById('musicVol'), svEl = document.getElementById('soundVol'), ttEl = document.getElementById('tipsToggle');
+    if(mvEl) mvEl.value = persisted.musicVol;
+    if(svEl) svEl.value = persisted.soundVol;
+    if(typeof paintRange === 'function'){ if(mvEl) paintRange(mvEl); if(svEl) paintRange(svEl); }
+    if(ttEl){ ttEl.classList.toggle('on', tipsOn); ttEl.setAttribute('aria-checked', tipsOn ? 'true' : 'false'); }
+    if(!tipsOn && typeof headPops !== 'undefined') headPops = [];
+  }
+  /* On sign-in: read the local save (the live `persisted`) and
+     the Firestore doc, merge them, write the merged doc back
+     with migratedFromLocal, then load it into the game.
+     best/totalCrossings keep the higher value; unlocked is the
+     union; earnedAt keeps cloud values and adds null for
+     locally-unlocked ids the cloud has never seen. Settings
+     prefer the most recently updated: the local save carries
+     no timestamp, so when a local save exists its settings win
+     (the spec's in-doubt fallback); a device with no local save
+     yet takes the cloud settings. */
+  function fbMergeOnSignIn(user){
+    var ref = fbGameRef();
+    if(!ref) return;
+    var uid = user.uid;
+    ref.get().then(function(snap){
+      if(!fbUser || fbUser.uid !== uid) return; /* signed out again mid-merge */
+      var cloud = (snap && snap.exists) ? (snap.data() || {}) : {};
+      cloudEarnedAt = (cloud.earnedAt && typeof cloud.earnedAt === 'object') ? cloud.earnedAt : {};
+      if(typeof cloud.best === 'number' && isFinite(cloud.best)) persisted.best = Math.max(persisted.best, Math.floor(cloud.best));
+      if(typeof cloud.totalCrossings === 'number' && isFinite(cloud.totalCrossings)) persisted.totalCrossings = Math.max(persisted.totalCrossings, Math.floor(cloud.totalCrossings));
+      if(typeof cloud.level === 'number' && isFinite(cloud.level)) persisted.level = Math.max(persisted.level || 0, Math.min(10, Math.floor(cloud.level)));
+      if(typeof cloud.levelXP === 'number' && isFinite(cloud.levelXP)) persisted.levelXP = Math.max(persisted.levelXP || 0, Math.floor(cloud.levelXP));
+      var cloudUnlocked = (cloud.unlocked && typeof cloud.unlocked === 'object') ? cloud.unlocked : {};
+      ACH.forEach(function(a){ if(cloudUnlocked[a.id]) unlocked[a.id] = true; });
+      persisted.unlocked = unlocked;
+      if(!hadLocalSave && cloud.settings) applyCloudSettings(cloud.settings);
+      pendingNull = {};
+      ACH.forEach(function(a){
+        if(unlocked[a.id] && !Object.prototype.hasOwnProperty.call(cloudEarnedAt, a.id) && !pendingStamp[a.id]) pendingNull[a.id] = true;
+      });
+      loadMergedIntoGame();
+      hadLocalSave = true;
+      writeCloud(true);
+    }).catch(function(){
+      /* Cloud read failed (offline): keep playing on the local
+         save; the next save or sign-in retries the sync. */
+    });
+  }
+  try{
+    if(window.firebase && firebase.initializeApp && firebase.auth && firebase.firestore){
+      if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      fbDb = firebase.firestore();
+      firebase.auth().onAuthStateChanged(function(user){
+        if(user){
+          fbUser = user;
+          fbMergeOnSignIn(user);
+        } else {
+          /* Signed out: stop Firestore writes; the game
+             continues on localStorage only. */
+          fbUser = null;
+          if(cloudTimer){ clearTimeout(cloudTimer); cloudTimer = null; }
+        }
+      });
+    }
+  }catch(e){ fbDb = null; fbUser = null; }
+
+  function savePersisted(){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(persisted)); }catch(e){}
+    /* Firestore mirror of every best / totalCrossings / settings
+       change: the full current game doc, debounced, merge write.
+       No-op when signed out. */
+    scheduleCloudSave();
+  }
+  var unlocked = {};
+  /* only keep known achievement ids from the save */
+  ACH.forEach(function(a){ if(persisted.unlocked && persisted.unlocked[a.id]) unlocked[a.id] = true; });
+  persisted.unlocked = unlocked;
+  var achList = document.getElementById('achList');
+  var xpTotal = document.getElementById('xpTotal');
+
+  function renderAch(){
+    achList.innerHTML = '';
+    var total = 0;
+    ACH.forEach(function(a){
+      var on = !!unlocked[a.id];
+      if(on) total += a.xp;
+      var li = document.createElement('li');
+      if(on) li.className = 'unlocked';
+      li.innerHTML =
+        '<span class="dot" aria-hidden="true">' + (on ? '✓' : '·') + '</span>' +
+        '<span class="txt"><strong></strong><span></span></span>' +
+        '<span class="pts">' + a.xp + ' XP</span>' +
+        '<span class="state">' + (on ? 'Unlocked' : 'Locked') + '</span>';
+      li.querySelector('.txt strong').textContent = a.name;
+      li.querySelector('.txt span').textContent = a.desc;
+      achList.appendChild(li);
+    });
+    /* Uncapped total: achievement XP plus level XP, no "/ 210". */
+    xpTotal.textContent = total + (persisted.levelXP || 0);
+  }
+
+  /* ---------- levels: 10 levels, 5 crossings each, XP = 15 x level ---------- */
+  function levelReward(n){ return 15 * n; }
+  function levelForIdx(idx){ return Math.min(10, Math.floor(idx / 5) + 1); }
+  var levelListEl = document.getElementById('levelList');
+  var levelXpTotalEl = document.getElementById('levelXpTotal');
+  function renderLevels(){
+    if(!levelListEl) return;
+    levelListEl.innerHTML = '';
+    var done = persisted.level || 0;
+    for(var n = 1; n <= 10; n++){
+      var li = document.createElement('li');
+      var stateName, stateLabel;
+      if(n <= done){ stateName = 'completed'; stateLabel = '✓ Completed'; }
+      else if(n === done + 1){ stateName = 'current'; stateLabel = 'Current'; }
+      else { stateName = 'locked'; stateLabel = 'Locked'; }
+      li.className = 'level-row ' + stateName;
+      li.innerHTML =
+        '<span class="lvl-num" aria-hidden="true">' + (stateName === 'completed' ? '✓' : n) + '</span>' +
+        '<span class="lvl-txt"><strong></strong><span></span></span>' +
+        '<span class="lvl-xp">+' + levelReward(n) + ' XP</span>' +
+        '<span class="lvl-state">' + stateLabel + '</span>';
+      li.querySelector('.lvl-txt strong').textContent = 'Level ' + n + ' · Crossings ' + ((n - 1) * 5 + 1) + '-' + (n * 5);
+      li.querySelector('.lvl-txt span').textContent = 'Crossings ' + ((n - 1) * 5 + 1) + ' to ' + (n * 5) + ' of the run';
+      levelListEl.appendChild(li);
+    }
+    if(levelXpTotalEl) levelXpTotalEl.textContent = (persisted.levelXP || 0) + ' XP from levels';
+  }
+
+  var toastTimer = null;
+  function toast(html){
+    toastEl.innerHTML = html;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+  function unlock(id){
+    if(unlocked[id]) return;
+    unlocked[id] = true;
+    persisted.unlocked = unlocked;
+    savePersisted();
+    /* Firestore mirror of the new unlock: the debounced cloud
+       write carries unlocked[id]=true with earnedAt[id] and
+       updatedAt as server timestamps (no-op when signed out). */
+    pendingStamp[id] = true;
+    scheduleCloudSave();
+    renderAch();
+    var a = ACH.filter(function(x){ return x.id===id; })[0];
+    if(a) toast('Achievement unlocked: <b>' + a.name + '</b> · +' + a.xp + ' XP');
+    if(typeof sfx !== 'undefined' && sfx.chime) sfx.chime(); else if(typeof sfx !== 'undefined') sfx.unlock();
+    /* spark burst on achievement collect, at Lofi or centre stage */
+    try{
+      var spx = W/2, spy = H*0.38;
+      if(typeof player !== 'undefined' && typeof rowCY === 'function'){ spx = player.x; spy = rowCY(player.row) - 28; }
+      if(typeof spawnSparkBurst === 'function') spawnSparkBurst(spx, spy);
+    }catch(e){}
+  }
+  renderAch();
+  renderLevels();
+
+  /* ---------- sticker art ----------
+     Every picture is drawn as a flat sticker in its original shape:
+     a dark edge, a thick white border, then the artwork itself.
+     Silhouettes are pre-rendered once each image loads. */
+  function makeSilhouette(img, color){
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    var g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = color;
+    g.fillRect(0, 0, c.width, c.height);
+    return c;
+  }
+  function loadSticker(src){
+    var o = { img: new Image(), ready: false, silWhite: null, silDark: null };
+    o.img.onload = function(){
+      o.silWhite = makeSilhouette(o.img, '#ffffff');
+      o.silDark = makeSilhouette(o.img, '#14304d');
+      o.ready = true;
+    };
+    o.img.src = src;
+    return o;
+  }
+  function drawSticker(o, x, y, w, h){
+    if(!o.ready) return;
+    var d, k, dirs = [[1,0],[-1,0],[0,1],[0,-1],[0.7,0.7],[-0.7,0.7],[0.7,-0.7],[-0.7,-0.7]];
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silDark, x + d[0]*5.5, y + d[1]*5.5, w, h); }
+    for(k=0;k<dirs.length;k++){ d = dirs[k]; ctx.drawImage(o.silWhite, x + d[0]*3.5, y + d[1]*3.5, w, h); }
+    ctx.drawImage(o.img, x, y, w, h);
+  }
+
+  /* Lofi: the user's own yeti art, kept whole in its original shape */
+  var yetiSticker = loadSticker('/lofigame/assets/yeti-ca776e9d.webp');
+
+  /* ---------- river art Archer picked ----------
+     Ice floes and speedboats cut from his sheets, white backgrounds
+     flooded to transparent, every boat facing right in sprite space
+     (drawBoat flips it to the row's drift direction). The treasure
+     chest is the far-bank gold. Ships stay code-drawn: no ship
+     image was sent. If a sprite has not loaded yet, the code-drawn
+     version below stands in for that frame. */
+  function loadSprite(src){
+    var o = { img: new Image(), ready: false, aspect: 1 };
+    o.img.onload = function(){
+      o.aspect = o.img.naturalWidth / o.img.naturalHeight;
+      o.ready = true;
+    };
+    o.img.src = src;
+    return o;
+  }
+  var floeSprites = [
+    loadSprite('/lofigame/assets/floe-d7364a40.png'), loadSprite('/lofigame/assets/floe-d446b25a.png'),
+    loadSprite('/lofigame/assets/floe-131361aa.png'), loadSprite('/lofigame/assets/floe-75dd6eea.png')
+  ];
+  var boatSprites = [
+    loadSprite('/lofigame/assets/boat-6ae0b77c.webp'), loadSprite('/lofigame/assets/boat-92bf8a66.webp'),
+    loadSprite('/lofigame/assets/boat-28ad8e2b.webp'), loadSprite('/lofigame/assets/boat-ec5559b8.webp'),
+    loadSprite('/lofigame/assets/boat-1ca6ae06.webp'), loadSprite('/lofigame/assets/boat-02363680.webp'),
+    loadSprite('/lofigame/assets/boat-4513b24c.webp'), loadSprite('/lofigame/assets/boat-a7c6af61.webp'),
+    loadSprite('/lofigame/assets/boat-abc1375c.webp'), loadSprite('/lofigame/assets/boat-84c26eac.webp'),
+    loadSprite('/lofigame/assets/boat-2af1104a.webp')
+  ];
+  /* the red speedboat's photo is shot on a diagonal, bow dropped
+     about 16 degrees below level, so in play it cruised tilted.
+     drawBoat rotates this one sprite back by this angle (in its
+     local, pre-flip space, so the correction mirrors correctly on
+     leftward rows) and it runs straight and level like the rest.
+     Every other boat photo is already level: tilt stays 0. */
+  boatSprites[1].tilt = -0.279;
+  var treasureSprite = loadSprite('/lofigame/assets/treasure-8f0cf237.webp');
+  /* the water half of Archer's ocean photo: wavy clear surface over
+     underwater depth, bubbles, fish and coral */
+  var waterTex = loadSprite('/lofigame/assets/water-ae9caf87.jpeg');
+
+  /* ---------- sound effects (synthesised, no audio files) ---------- */
+  var AC = null, muted = persisted.muted, sfxGain = null, musicGain = null;
+  var soundVolVal = persisted.soundVol / 100, musicVolVal = persisted.musicVol / 100;
+  function applyVolumes(){
+    if(!AC || !sfxGain || !musicGain) return;
+    var s = muted ? 0 : soundVolVal, m = muted ? 0 : musicVolVal;
+    sfxGain.gain.value = s*s*0.9;
+    musicGain.gain.value = m*m*0.45;
+  }
+  function audio(){
+    if(!AC){
+      try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ AC = null; }
+      if(AC){
+        sfxGain = AC.createGain(); sfxGain.connect(AC.destination);
+        musicGain = AC.createGain(); musicGain.connect(AC.destination);
+        applyVolumes();
+      }
+    }
+    if(AC && AC.state === 'suspended') AC.resume();
+    return AC;
+  }
+  function tone(f0, f1, dur, type, vol, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(sfxGain || ac.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noiseHit(dur, vol, freq, delay){
+    var ac = audio(); if(!ac || muted) return;
+    var t0 = ac.currentTime + (delay || 0);
+    var len = Math.max(1, Math.floor(ac.sampleRate * dur));
+    var buf = ac.createBuffer(1, len, ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var n=0;n<len;n++) d[n] = (Math.random()*2 - 1) * (1 - n/len);
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq;
+    var g = ac.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(sfxGain || ac.destination);
+    src.start(t0);
+  }
+  var sfx = {
+    click:  function(){ tone(620, 520, 0.07, 'triangle', 0.12); },
+    start:  function(){ tone(440, 440, 0.09, 'triangle', 0.14); tone(660, 660, 0.09, 'triangle', 0.14, 0.09); tone(880, 880, 0.14, 'triangle', 0.15, 0.18); },
+    hop:    function(){ tone(300, 560, 0.1, 'sine', 0.13); noiseHit(0.05, 0.03, 2600); },
+    ding:   function(){ tone(880, 880, 0.09, 'sine', 0.12); tone(1318, 1318, 0.15, 'sine', 0.12, 0.07); },
+    heart:  function(){ tone(660, 660, 0.1, 'triangle', 0.13); tone(880, 880, 0.1, 'triangle', 0.13, 0.07); tone(990, 990, 0.16, 'triangle', 0.13, 0.14); },
+    coin:   function(){ tone(1318, 1318, 0.07, 'square', 0.06); tone(1760, 1760, 0.13, 'square', 0.06, 0.055); },
+    splash: function(){ noiseHit(0.3, 0.26, 900); tone(520, 120, 0.3, 'sine', 0.2); },
+    paw:    function(){ tone(1568, 1568, 0.06, 'sine', 0.05); },
+    crash:  function(){ noiseHit(0.28, 0.3, 700); tone(160, 42, 0.32, 'sine', 0.28); },
+    /* game over: the thud of the fall, then a soft descending jingle
+       that settles on a low note as the frost panel appears */
+    gameOver: function(){
+      noiseHit(0.26, 0.28, 700); tone(160, 46, 0.3, 'sine', 0.24);
+      tone(392, 392, 0.17, 'triangle', 0.15, 0.14);
+      tone(330, 330, 0.17, 'triangle', 0.15, 0.32);
+      tone(262, 262, 0.2, 'triangle', 0.15, 0.5);
+      tone(196, 165, 0.46, 'sine', 0.17, 0.7);
+    },
+    /* the far bank: a bright little fanfare, four notes climbing */
+    win: function(){
+      tone(523, 523, 0.12, 'triangle', 0.15);
+      tone(659, 659, 0.12, 'triangle', 0.15, 0.1);
+      tone(784, 784, 0.12, 'triangle', 0.15, 0.2);
+      tone(1046, 1046, 0.2, 'triangle', 0.16, 0.3);
+      tone(1318, 1318, 0.34, 'sine', 0.14, 0.42);
+    },
+    unlock: function(){ tone(660, 660, 0.1, 'triangle', 0.14); tone(880, 880, 0.1, 'triangle', 0.14, 0.09); tone(1100, 1100, 0.18, 'triangle', 0.15, 0.18); },
+    /* short chime for level complete + achievement unlock, reusing tone patterns */
+    chime: function(){ tone(1046, 1046, 0.09, 'sine', 0.11); tone(1318, 1318, 0.10, 'sine', 0.11, 0.07); tone(1568, 1568, 0.16, 'sine', 0.10, 0.14); }
+  };
+  var soundBtn = document.getElementById('soundBtn');
+  function setMuted(m){
+    muted = m;
+    persisted.muted = muted;
+    savePersisted();
+    applyVolumes();
+    soundBtn.classList.toggle('muted', muted);
+    soundBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    soundBtn.setAttribute('aria-label', muted ? 'Sound off. Tap to turn on.' : 'Sound on. Tap to mute.');
+  }
+  /* reflect a saved mute on first paint */
+  if(muted){
+    soundBtn.classList.add('muted');
+    soundBtn.setAttribute('aria-pressed', 'true');
+    soundBtn.setAttribute('aria-label', 'Sound off. Tap to turn on.');
+  }
+  soundBtn.addEventListener('click', function(){
+    setMuted(!muted);
+    if(!muted) sfx.click();
+  });
+
+  /* ---------- background music: a small cheerful loop, synthesised live.
+     An eighth-note sequencer at ~116 BPM: a bouncy triangle lead over a
+     soft sine bass, routed through its own gain so the Settings music
+     slider (and the mute button) control it separately from effects. */
+  var musicTimer = null, musicStep = 0, musicNext = 0, musicStarted = false;
+  var LEAD = [72,0,76,0,79,0,76,0, 81,0,79,0,76,0,72,0, 74,0,76,0,79,0,81,0, 79,0,76,0,74,0,71,0];
+  var BASS = [48,53,55,48];
+  function midiHz(m){ return 440*Math.pow(2,(m-69)/12); }
+  function musicNote(midi, t0, dur, type, vol){
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = midiHz(midi);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(g); g.connect(musicGain);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function scheduleMusic(){
+    if(!AC || !musicGain) return;
+    while(musicNext < AC.currentTime + 0.24){
+      var step = musicStep, t0 = musicNext;
+      var lead = LEAD[step % LEAD.length];
+      if(lead) musicNote(lead, t0, 0.26, 'triangle', 0.16);
+      if(step % 8 === 0) musicNote(BASS[Math.floor(step/8) % 4], t0, 0.5, 'sine', 0.15);
+      if(step % 8 === 4) musicNote(BASS[Math.floor(step/8) % 4] + 7, t0, 0.3, 'sine', 0.07);
+      musicStep++;
+      musicNext += 0.2586;
+    }
+  }
+  function startMusic(){
+    if(musicStarted) return;
+    var ac = audio(); if(!ac || !musicGain) return;
+    musicStarted = true;
+    musicStep = 0;
+    musicNext = ac.currentTime + 0.08;
+    musicTimer = setInterval(scheduleMusic, 84);
+  }
+
+  /* ---------- happy pops by Lofi's head ----------
+     Every few seconds a little cheer, word or emoji pops up beside
+     Lofi's head, bobs there happily, then drifts away. The Settings
+     Game tips switch turns them off. */
+  var headPops = [];
+  var tipsOn = persisted.tips;
+  var popTimer = 1.1;
+  var POP_ITEMS = [
+    { t:'Go go!', e:false }, { t:'Brrr!', e:false }, { t:'Careful!', e:false },
+    { t:'So cold!', e:false }, { t:'Gold!', e:false }, { t:'Row row!', e:false },
+    { t:'😊', e:true }, { t:'😄', e:true }, { t:'⭐', e:true },
+    { t:'✨', e:true }, { t:'❄️', e:true }, { t:'🧊', e:true }, { t:'💨', e:true }
+  ];
+  var lastPopIdx = -1;
+  function spawnHeadPop(text){
+    var item;
+    if(text){ item = { t:text, e:false }; }
+    else{
+      var idx = Math.floor(Math.random()*POP_ITEMS.length);
+      if(idx === lastPopIdx) idx = (idx + 1) % POP_ITEMS.length;
+      lastPopIdx = idx;
+      item = POP_ITEMS[idx];
+    }
+    headPops.push({
+      text: item.t, emoji: item.e,
+      t: 0, life: 2.4,
+      dx0: 52 + Math.random()*20,
+      travel: reduced ? 30 : 66,
+      dy0: -10 + Math.random()*14,
+      ph: Math.random()*6.28
+    });
+  }
+  function tickHeadPops(dt, allowSpawn){
+    for(var i=headPops.length-1;i>=0;i--){
+      headPops[i].t += dt;
+      if(headPops[i].t >= headPops[i].life) headPops.splice(i,1);
+    }
+    if(allowSpawn && tipsOn && (state === 'playing' || state === 'ready')){
+      popTimer -= dt;
+      if(popTimer <= 0){
+        spawnHeadPop();
+        popTimer = 2.6 + Math.random()*2.8;
+      }
+    }
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+  function hash(n){ var x = Math.sin(n*127.1)*43758.5453; return x - Math.floor(x); }
+  /* ---------- soft glow: pre-rendered sprites (no per-frame shadowBlur) ---------- */
+  function makeGlowSprite(size, stops){
+    var c = document.createElement('canvas'); c.width = size; c.height = size;
+    var g = c.getContext('2d');
+    var grad = g.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    stops.forEach(function(s){ grad.addColorStop(s[0], s[1]); });
+    g.fillStyle = grad; g.fillRect(0,0,size,size);
+    return c;
+  }
+  var coinGlowSprite = makeGlowSprite(64, [[0,'rgba(255,205,60,0.55)'],[0.45,'rgba(255,195,31,0.28)'],[1,'rgba(255,195,31,0)']]);
+  var lanternGlowSprite = makeGlowSprite(64, [[0,'rgba(255,190,70,0.60)'],[0.45,'rgba(255,160,40,0.28)'],[1,'rgba(255,160,40,0)']]);
+  /* subtle day-to-dusk progress across the run: 0 at crossing 1, 1 at crossing 50 */
+  function duskProgress(){ return Math.max(0, Math.min(1, (typeof crossingIdx !== 'undefined' ? crossingIdx : 0) / 49)); }
+
+  /* ---------- the river ----------
+     Fifteen rows: the start bank, eleven water rows in two groups,
+     a snow island in the middle, and a wide far bank two rows deep
+     with the gold. Every crossing runs boat rows in BOTH water
+     sections (start bank to island, island to far bank), with ship
+     hazard rows interspersed between them. Ice floes and boats
+     drift with the current and carry Lofi along; ships are hazards
+     that must never be touched.
+     Ten designed layouts, each faster and meaner than the last,
+     cycled across the run's fifty crossings. */
+  var COLS = 16, CELL = 60, ROWS = 15, ROWH = H / ROWS;
+  var WATER_ORDER = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12];
+  var SAFE_ROWS = [0, 6, 13, 14];
+  var MARGIN = 300, TRACK = W + MARGIN * 2;
+  /* The two far-bank rows (13 and 14) carry extra depth at every
+     stage size, so the far bank — treasure chest, gold piles, bank
+     coins and the pennant string — sits deep and fully visible at
+     the top of the frame, with generous air around it and well
+     clear of the HUD chips (which are fixed-size DOM, while the
+     world scales with the stage, so the bank needs the extra
+     depth most at small stage sizes). The extra comes out of the
+     shared row height, so the frame and the fifteen rows stay
+     exactly as they are. Row 14 (pennants and pines) takes the
+     larger share on the phone view, where its decorations sit
+     highest in the frame. */
+  var BANK_X13 = 0, BANK_X14 = 0;
+  function rowH(row){ return ROWH + (row === 13 ? BANK_X13 : row === 14 ? BANK_X14 : 0); }
+
+  function rowTop(row){
+    var s = 0, r;
+    for(r = 0; r <= row; r++) s += rowH(r);
+    return H - s;
+  }
+  function rowCY(row){ return rowTop(row) + rowH(row) / 2; }
+  function isSafe(row){ return SAFE_ROWS.indexOf(row) >= 0; }
+  function mod(a, n){ return ((a % n) + n) % n; }
+
+  /* row kinds: f = ice floe, b = boat, s = ship (hazard) */
+  function F(d, v, l0, l1, g){ return { t:'f', d:d, v:v, l0:l0, l1:l1, g:g }; }
+  function B(d, v, l0, l1, g){ return { t:'b', d:d, v:v, l0:l0, l1:l1, g:g }; }
+  function S(d, v, l0, l1, g){ return { t:'s', d:d, v:v, l0:l0, l1:l1, g:g }; }
+
+  var CROSSINGS = [
+    { name:'Calm Canal', rows:[
+      F(1,30,170,220,280), B(1,26,150,180,320), F(-1,34,170,220,290), B(-1,28,150,180,310), F(1,32,170,220,280),
+      F(-1,30,170,220,290), B(1,27,150,180,320), F(1,36,160,210,270), F(-1,28,180,230,300), B(-1,30,150,180,310), F(1,30,180,230,300) ] },
+    { name:'Lantern River', rows:[
+      F(1,38,160,200,280), B(1,42,140,170,300), F(-1,40,160,200,280), B(-1,40,140,170,310), F(1,44,150,190,290),
+      F(-1,38,160,200,280), B(-1,40,140,170,310), F(1,46,150,190,290), F(-1,42,160,200,280), B(1,44,140,170,300), F(-1,40,160,210,280) ] },
+    { name:'Frozen Falls', rows:[
+      F(1,48,150,190,280), B(-1,46,140,170,300), F(1,52,140,180,290), F(-1,50,150,190,280), B(1,48,140,170,300),
+      F(-1,48,150,190,280), B(1,48,140,170,300), F(1,52,140,180,290), S(-1,135,240,300,320), F(-1,50,150,190,280), B(-1,46,140,170,300) ] },
+    { name:'Ice Lagoon', rows:[
+      F(-1,55,140,180,270), B(1,50,135,165,290), F(1,58,140,175,280), S(1,145,240,310,310), B(-1,52,135,165,290),
+      F(1,55,140,180,270), F(-1,58,140,175,280), B(-1,52,135,165,290), F(1,60,135,175,280), S(-1,150,240,310,310), B(1,54,135,165,290) ] },
+    { name:'Ship Channel', rows:[
+      F(1,60,135,175,260), B(-1,54,135,165,280), S(1,150,250,320,290), F(1,64,130,170,270), B(1,56,135,165,280),
+      F(-1,60,135,175,260), F(1,62,130,170,270), S(-1,155,250,320,290), B(-1,56,135,165,280), F(-1,64,130,170,270), S(1,160,250,320,280) ] },
+    { name:'Glacier Run', rows:[
+      F(-1,72,115,155,260), B(1,58,130,160,280), F(1,75,110,150,270), F(-1,78,110,150,270), B(-1,60,130,160,280),
+      F(-1,75,110,150,270), S(1,165,250,320,280), B(1,60,130,160,280), F(1,78,110,150,270), F(-1,72,115,155,260), S(-1,170,250,320,270) ] },
+    { name:'Aurora Stream', rows:[
+      F(1,80,110,150,250), B(1,62,130,160,270), S(-1,170,260,330,270), F(1,82,110,150,250), B(-1,64,130,160,270),
+      F(-1,80,110,150,250), S(1,175,260,330,265), B(1,62,130,160,270), F(1,84,105,145,260), S(-1,180,260,330,260), B(-1,64,130,160,270) ] },
+    { name:'Snowmelt Rapids', rows:[
+      F(-1,95,100,140,240), B(-1,66,125,155,260), F(1,100,95,135,250), S(1,180,260,330,260), B(1,68,125,155,260),
+      F(1,98,95,135,250), F(-1,102,95,135,260), B(-1,66,125,155,260), F(1,95,100,140,240), S(-1,185,260,330,255), B(1,68,125,155,260) ] },
+    { name:'Crystal Harbor', rows:[
+      F(1,88,105,145,235), S(-1,185,270,340,250), B(1,68,125,155,255), F(-1,90,105,145,245), S(1,190,270,340,250),
+      B(-1,70,125,155,255), F(-1,88,105,145,235), F(1,92,100,140,245), S(-1,195,270,340,245), B(1,68,125,155,255), S(1,200,270,340,240) ] },
+    { name:'Moonlit Fjord', rows:[
+      F(-1,105,95,130,230), B(-1,70,120,150,250), S(1,195,270,340,245), F(-1,108,90,125,240), B(1,72,120,150,250),
+      S(-1,200,270,340,240), F(1,112,90,125,240), B(-1,70,120,150,250), F(-1,105,95,130,230), S(1,205,280,350,235), B(1,72,120,150,250) ] }
+  ];
+
+  var rowData = {};   /* row -> {kind:'safe'|'plat'|'ship', type, dir, speed, items:[...]} */
+  var farCoins = [];
+
+  function buildCrossing(ci){
+    /* 50 crossings per run cycle the ten designed layouts: crossing
+       11 replays layout 1's pattern (fresh randomised build each
+       time, as always), and so on, so the run can reach 50 while
+       every layout, speed and ship pattern stays as designed. */
+    var def = CROSSINGS[ci % CROSSINGS.length];
+    rowData = {};
+    var r, i, j;
+    for(r = 0; r < ROWS; r++) rowData[r] = { kind:'safe', items:[] };
+    /* ---------- fresh layout, built around a walked path ----------
+       Every build (each new run, and each crossing when reached)
+       draws a genuinely new layout: new platform lengths, new gaps,
+       new drift speeds, new starting offsets and new boat colours.
+       The layout is generated by walking a reachable path up the
+       river, never by pure random gaps:
+       - a path column starts at Lofi's bank spot and steps a short
+         way left or right at each water row;
+       - every platform row is built LONG (lantern-boat length, a
+         good share of the river's width) with its open-water gaps
+         kept small, then shifted so one platform sits centred on
+         the path column, staggered against the rows around it;
+       - neighbouring platform rows keep a healthy difference in
+         drift speed, so a platform in the next row always sweeps
+         across to wherever Lofi is standing within a few seconds;
+       - ship rows instead centre a wide gap on the path column.
+       So from any bank, island or platform there is always a
+       platform in reach in the next row: never a row with nothing
+       to hop onto, never a gap too wide to cross. Difficulty still
+       comes from the designed speeds and ship rows, which rise
+       crossing by crossing exactly as before. */
+    var pathX = W / 2;
+    var prevPlatDir = 0, prevPlatSpeed = 0;
+    for(i = 0; i < WATER_ORDER.length; i++){
+      var row = WATER_ORDER[i], cfg = def.rows[i];
+      var avg = (cfg.l0 + cfg.l1) / 2;
+      var isShip = cfg.t === 's';
+      var gapMin, gapMax, targetLen;
+      if(isShip){
+        targetLen = avg; gapMin = 185; gapMax = 300;
+      } else {
+        targetLen = Math.max(235, Math.min(310, avg * 1.5));
+        gapMin = 95; gapMax = 160;
+      }
+      var n = Math.max(isShip ? 2 : 3, Math.round(TRACK / (targetLen + (gapMin + gapMax) / 2)));
+      var spacing = TRACK / n;
+      /* Random drift speed within a fair range around the designed
+         speed: platforms vary a little more, ships a little less,
+         direction never changes. */
+      var speedFactor = isShip
+        ? 0.9 + Math.random() * 0.2
+        : 0.85 + Math.random() * 0.35;
+      var randSpeed = Math.max(20, Math.round(cfg.v * speedFactor));
+      if(!isShip){
+        /* Same-direction neighbours must not drift in lockstep:
+           keep at least 16px/s of relative drift between this row
+           and the platform row below, so the next platform along
+           always arrives while Lofi waits on this one. */
+        if(prevPlatDir === cfg.d && Math.abs(randSpeed - prevPlatSpeed) < 16){
+          randSpeed = prevPlatSpeed + (randSpeed >= prevPlatSpeed ? 16 : -16);
+          if(randSpeed < 20) randSpeed = prevPlatSpeed + 16;
+        }
+        prevPlatDir = cfg.d; prevPlatSpeed = randSpeed;
+      }
+      /* Random starting offset for the whole row, so floes and
+         boats never start in the same place twice. */
+      var rowOffset = Math.random() * TRACK;
+      var items = [];
+      for(j = 0; j < n; j++){
+        var lenJ;
+        if(isShip) lenJ = cfg.l0 + Math.random() * (cfg.l1 - cfg.l0);
+        else lenJ = Math.min(340, spacing - (gapMin + Math.random() * (gapMax - gapMin)));
+        items.push({
+          x: mod(j * spacing + rowOffset, TRACK),
+          len: lenJ,
+          seed: Math.floor(Math.random() * 100000),
+          coin: false, coinOff: 0, coinTaken: false, pawed: false
+        });
+      }
+      items.sort(function(a, b){ return a.x - b.x; });
+      /* Walk the path onto this row: shift the whole row (a uniform
+         shift changes no gap) so the path column lands in the
+         middle of a platform — or, on a ship row, in the middle of
+         a gap wide enough to stand in. */
+      var target = pathX + MARGIN, delta = 0, bestD = Infinity, k;
+      for(k = 0; k < n; k++){
+        var ctr;
+        if(isShip){
+          var g0 = items[k].x + items[k].len;
+          var g1 = (k + 1 < n) ? items[k + 1].x : items[0].x + TRACK;
+          ctr = (g0 + g1) / 2;
+        } else {
+          ctr = items[k].x + items[k].len / 2;
+        }
+        var wrapped = mod(target - ctr + TRACK / 2, TRACK) - TRACK / 2;
+        if(Math.abs(wrapped) < bestD){ bestD = Math.abs(wrapped); delta = wrapped; }
+      }
+      if(delta){
+        for(k = 0; k < n; k++) items[k].x = mod(items[k].x + delta, TRACK);
+        items.sort(function(a, b){ return a.x - b.x; });
+      }
+      var rd = { kind: isShip ? 'ship' : 'plat', type: cfg.t, dir: cfg.d, speed: randSpeed, items: items };
+      /* A random boat sprite / colour for this boat row this time. */
+      if(cfg.t === 'b') rd.boatSprite = Math.floor(Math.random() * boatSprites.length);
+      rowData[row] = rd;
+      /* gold rides some of the floes and boats: same rows as before,
+         but a random carrier on the row each time */
+      if(!isShip && ((row * 7 + ci * 3) % 4) < 2){
+        var it = items[Math.floor(Math.random() * items.length)];
+        it.coin = true;
+        it.coinOff = it.len / 2;
+      }
+      /* The path steps a little way along before the next row, so
+         the route meanders instead of running straight up the
+         middle. */
+      pathX += (Math.random() * 2 - 1) * 90;
+      pathX = Math.max(110, Math.min(W - 110, pathX));
+    }
+    /* the far-bank coins spread with the river's width: at the
+       original 960px view these are the same 150 / 480 / 810 spots */
+    farCoins = [ { x: W * 0.15625, taken: false }, { x: W / 2, taken: false }, { x: W * 0.84375, taken: false } ];
+  }
+
+  function updateItems(dt){
+    for(var r = 0; r < ROWS; r++){
+      var rd = rowData[r];
+      if(!rd || !rd.items) continue;
+      for(var i = 0; i < rd.items.length; i++){
+        rd.items[i].x = mod(rd.items[i].x + rd.dir * rd.speed * dt, TRACK);
+      }
+    }
+  }
+  function itemSX(it){ return it.x - MARGIN; }
+  function itemUnder(row, px){
+    var rd = rowData[row];
+    if(!rd || rd.kind !== 'plat') return null;
+    for(var i = 0; i < rd.items.length; i++){
+      var it = rd.items[i], sx = itemSX(it);
+      if(px >= sx - 6 && px <= sx + it.len + 6) return it;
+    }
+    return null;
+  }
+
+  /* ---------- game state ---------- */
+  var state = 'ready'; // ready | playing | paused | hit | crossdone | over | won
+  var clockT = 0;
+  var lives = 3, deaths = 0, runTime = 0;
+  var crossingIdx = 0, crossingsDone = 0, totalCrossings = persisted.totalCrossings;
+  var score = 0, bestScore = persisted.best, chain = 0, bestChain = 0, goldRun = 0;
+  var bonusT = -1, goldPts = 0, pawPts = 0, coinsCross = 0;
+  var lastDeathKind = '', lastDeathName = '';
+  var crossT = 0;
+  var player = { row: 0, x: W / 2 };
+  var hop = null, buffered = null;
+  var hitT = 0;
+  /* levels in this run: numbers completed and the first-time XP they paid */
+  var runLevels = [], runLevelXP = 0;
+  /* canvas confetti burst for a level-up */
+  var confetti = [];
+  var levelBannerEl = document.getElementById('levelBanner');
+  var levelBannerTimer = null;
+  var hudLevelEl = document.getElementById('hudLevel');
+  function crossingName(idx){ return CROSSINGS[idx % CROSSINGS.length].name; }
+  /* a slight water tint shift per level (index 0 = level 1) */
+  var LEVEL_TINTS = [
+    'rgba(38,140,215,0.13)', 'rgba(30,150,205,0.15)', 'rgba(24,160,190,0.16)',
+    'rgba(20,150,180,0.17)', 'rgba(28,130,190,0.18)', 'rgba(40,110,200,0.19)',
+    'rgba(52,95,205,0.20)', 'rgba(45,85,195,0.21)', 'rgba(38,75,185,0.22)',
+    'rgba(30,65,175,0.23)'
+  ];
+  function spawnConfetti(){
+    if(reduced) return;
+    var cols = ['#ffc21f', '#00b7ff', '#59d8ff', '#ff5c8a', '#ffffff', '#ffd34d'];
+    var cx0 = W / 2, cy0 = H * 0.32;
+    for(var i = 0; i < 46; i++){
+      var ang = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 190;
+      confetti.push({
+        type:'confetti',
+        x: cx0 + (Math.random() * 2 - 1) * 60, y: cy0 + (Math.random() * 2 - 1) * 20,
+        vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 70,
+        t: 0, life: 1 + Math.random() * 0.7,
+        size: 3 + Math.random() * 4, color: cols[i % cols.length],
+        rot: Math.random() * 6.28, vr: (Math.random() * 2 - 1) * 7
+      });
+    }
+  }
+  /* --- light particle bursts reusing the same confetti particle system --- */
+  function spawnSnowBurst(cx0, cy0){
+    if(reduced) return;
+    cx0 = (typeof cx0 === 'number') ? cx0 : W/2; cy0 = (typeof cy0 === 'number') ? cy0 : H*0.32;
+    for(var i=0;i<28;i++){
+      var a = Math.random()*Math.PI*2, sp2 = 40+Math.random()*130;
+      confetti.push({ type:'snow', x:cx0+(Math.random()*2-1)*70, y:cy0+(Math.random()*2-1)*18, vx:Math.cos(a)*sp2, vy:Math.sin(a)*sp2-40, t:0, life:0.9+Math.random()*0.6, size:1.8+Math.random()*2.6, color:'#ffffff', rot:0, vr:0 });
+    }
+  }
+  function spawnSplashSparkle(x, y){
+    if(reduced) return;
+    for(var i=0;i<14;i++){
+      var a2 = -Math.PI/2 + (Math.random()*2-1)*1.1, sp3 = 55+Math.random()*95;
+      confetti.push({ type:'splash', x:x+(Math.random()*2-1)*10, y:y, vx:Math.cos(a2)*sp3, vy:Math.sin(a2)*sp3, t:0, life:0.45+Math.random()*0.3, size:1.6+Math.random()*2.2, color: i%3===0 ? '#ffffff' : '#aee9ff', rot:0, vr:0 });
+    }
+  }
+  function spawnSparkBurst(x, y){
+    if(reduced) return;
+    var cols2 = ['#ffd34d','#fff3b0','#59d8ff','#ffffff'];
+    for(var i=0;i<20;i++){
+      var a3 = Math.random()*Math.PI*2, sp4 = 50+Math.random()*140;
+      confetti.push({ type:'spark', x:x, y:y, vx:Math.cos(a3)*sp4, vy:Math.sin(a3)*sp4-20, t:0, life:0.55+Math.random()*0.4, size:2+Math.random()*2.5, color:cols2[i%cols2.length], rot:Math.random()*6.28, vr:(Math.random()*2-1)*6 });
+    }
+  }
+  function tickConfetti(dt){
+    for(var i = confetti.length - 1; i >= 0; i--){
+      var p = confetti[i];
+      p.t += dt;
+      if(p.t >= p.life){ confetti.splice(i, 1); continue; }
+      var grav = p.type==='snow' ? 55 : (p.type==='spark' ? 90 : 260);
+      p.vy += grav * dt;
+      if(p.type==='snow'){ p.vx *= (1 - dt*1.2); p.vy *= (1 - dt*0.6); }
+      if(p.type==='spark'){ p.vx *= (1 - dt*1.6); p.vy *= (1 - dt*0.8); }
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += (p.vr||0) * dt;
+    }
+  }
+  function drawConfetti(){
+    confetti.forEach(function(p){
+      var a = Math.max(0, 1 - p.t / p.life);
+      ctx.save();
+      ctx.globalAlpha = p.type==='snow' ? a*0.95 : a;
+      ctx.translate(p.x, p.y);
+      ctx.fillStyle = p.color;
+      if(p.type==='snow' || p.type==='splash'){
+        ctx.beginPath(); ctx.arc(0,0,p.size,0,6.29); ctx.fill();
+      } else if(p.type==='spark'){
+        ctx.rotate(p.rot);
+        var s = p.size*1.6;
+        ctx.fillRect(-s, -0.9, s*2, 1.8); ctx.fillRect(-0.9, -s, 1.8, s*2);
+      } else {
+        ctx.rotate(p.rot);
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+      }
+      ctx.restore();
+    });
+  }
+  function showLevelBanner(n, reward, firstTime){
+    if(!levelBannerEl) return;
+    levelBannerEl.textContent = firstTime
+      ? 'Level ' + n + ' complete! +' + reward + ' XP'
+      : 'Level ' + n + ' complete!';
+    levelBannerEl.hidden = false;
+    /* force a reflow so re-showing restarts the transition */
+    void levelBannerEl.offsetWidth;
+    levelBannerEl.classList.add('show');
+    clearTimeout(levelBannerTimer);
+    levelBannerTimer = setTimeout(function(){
+      levelBannerEl.classList.remove('show');
+      setTimeout(function(){ levelBannerEl.hidden = true; }, 240);
+    }, 2400);
+  }
+
+  function resetRun(){
+    lives = 3; deaths = 0; runTime = 0;
+    crossingsDone = 0; chain = 0; bestChain = 0; score = 0; goldRun = 0;
+    crossingIdx = 0;
+    runLevels = []; runLevelXP = 0; confetti = [];
+    hop = null; buffered = null;
+    headPops = []; popTimer = 1.1;
+  }
+  function setupCrossing(){
+    buildCrossing(crossingIdx);
+    player.row = 0; player.x = W / 2;
+    visCX = null;
+    hop = null; buffered = null;
+    bonusT = -1; goldPts = 0; pawPts = 0; coinsCross = 0;
+  }
+
+  function playerPos(){
+    var x = player.x, r = player.row, arc = 0;
+    if(hop){
+      var p = Math.min(1, hop.t / hop.dur);
+      x = hop.fx + (hop.tx - hop.fx) * p;
+      r = hop.fr + (hop.tr - hop.fr) * p;
+      arc = Math.sin(p * Math.PI) * 15;
+    }
+    return { x: x, y: rowCY(r) - arc, rowF: r };
+  }
+
+  function tryMove(dr, dc){
+    if(state === 'ready'){ startGame(); return; }
+    if(state !== 'playing') return;
+    if(hop){ buffered = { dr: dr, dc: dc }; return; }
+    startHop(dr, dc);
+  }
+  function startHop(dr, dc){
+    var tr = player.row + dr;
+    var tx = player.x + dc * CELL;
+    if(tr < 0 || tr >= ROWS) return;
+    if(dc !== 0 && (tx < CELL / 2 - 6 || tx > W - CELL / 2 + 6)) return;
+    tx = Math.max(CELL / 2, Math.min(W - CELL / 2, tx));
+    hop = { t: 0, dur: 0.13, fr: player.row, fx: player.x, tr: tr, tx: tx };
+    if(bonusT < 0) bonusT = 0;
+    sfx.hop();
+  }
+  function collectCoin(){
+    coinsCross++; goldRun++; goldPts += 25;
+    sfx.coin();
+    if(tipsOn) spawnHeadPop('+25 gold');
+  }
+  function onArrive(){
+    /* small splash sparkle when Lofi lands on a boat or floe */
+    (function(){
+      var rd0 = rowData[player.row];
+      if(rd0 && rd0.kind === 'plat' && itemUnder(player.row, player.x)){
+        spawnSplashSparkle(player.x, rowCY(player.row) + 6);
+      }
+    })();
+    if(player.row === 13){
+      for(var i = 0; i < farCoins.length; i++){
+        var fc = farCoins[i];
+        if(!fc.taken && Math.abs(player.x - fc.x) <= 95){ fc.taken = true; collectCoin(); }
+      }
+      completeCrossing();
+      return;
+    }
+    var rd = rowData[player.row];
+    if(rd && rd.kind === 'plat' && !itemUnder(player.row, player.x)){
+      doHit('fall');
+      return;
+    }
+    updateHud();
+  }
+
+  function nearestBankBelow(row){
+    var cp = 0;
+    for(var i = 0; i < SAFE_ROWS.length; i++) if(SAFE_ROWS[i] < row) cp = SAFE_ROWS[i];
+    return cp;
+  }
+  function doHit(kind){
+    lives--; deaths++; chain = 0;
+    lastDeathKind = kind;
+    lastDeathName = crossingName(crossingIdx);
+    hop = null; buffered = null;
+    state = 'hit'; hitT = 0;
+    if(kind === 'ship') sfx.crash(); else sfx.splash();
+    updateHud();
+  }
+  function finishHit(){
+    if(lives <= 0){ endGame(false); return; }
+    player.row = nearestBankBelow(player.row);
+    player.x = W / 2;
+    visCX = null;
+    state = 'playing';
+  }
+
+  function completeCrossing(){
+    var bonus = bonusT < 0 ? 600 : Math.max(0, 600 - Math.floor(bonusT * 10));
+    var gained = 100 + bonus + goldPts + pawPts;
+    score += gained;
+    crossingsDone++; totalCrossings++;
+    persisted.totalCrossings = totalCrossings;
+    savePersisted();
+    chain++; if(chain > bestChain) bestChain = chain;
+    unlock('first');
+    if(crossingsDone >= 6) unlock('station');
+    if(totalCrossings >= 30) unlock('commuter');
+    sfx.win();
+    /* level completion: every 5th crossing of the run finishes a
+       level. First completion of level n pays 15 x n XP, once ever;
+       the banner, chime and confetti fire on every completion. */
+    if(crossingIdx % 5 === 4){
+      var lvlN = levelForIdx(crossingIdx);
+      var reward = levelReward(lvlN);
+      var firstTime = lvlN > (persisted.level || 0);
+      runLevels.push(lvlN);
+      if(firstTime){
+        persisted.level = lvlN;
+        persisted.levelXP = (persisted.levelXP || 0) + reward;
+        runLevelXP += reward;
+        savePersisted();
+        renderAch();
+        renderLevels();
+      }
+      showLevelBanner(lvlN, reward, firstTime);
+      if(sfx.chime) sfx.chime(); else sfx.unlock();
+      spawnConfetti();
+      spawnSnowBurst(W / 2, H * 0.32);
+      spawnSparkBurst(W / 2, H * 0.30);
+    }
+    if(crossingIdx >= 49){ endGame(true); return; }
+    document.getElementById('crossTitle').textContent = 'Crossing ' + (crossingIdx + 1) + ' · ' + crossingName(crossingIdx);
+    document.getElementById('crossBonus').textContent = '+' + bonus;
+    document.getElementById('crossGold').textContent = '+' + goldPts;
+    document.getElementById('crossGoldN').textContent = coinsCross;
+    document.getElementById('crossPaw').textContent = '+' + pawPts;
+    document.getElementById('crossScore').textContent = score;
+    document.getElementById('crossNext').textContent = 'Next: Crossing ' + (crossingIdx + 2) + ' · ' + crossingName(crossingIdx + 1);
+    crossOverlay.hidden = false;
+    state = 'crossdone'; crossT = 0;
+    updateHud();
+  }
+  function advanceCrossing(){
+    if(state !== 'crossdone') return;
+    crossOverlay.hidden = true;
+    crossingIdx++;
+    setupCrossing();
+    state = 'playing';
+    toast('Crossing ' + (crossingIdx + 1) + ' · <b>' + crossingName(crossingIdx) + '</b>');
+    updateHud();
+  }
+
+  var overTitle = document.getElementById('overTitle');
+  var overSub = document.getElementById('overSub');
+  function fmtTime(s){
+    var m = Math.floor(s / 60), ss = Math.floor(s % 60);
+    return m + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+  function renderStamps(){
+    var row = document.getElementById('stampRow');
+    row.innerHTML = '';
+    ACH.forEach(function(a){
+      var d = document.createElement('span');
+      d.className = 'stamp-dot' + (unlocked[a.id] ? ' on' : '');
+      d.textContent = unlocked[a.id] ? '✓' : '·';
+      d.title = a.name + ' · ' + a.xp + ' XP';
+      row.appendChild(d);
+    });
+  }
+  function endGame(wonGame){
+    var prevBest = bestScore;
+    if(score > bestScore){ bestScore = score; persisted.best = bestScore; savePersisted(); }
+    state = wonGame ? 'won' : 'over';
+    overTitle.textContent = wonGame ? 'You Crossed!' : 'Game Over';
+    overSub.textContent = wonGame
+      ? 'All fifty crossings cleared in ' + fmtTime(runTime) + ' · the far bank gold is Lofi\u2019s.'
+      : (lastDeathKind === 'ship'
+          ? 'A ship caught Lofi in the ' + lastDeathName + '. He finished ' + crossingsDone + ' of 50 crossings.'
+          : 'Lofi went under in the ' + lastDeathName + '. He finished ' + crossingsDone + ' of 50 crossings.');
+    document.getElementById('resScore').textContent = score;
+    document.getElementById('resBest').textContent = bestScore;
+    document.getElementById('resCross').textContent = crossingsDone;
+    document.getElementById('resChain').textContent = bestChain;
+    var runLevelsEl = document.getElementById('runLevels');
+    if(runLevelsEl){
+      if(runLevels.length){
+        runLevelsEl.innerHTML = '';
+        var rlTxt = document.createElement('span');
+        rlTxt.textContent = 'Levels completed this run: ' + runLevels.map(function(n){ return 'Level ' + n; }).join(', ') + ' · ';
+        var rlB = document.createElement('b');
+        rlB.textContent = '+' + runLevelXP + ' XP';
+        runLevelsEl.appendChild(rlTxt);
+        runLevelsEl.appendChild(rlB);
+      } else {
+        runLevelsEl.textContent = '';
+      }
+    }
+    document.getElementById('newBest').className = 'newbest' + (score > prevBest && score > 0 ? ' show' : '');
+    renderStamps();
+    hudIn.classList.add('hud-hidden');
+    overOverlay.hidden = false;
+    if(wonGame){
+      unlock('wholeway');
+      if(deaths === 0) unlock('scratch');
+    } else {
+      sfx.gameOver();
+    }
+    updateHud();
+  }
+  function startGame(){
+    resetRun();
+    setupCrossing();
+    state = 'playing';
+    hudIn.classList.remove('hud-hidden');
+    startOverlay.hidden = true;
+    overOverlay.hidden = true;
+    pauseOverlay.hidden = true;
+    crossOverlay.hidden = true;
+    sfx.start();
+    startMusic();
+    toast('Crossing 1 · <b>Calm Canal</b>');
+    updateHud();
+  }
+  function togglePause(){
+    if(state === 'playing'){ state = 'paused'; pauseOverlay.hidden = false; sfx.click(); }
+    else if(state === 'paused'){ state = 'playing'; pauseOverlay.hidden = true; sfx.click(); }
+  }
+
+  /* ---------- update ---------- */
+  function update(dt){
+    tickConfetti(dt);
+    if(state === 'playing' || state === 'ready' || state === 'hit' || state === 'crossdone'){
+      clockT += dt;
+      updateItems(dt);
+      tickHeadPops(dt, state === 'playing' || state === 'ready');
+    }
+    if(state === 'hit'){
+      hitT += dt;
+      if(hitT >= 0.55) finishHit();
+      return;
+    }
+    if(state === 'crossdone'){
+      crossT += dt;
+      if(crossT >= 3.4) advanceCrossing();
+      return;
+    }
+    if(state !== 'playing') return;
+    runTime += dt;
+    if(bonusT >= 0) bonusT += dt;
+
+    if(hop){
+      hop.t += dt;
+      if(hop.t >= hop.dur){
+        player.row = hop.tr; player.x = hop.tx;
+        hop = null;
+        onArrive();
+        if(state !== 'playing') return;
+        if(buffered){ var b = buffered; buffered = null; startHop(b.dr, b.dc); }
+      }
+    }
+    if(hop){ updateHud(); return; }
+
+    var rd = rowData[player.row];
+    if(rd && rd.kind === 'plat'){
+      /* riding: the current carries Lofi with the floe or boat */
+      var it = itemUnder(player.row, player.x);
+      if(!it){ doHit('fall'); return; }
+      player.x += rd.dir * rd.speed * dt;
+      if(player.x < -18 || player.x > W + 18){ doHit('fall'); return; }
+      if(it.coin && !it.coinTaken){
+        var cxp = itemSX(it) + it.coinOff;
+        if(Math.abs(player.x - cxp) < 36){ it.coinTaken = true; collectCoin(); }
+      }
+    } else if(rd && rd.kind === 'ship'){
+      var pb = { x: player.x - 16, w: 32 };
+      for(var j = 0; j < rd.items.length; j++){
+        var sh = rd.items[j], sx = itemSX(sh);
+        var sb = { x: sx + 4, w: sh.len - 8 };
+        if(pb.x < sb.x + sb.w && pb.x + pb.w > sb.x){ doHit('ship'); return; }
+        var gap = pb.x >= sb.x + sb.w ? pb.x - (sb.x + sb.w) : sb.x - (pb.x + pb.w);
+        if(gap > 0 && gap <= 30 && !sh.pawed){
+          sh.pawed = true; pawPts += 15; sfx.paw();
+          if(tipsOn) spawnHeadPop('Paw +15');
+        }
+        if(gap > 160) sh.pawed = false;
+      }
+    }
+    updateHud();
+  }
+
+  function updateHud(){
+    hudCross.textContent = crossingsDone;
+    if(hudLevelEl){
+      var curIdx = Math.min(49, crossingIdx);
+      hudLevelEl.textContent = 'Level ' + levelForIdx(curIdx) + ' · Crossing ' + ((curIdx % 5) + 1) + ' of 5';
+    }
+    var hs = '';
+    for(var i = 0; i < 3; i++) hs += i < lives ? '❤️' : '🖤';
+    hudLives.textContent = hs;
+    hudBest.textContent = bestScore;
+    hudGold.textContent = goldRun;
+  }
+
+  /* ---------- drawing ---------- */
+  var snow = [];
+  function seedSnow(){
+    snow = [];
+    for(var si = 0; si < 38; si++){
+      snow.push({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 1.6, s: 10 + Math.random() * 18, ph: Math.random() * 6.28 });
+    }
+  }
+  seedSnow();
+
+  function drawPine(x, baseY, s){
+    ctx.fillStyle = '#7c4f2a';
+    ctx.fillRect(x - 2 * s, baseY - 8 * s, 4 * s, 8 * s);
+    ctx.fillStyle = '#2f8f4e';
+    for(var i = 0; i < 3; i++){
+      var wdt = (17 - i * 3.5) * s, ty = baseY - (9 + i * 7) * s;
+      ctx.beginPath();
+      ctx.moveTo(x - wdt / 2, ty); ctx.lineTo(x + wdt / 2, ty); ctx.lineTo(x, ty - 9 * s);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(x - 3 * s, baseY - 29 * s); ctx.lineTo(x + 3 * s, baseY - 29 * s); ctx.lineTo(x, baseY - 35 * s);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawWaterRow(row, t){
+    var y = rowTop(row), i;
+    /* Archer's ocean photo (its water half) sliced across the whole
+       river: the wavy, sunlit clear-blue surface at the far side
+       deepening row by row into the photo's underwater blue, with
+       its bubbles, fish, starfish and coral. A light blue wash over
+       the slice keeps floes, boats and Lofi clearly readable. */
+    if(waterTex && waterTex.ready){
+      var regTop = rowTop(12), regH = (rowTop(1) + ROWH) - regTop;
+      var imW = waterTex.img.naturalWidth, imH = waterTex.img.naturalHeight;
+      var sY = (y - regTop) / regH * imH;
+      var sH = ROWH / regH * imH;
+      ctx.drawImage(waterTex.img, 0, sY, imW, sH, 0, y, W, ROWH + 1);
+      /* the wash shifts slightly deeper as the levels climb */
+      ctx.fillStyle = LEVEL_TINTS[levelForIdx(crossingIdx) - 1] || 'rgba(38,140,215,0.13)';
+      ctx.fillRect(0, y, W, ROWH + 1);
+      /* subtle day-to-dusk shift, smooth across all 50 crossings */
+      var dk = duskProgress();
+      if(dk > 0){
+        ctx.fillStyle = 'rgba(32,36,105,' + (dk * 0.11).toFixed(3) + ')';
+        ctx.fillRect(0, y, W, ROWH + 1);
+        ctx.fillStyle = 'rgba(255,130,70,' + (dk * 0.045).toFixed(3) + ')';
+        ctx.fillRect(0, y, W, (ROWH + 1) * 0.45);
+      }
+    } else {
+      var g = ctx.createLinearGradient(0, y, 0, y + ROWH);
+      g.addColorStop(0, '#8fd2f7'); g.addColorStop(0.45, '#54aeee'); g.addColorStop(1, '#2f8cd8');
+      ctx.fillStyle = g; ctx.fillRect(0, y, W, ROWH + 1);
+      var dkF = duskProgress();
+      if(dkF > 0){ ctx.fillStyle = 'rgba(32,36,105,' + (dkF * 0.11).toFixed(3) + ')'; ctx.fillRect(0, y, W, ROWH + 1); }
+    }
+    var rd = rowData[row];
+    var dir = rd ? rd.dir : 1;
+    var wt = reduced ? 0 : t;
+    /* deep patches: soft darker water far below the clear surface,
+       drifting slowly so the depth feels alive */
+    for(i = 0; i < 3; i++){
+      var dpx = mod(hash(row * 131 + i * 47) * W + wt * 6 * dir + i * 300, W + 300) - 150;
+      var dpy = y + ROWH * (0.3 + 0.4 * hash(row * 17 + i * 29));
+      var dpr = 62 + hash(row * 23 + i * 41) * 72;
+      var dg = ctx.createRadialGradient(dpx, dpy, 4, dpx, dpy, dpr);
+      dg.addColorStop(0, 'rgba(18,86,172,0.30)');
+      dg.addColorStop(1, 'rgba(18,86,172,0)');
+      ctx.fillStyle = dg;
+      ctx.fillRect(dpx - dpr, y - 2, dpr * 2, ROWH + 4);
+    }
+    /* sunlit sheen pooled along the top of the row */
+    var sg = ctx.createLinearGradient(0, y, 0, y + ROWH * 0.6);
+    sg.addColorStop(0, 'rgba(255,255,255,0.22)');
+    sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg; ctx.fillRect(0, y, W, ROWH * 0.6);
+    /* caustic light: pale wavy flecks shimmering just under the surface */
+    ctx.fillStyle = 'rgba(215,242,255,0.4)';
+    for(i = 0; i < 7; i++){
+      var cxp = mod(hash(row * 113 + i * 59) * W + wt * 9 * dir + i * 90, W + 60) - 30;
+      var cyp = y + 5 + hash(row * 37 + i * 23) * (ROWH - 11);
+      ctx.beginPath(); ctx.ellipse(cxp, cyp, 13 + (i % 3) * 5, 2.2, 0, 0, 6.29); ctx.fill();
+    }
+    /* pixel waves: little dashes drifting with the row's current */
+    ctx.fillStyle = 'rgba(225,246,255,0.6)';
+    for(i = 0; i < 16; i++){
+      var wx = mod(hash(row * 71 + i * 37) * W + wt * (14 + (i % 3) * 5) * dir + row * 40, W + 40) - 20;
+      var wy = y + 6 + hash(row * 43 + i * 19) * (ROWH - 13);
+      ctx.fillRect(wx, wy, 12, 3);
+      ctx.fillRect(wx + 4, wy - 3, 5, 3);
+    }
+    /* sparkle glints on the clear surface */
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    for(i = 0; i < 6; i++){
+      var sx2 = mod(hash(row * 97 + i * 53) * W + wt * 22 * dir, W + 20) - 10;
+      var sy2 = y + 4 + hash(row * 61 + i * 31) * (ROWH - 9);
+      ctx.fillRect(sx2, sy2, 3, 3);
+    }
+    /* bubbles rising through the clear water, as in the photo */
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1.1;
+    for(i = 0; i < 5; i++){
+      var bx = mod(hash(row * 149 + i * 67) * W + wt * 5 * dir + i * 130, W + 24) - 12;
+      var rise = mod(hash(row * 31 + i * 43) * ROWH + (reduced ? 0 : t * (5 + (i % 3) * 2.5)), ROWH - 6);
+      var by = y + ROWH - 3 - rise;
+      var br = 1.4 + hash(row * 53 + i * 71) * 2.1;
+      ctx.beginPath(); ctx.arc(bx, by, br, 0, 6.29); ctx.fill(); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(10,70,150,0.25)'; ctx.fillRect(0, y, W, 2);
+  }
+
+  function drawSafeRow(row){
+    var y = rowTop(row), i;
+    var RH = rowH(row);
+    var fin = row === 13 || row === 14, start = row === 0, island = row === 6;
+    var g2 = ctx.createLinearGradient(0, y, 0, y + RH);
+    if(fin){ g2.addColorStop(0, '#fff6da'); g2.addColorStop(1, '#eaf6ff'); }
+    else { g2.addColorStop(0, '#ffffff'); g2.addColorStop(1, '#dceefb'); }
+    ctx.fillStyle = g2; ctx.fillRect(0, y, W, RH + 1);
+    /* subtle dusk light on the banks as levels rise, never dimming readability */
+    var dk2 = (typeof duskProgress === 'function') ? duskProgress() : 0;
+    if(dk2 > 0){
+      ctx.fillStyle = 'rgba(38,42,110,' + (dk2 * 0.07).toFixed(3) + ')';
+      ctx.fillRect(0, y, W, RH + 1);
+      if(row === 14){ ctx.fillStyle = 'rgba(255,140,80,' + (dk2 * 0.06).toFixed(3) + ')'; ctx.fillRect(0, y, W, RH * 0.5); }
+    }
+    ctx.fillStyle = 'rgba(89,216,255,0.5)';
+    for(i = 0; i < 7; i++){
+      ctx.fillRect(hash(row * 91 + i * 13) * W, y + 5 + hash(row * 57 + i * 7) * (RH - 10), 3, 3);
+    }
+    /* snow texture: soft drift mounds shaded along the bank's lower
+       edge, and little sparkle glints caught in the snow */
+    ctx.fillStyle = 'rgba(148,199,242,0.45)';
+    for(i = 0; i < 4; i++){
+      var mdx = 46 + hash(row * 43 + i * 67) * (W - 92);
+      ctx.beginPath();
+      ctx.ellipse(mdx, y + RH - 2, 15 + hash(row * 7 + i * 13) * 15, 3.6, 0, Math.PI, 0);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    for(i = 0; i < 5; i++){
+      var spx = hash(row * 37 + i * 53) * W, spy = y + 6 + hash(row * 71 + i * 31) * (RH - 12);
+      ctx.fillRect(spx - 2.5, spy, 5, 1.4);
+      ctx.fillRect(spx - 0.7, spy - 1.8, 1.4, 5);
+    }
+    /* chunky ice shadow where the bank meets the water: the two far
+       bank rows read as one wide bank, so no line is drawn between
+       them, only at the water edges */
+    ctx.fillStyle = 'rgba(0,87,255,0.28)';
+    if(!fin) ctx.fillRect(0, y, W, 3);
+    if(!start && row !== 14) ctx.fillRect(0, y + RH - 3, W, 3);
+    if(island){
+      /* grass tufts poking through the island snow */
+      ctx.strokeStyle = '#4fae62'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      for(i = 0; i < 6; i++){
+        var tx = 30 + hash(row * 13 + i * 29) * (W - 60), ty = y + RH - 5;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty); ctx.lineTo(tx - 3, ty - 7);
+        ctx.moveTo(tx + 4, ty); ctx.lineTo(tx + 4, ty - 8);
+        ctx.moveTo(tx + 8, ty); ctx.lineTo(tx + 11, ty - 6);
+        ctx.stroke();
+      }
+      drawPine(30, y + RH - 1, 0.62);
+      drawPine(W - 30, y + RH - 1, 0.55);
+    }
+    if(start){
+      drawPine(36, y + RH, 1);
+      drawPine(W - 36, y + RH, 0.85);
+    }
+    if(row === 14){
+      /* pennant string strung across the wide far bank, with snowy
+         pine trees standing at both ends of it. On desktop the bank
+         is deeper, so the string and its poles settle by the extra
+         depth (po) into the bank's lower half, below the HUD chips,
+         and the pines stand at the bank's lower edge as before. */
+      var po = RH - ROWH;
+      ctx.strokeStyle = '#0a2a5e'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(26, y + 5 + po); ctx.quadraticCurveTo(W / 2, y + 17 + po, W - 26, y + 5 + po); ctx.stroke();
+      var cols = ['#e8452c', '#ffc21f', '#12a5b8', '#3f9e57', '#ff5c8a'];
+      for(i = 0; i < 11; i++){
+        var px = 48 + i * ((W - 96) / 10);
+        var py = y + 7 + po + Math.sin((i / 10) * Math.PI) * 8;
+        ctx.fillStyle = cols[i % cols.length];
+        ctx.beginPath();
+        ctx.moveTo(px - 9, py); ctx.lineTo(px + 9, py); ctx.lineTo(px, py + 13);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = '#0a2a5e';
+      ctx.fillRect(22, y + 2 + po, 5, RH - 2 - po);
+      ctx.fillRect(W - 27, y + 2 + po, 5, RH - 2 - po);
+      drawPine(64, y + RH + 1, 0.72);
+      drawPine(W - 64, y + RH + 1, 0.66);
+    }
+    if(row === 13){
+      /* gold piles heaped at both ends of the far bank's lower row,
+         where Lofi steps ashore */
+      ctx.fillStyle = '#ffc21f';
+      [46, W - 46].forEach(function(gx){
+        ctx.beginPath(); ctx.arc(gx - 9, y + RH - 4, 6, Math.PI, 0); ctx.fill();
+        ctx.beginPath(); ctx.arc(gx + 2, y + RH - 4, 8, Math.PI, 0); ctx.fill();
+        ctx.beginPath(); ctx.arc(gx + 12, y + RH - 4, 5, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = '#fff3b0'; ctx.fillRect(gx, y + RH - 13, 3, 3);
+        ctx.fillStyle = '#ffc21f';
+      });
+    }
+  }
+
+  function drawFloe(it, row){
+    var sx = itemSX(it), y = rowTop(row), h = ROWH - 8, top = y + 4;
+    if(sx + it.len < -10 || sx > W + 10) return;
+    /* Archer's cut-out ice chunks, one of four shapes per floe.
+       Each chunk is drawn at its photo's own aspect and repeated
+       along the floe's length: the photo is never stretched, so the
+       chunky 3D shape, colours and facets stay exactly as shot. */
+    var fs = floeSprites[it.seed % floeSprites.length];
+    if(fs && fs.ready){
+      /* the photo itself is never touched: the detail goes in the
+         water around it — a soft shadow under the chunk, a glassy
+         light smear reflected off the clear surface, and a foam rim
+         lapping where the ice meets the water */
+      ctx.fillStyle = 'rgba(10,60,130,0.30)';
+      ctx.beginPath();
+      ctx.ellipse(sx + it.len / 2, y + ROWH - 2, it.len / 2, 4.5, 0, 0, 6.29);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(205,238,255,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(sx + it.len / 2, y + ROWH + 3, Math.max(10, it.len / 2 - 12), 2.8, 0, 0, 6.29);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      var fseg = Math.max(1, Math.floor(it.len / 26));
+      for(var fi2 = 0; fi2 < fseg; fi2++){
+        ctx.fillRect(sx + 6 + fi2 * 26 + (it.seed % 9), y + ROWH - 6, 12, 2.5);
+      }
+      var fth = ROWH + 22, ftw = fth * fs.aspect;
+      var fspan = it.len + 4;
+      var fn = Math.max(1, Math.ceil(fspan / ftw));
+      var fx0 = sx - 2 - (fn * ftw - fspan) / 2;
+      var fy = y + (ROWH - fth) / 2;
+      for(var fk = 0; fk < fn; fk++){
+        ctx.drawImage(fs.img, fx0 + fk * ftw, fy, ftw, fth);
+      }
+      return;
+    }
+    /* shadow in the water */
+    ctx.fillStyle = 'rgba(6,40,96,0.3)';
+    ctx.fillRect(sx + 4, top + h - 2, it.len - 4, 5);
+    /* chunky pixel ice: stepped corners, bright snow top, blue belly */
+    ctx.fillStyle = '#bfe6fb';
+    ctx.fillRect(sx + 4, top + 3, it.len - 8, h - 6);
+    ctx.fillRect(sx, top + 7, it.len, h - 14);
+    ctx.fillStyle = '#eaf7ff';
+    ctx.fillRect(sx + 4, top, it.len - 8, 7);
+    ctx.fillRect(sx + 10, top + 7, it.len - 20, 4);
+    ctx.fillStyle = '#7cc0ee';
+    ctx.fillRect(sx + 4, top + h - 6, it.len - 8, 3);
+    /* pixel facets and a crack, fixed per floe */
+    ctx.fillStyle = 'rgba(89,216,255,0.55)';
+    ctx.fillRect(sx + 14 + (it.seed % 30), top + 12, 16, 3);
+    ctx.fillRect(sx + it.len - 40 - (it.seed % 20), top + 16, 12, 3);
+    ctx.strokeStyle = 'rgba(70,150,220,0.6)'; ctx.lineWidth = 1.4;
+    var cx0 = sx + 20 + (it.seed % 40), cy0 = top + 10;
+    ctx.beginPath(); ctx.moveTo(cx0, cy0); ctx.lineTo(cx0 + 12, cy0 + 5); ctx.lineTo(cx0 + 22, cy0 + 3); ctx.stroke();
+  }
+
+  function drawBoat(it, row, t){
+    var sx = itemSX(it), cy = rowCY(row);
+    if(sx + it.len < -10 || sx > W + 10) return;
+    var rd = rowData[row];
+    /* Archer's cut-out speedboats: a random colour per boat row,
+       picked fresh each time the crossing starts (stored on the
+       row at build time), flipped to face the drift */
+    var bsIdx = (rd && typeof rd.boatSprite === 'number') ? rd.boatSprite : (row * 2 + crossingIdx * 3);
+    var bs = boatSprites[bsIdx % boatSprites.length];
+    if(bs && bs.ready){
+      /* the photo at its own aspect: width follows the boat's span,
+         and if that would make it too tall or too flat the width
+         gives way instead, so the hull is never stretched */
+      var bw = it.len + 10;
+      var bh = bw / bs.aspect;
+      if(bh > 84){ bh = 84; bw = bh * bs.aspect; }
+      if(bh < 42){ bh = 42; bw = bh * bs.aspect; }
+      ctx.save();
+      ctx.translate(sx + it.len / 2, cy);
+      ctx.scale(rd.dir, 1);
+      /* the photo itself is never touched: the detail goes in the
+         water around it. A short glassy reflection shimmers under
+         the hull, clipped so it stays a shimmer, not a mirror. */
+      ctx.save();
+      ctx.beginPath(); ctx.rect(-bw / 2 - 4, 15, bw + 8, 13); ctx.clip();
+      ctx.globalAlpha = 0.16;
+      ctx.translate(0, 30);
+      ctx.scale(1, -1);
+      if(bs.tilt){
+        /* the leveled boat's mirror: same counter-rotation about
+           the hull centre, mirrored by the flip already applied */
+        ctx.translate(0, 15 - bh / 2);
+        ctx.rotate(bs.tilt);
+        ctx.drawImage(bs.img, -bw / 2, -bh / 2, bw, bh);
+      } else {
+        ctx.drawImage(bs.img, -bw / 2, 15 - bh, bw, bh);
+      }
+      ctx.restore();
+      /* wake: foam ellipses trailing off the stern, widening and
+         fading as they fall behind, bobbing with the water */
+      for(var wk = 0; wk < 4; wk++){
+        var wob = reduced ? 0 : Math.sin(t * 5 + it.seed + wk * 1.3) * 0.8;
+        ctx.fillStyle = 'rgba(255,255,255,' + (0.5 - wk * 0.1) + ')';
+        ctx.beginPath();
+        ctx.ellipse(-bw / 2 - 7 - wk * 13, 10 + wk * 2.2 + wob, 8.5 - wk * 1.2, 2.2, 0, 0, 6.29);
+        ctx.fill();
+      }
+      /* a bright bow ripple where the hull cuts the surface */
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.ellipse(bw / 2 - 4, 13, 9, 2.4, 0, 0, 6.29);
+      ctx.fill();
+      if(bs.tilt){
+        /* the red boat's photo runs downhill toward the bow:
+           rotate the sprite back about its centre so the boat
+           itself sits straight and level in its row. Only the
+           sprite turns; the wake and ripple above stay flat on
+           the water, and there is no rocking: the angle is fixed. */
+        ctx.save();
+        ctx.translate(0, 15 - bh / 2);
+        ctx.rotate(bs.tilt);
+        ctx.drawImage(bs.img, -bw / 2, -bh / 2, bw, bh);
+        ctx.restore();
+      } else {
+        ctx.drawImage(bs.img, -bw / 2, 15 - bh, bw, bh);
+      }
+      ctx.restore();
+      return;
+    }
+    ctx.save();
+    ctx.translate(sx + it.len / 2, cy);
+    ctx.scale(rd.dir, 1);
+    /* wake pixels trailing behind */
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillRect(-it.len / 2 - 12, 8, 10, 3);
+    ctx.fillRect(-it.len / 2 - 20, 12, 7, 3);
+    /* wooden hull */
+    ctx.fillStyle = '#8a5a2b';
+    ctx.beginPath();
+    ctx.moveTo(-it.len / 2, -6); ctx.lineTo(it.len / 2, -6);
+    ctx.lineTo(it.len / 2 - 12, 9); ctx.lineTo(-it.len / 2 + 12, 9);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#a9713a'; ctx.fillRect(-it.len / 2, -9, it.len, 4);
+    ctx.fillStyle = '#6e451f'; ctx.fillRect(-it.len / 2 + 12, 5, it.len - 24, 4);
+    /* lantern mast */
+    ctx.fillStyle = '#5b3a1a';
+    ctx.fillRect(-2, -26, 4, 18);
+    ctx.fillRect(-2, -26, 16, 3);
+    /* the lantern itself, glowing and flickering */
+    var fl = reduced ? 0.85 : 0.75 + Math.sin(t * 6 + it.seed) * 0.2;
+    ctx.save();
+    ctx.globalAlpha = fl;
+    /* soft pre-rendered lantern glow (no per-frame shadowBlur) */
+    ctx.drawImage(lanternGlowSprite, 13.5 - 26, -18.5 - 26, 52, 52);
+    ctx.fillStyle = '#ffd34d';
+    ctx.fillRect(9, -24, 9, 11);
+    ctx.restore();
+    ctx.strokeStyle = '#0a2a5e'; ctx.lineWidth = 1.6;
+    ctx.strokeRect(9, -24, 9, 11);
+    ctx.fillStyle = '#ff9d2e'; ctx.fillRect(11, -21, 5, 5);
+    ctx.restore();
+  }
+
+  function drawShip(it, row, t){
+    var sx = itemSX(it);
+    if(sx + it.len < -16 || sx > W + 16) return;
+    var rd = rowData[row], cy = rowCY(row), L = it.len;
+    ctx.save();
+    ctx.translate(sx + L / 2, cy);
+    ctx.scale(rd.dir, 1);
+    /* bow foam and a foaming stern wake trailing behind */
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.fillRect(L / 2 + 2, 9, 12, 3);
+    ctx.fillRect(L / 2 + 8, 13, 8, 3);
+    ctx.fillRect(-L / 2 - 12, 11, 9, 3);
+    for(var swk = 0; swk < 3; swk++){
+      var swob = reduced ? 0 : Math.sin(t * 4 + it.seed + swk * 1.4) * 0.7;
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.45 - swk * 0.11) + ')';
+      ctx.beginPath();
+      ctx.ellipse(-L / 2 - 16 - swk * 15, 12 + swk * 2 + swob, 9 - swk * 1.5, 2.3, 0, 0, 6.29);
+      ctx.fill();
+    }
+    /* hull: deep blue over a red waterline */
+    ctx.fillStyle = '#2c5379';
+    ctx.fillRect(-L / 2, -2, L, 12);
+    ctx.beginPath();
+    ctx.moveTo(L / 2, -2); ctx.lineTo(L / 2 + 10, 4); ctx.lineTo(L / 2, 10);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#b3372a';
+    ctx.fillRect(-L / 2 + 4, 10, L - 6, 4);
+    /* hull plating: seams down the side and a bright rubbing strake */
+    ctx.strokeStyle = 'rgba(8,28,58,0.4)'; ctx.lineWidth = 1.2;
+    for(var hpl = 0; hpl < 5; hpl++){
+      var hpx = -L / 2 + 18 + hpl * (L - 36) / 4;
+      ctx.beginPath(); ctx.moveTo(hpx, -1); ctx.lineTo(hpx, 9); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(220,240,255,0.5)';
+    ctx.fillRect(-L / 2 + 3, 0, L - 4, 1.6);
+    /* snowy deck with a railing line along its edge */
+    ctx.fillStyle = '#e8f6ff';
+    ctx.fillRect(-L / 2 + 6, -8, L - 12, 6);
+    ctx.strokeStyle = 'rgba(20,48,77,0.55)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-L / 2 + 6, -9.5); ctx.lineTo(L / 2 - 6, -9.5); ctx.stroke();
+    for(var rpl = 0; rpl < 7; rpl++){
+      var rpx = -L / 2 + 12 + rpl * (L - 24) / 6;
+      ctx.beginPath(); ctx.moveTo(rpx, -9.5); ctx.lineTo(rpx, -6.5); ctx.stroke();
+    }
+    /* bow mast with a little red flag */
+    ctx.fillStyle = '#22354f';
+    ctx.fillRect(L * 0.36, -26, 3, 19);
+    ctx.fillStyle = '#e8452c';
+    ctx.beginPath();
+    ctx.moveTo(L * 0.36 + 3, -26); ctx.lineTo(L * 0.36 + 13, -23.5); ctx.lineTo(L * 0.36 + 3, -21);
+    ctx.closePath(); ctx.fill();
+    /* cabins with lit windows */
+    ctx.fillStyle = '#f4fbff';
+    ctx.fillRect(-L * 0.2, -21, L * 0.3, 14);
+    ctx.fillRect(L * 0.16, -18, L * 0.16, 11);
+    ctx.fillStyle = '#ffd34d';
+    var wxi, wxj;
+    for(wxi = 0; wxi < 4; wxi++) for(wxj = 0; wxj < 2; wxj++)
+      ctx.fillRect(-L * 0.2 + 7 + wxi * (L * 0.3 - 12) / 3 - 2, -18 + wxj * 6, 4, 4);
+    for(wxi = 0; wxi < 3; wxi++)
+      ctx.fillRect(L * 0.16 + 6 + wxi * (L * 0.16 - 10) / 2 - 2, -15, 4, 4);
+    /* lit portholes along the hull, over a dimmer unlit row */
+    ctx.fillStyle = 'rgba(140,190,235,0.6)';
+    for(wxi = 0; wxi < Math.floor(L / 30); wxi++)
+      ctx.fillRect(-L / 2 + 16 + wxi * 30, 7, 3, 3);
+    ctx.fillStyle = '#ffd34d';
+    for(wxi = 0; wxi < Math.floor(L / 34); wxi++)
+      ctx.fillRect(-L / 2 + 14 + wxi * 34, 3, 4, 4);
+    /* smokestack with drifting puffs */
+    ctx.fillStyle = '#22354f';
+    ctx.fillRect(L * 0.3, -25, 11, 18);
+    ctx.fillStyle = '#c33d2e';
+    ctx.fillRect(L * 0.3, -25, 11, 4);
+    if(!reduced){
+      ctx.fillStyle = 'rgba(230,240,250,0.55)';
+      for(var sp = 0; sp < 3; sp++){
+        var pu = (t * 0.5 + sp * 0.33 + (it.seed % 10) * 0.07) % 1;
+        ctx.beginPath();
+        ctx.arc(L * 0.3 + 5 - pu * 16, -29 - pu * 13, 3 + pu * 4.5, 0, 6.29);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawCoin(x, y, t, big){
+    var r = big ? 11 : 9;
+    var bobY = reduced ? 0 : Math.sin(t * 3 + x * 0.05) * 2;
+    ctx.save();
+    ctx.translate(x, y + bobY);
+    /* soft pre-rendered glow behind the coin (no per-frame shadowBlur) */
+    var gs = r * 4.6;
+    ctx.drawImage(coinGlowSprite, -gs/2, -gs/2, gs, gs);
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.29);
+    ctx.fillStyle = '#ffc21f'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = '#b97e06'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, r - 3.5, 0, 6.29);
+    ctx.strokeStyle = 'rgba(185,126,6,0.65)'; ctx.lineWidth = 1.4; ctx.stroke();
+    ctx.fillStyle = '#fff3b0';
+    ctx.fillRect(-4, -6, 3, 3);
+    /* a star glint flashing off the rim as the coin bobs */
+    if(!reduced && Math.sin(t * 4 + x * 0.7) > 0.55){
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      var gr = r * 0.75, gx2 = r * 0.62, gy2 = -r * 0.62;
+      ctx.fillRect(gx2 - gr, gy2 - 0.8, gr * 2, 1.6);
+      ctx.fillRect(gx2 - 0.8, gy2 - gr, 1.6, gr * 2);
+    }
+    ctx.restore();
+  }
+
+  function drawEntities(t){
+    var r, i;
+    /* the far-bank gold: Archer's treasure chest, heaped centre-bank,
+       drawn first so the bank coins land in front of it */
+    if(treasureSprite.ready){
+      var tw = 78, th = tw / treasureSprite.aspect;
+      var cb = rowTop(13) + rowH(13) - 2, cxm = W / 2;
+      /* warm glow pooling behind the chest on the wide far bank */
+      var gg = ctx.createRadialGradient(cxm, cb - th / 2, 6, cxm, cb - th / 2, 92);
+      gg.addColorStop(0, 'rgba(255,205,60,0.5)');
+      gg.addColorStop(1, 'rgba(255,205,60,0)');
+      ctx.fillStyle = gg;
+      ctx.fillRect(cxm - 92, cb - th - 34, 184, th + 68);
+      ctx.drawImage(treasureSprite.img, cxm - tw / 2, cb - th, tw, th);
+      /* sparkles dancing over the gold */
+      if(!reduced){
+        ctx.fillStyle = 'rgba(255,240,170,0.95)';
+        for(var sp2 = 0; sp2 < 4; sp2++){
+          var ph2 = t * 2 + sp2 * 1.7;
+          var sxp = cxm + Math.sin(ph2 * 0.9 + sp2) * (26 + sp2 * 6);
+          var syp = cb - th - 4 - ((ph2 * 9) % 22);
+          var sr2 = 1.6 + Math.sin(ph2 * 2.4) * 0.8;
+          ctx.fillRect(sxp - sr2, syp - 0.8, sr2 * 2, 1.6);
+          ctx.fillRect(sxp - 0.8, syp - sr2, 1.6, sr2 * 2);
+        }
+      }
+    }
+    for(r = ROWS - 1; r >= 0; r--){
+      var rd = rowData[r];
+      if(!rd || !rd.items) continue;
+      for(i = 0; i < rd.items.length; i++){
+        var it = rd.items[i];
+        if(rd.kind === 'ship') drawShip(it, r, t);
+        else if(rd.type === 'b') drawBoat(it, r, t);
+        else drawFloe(it, r);
+        if(it.coin && !it.coinTaken) drawCoin(itemSX(it) + it.coinOff, rowCY(r) - 6, t, false);
+      }
+    }
+    for(i = 0; i < farCoins.length; i++){
+      if(!farCoins[i].taken) drawCoin(farCoins[i].x, rowCY(13) + 2, t, true);
+    }
+  }
+
+  function drawHeadPops(){
+    if(!headPops.length) return;
+    var vis = lofiVisual();
+    var cx = vis.cx, headY = vis.feetY - 76;
+    headPops.forEach(function(p){
+      var pr = p.t / p.life;
+      var dx = p.dx0 - pr * p.travel;
+      var dy = p.dy0 - Math.sin(pr * Math.PI) * (reduced ? 4 : 13) - pr * 5;
+      var x = cx + dx, y = headY + dy;
+      var alpha = 1;
+      if(pr > 0.62) alpha = Math.max(0, 1 - (pr - 0.62) / 0.38);
+      var scale = pr < 0.14 ? 0.5 + (pr / 0.14) * 0.62 : 1.12 - Math.min(0.12, (pr - 0.14) * 0.14);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(x, y);
+      if(!reduced) ctx.rotate(Math.sin(p.t * 5 + p.ph) * 0.07);
+      ctx.scale(scale, scale);
+      ctx.font = p.emoji ? '23px -apple-system, "Helvetica Neue", Arial, sans-serif'
+                         : '700 15px -apple-system, "Helvetica Neue", Arial, sans-serif';
+      var tw = ctx.measureText(p.text).width;
+      var bw = tw + 20, bh = p.emoji ? 36 : 30;
+      ctx.beginPath();
+      roundRect(-bw / 2, -bh / 2, bw, bh, bh / 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#14304d'; ctx.stroke();
+      ctx.fillStyle = '#14304d';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.text, 0, 1);
+      ctx.restore();
+    });
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  }
+
+  /* ---------- Lofi's footing ----------
+     Lofi is drawn standing ON TOP of the floe or boat carrying
+     him: centred on that platform, feet planted on its top
+     surface, with a contact shadow directly under his feet on
+     the platform itself. The platform he is on, the platform
+     left visible on both sides of him, and the open-water gap
+     to the next platform all read at a glance. Only the drawing
+     is centred; his gameplay position is untouched. */
+  var visCX = null, visT = 0;
+  function deckOffsetFor(row){
+    var rd = rowData[row];
+    if(!rd || rd.kind !== 'plat') return 14;
+    return rd.type === 'b' ? 3 : -1;
+  }
+  function lofiVisual(){
+    var pos = playerPos();
+    var cx = pos.x, standIt = null;
+    if(!hop && state !== 'hit'){
+      var rd0 = rowData[player.row];
+      if(rd0 && rd0.kind === 'plat'){
+        var it0 = itemUnder(player.row, player.x);
+        if(it0){ standIt = it0; cx = itemSX(it0) + it0.len / 2; }
+      }
+    }
+    var lift = hop ? Math.sin(Math.min(1, hop.t / hop.dur) * Math.PI) * 15 : 0;
+    var off;
+    if(hop){
+      var p = Math.min(1, hop.t / hop.dur);
+      off = deckOffsetFor(hop.fr) + (deckOffsetFor(hop.tr) - deckOffsetFor(hop.fr)) * p;
+    } else {
+      off = deckOffsetFor(player.row);
+    }
+    var deckY = rowCY(pos.rowF) + off;
+    return { cx: cx, standIt: standIt, lift: lift, deckY: deckY, feetY: deckY - lift, rowF: pos.rowF };
+  }
+
+  function drawLofi(t){
+    var pos = playerPos();
+    var cx = pos.x, cy = pos.y;
+    if(state === 'hit'){
+      /* soft shadow on the snow, shrinking as Lofi hops */
+      var groundY = rowCY(pos.rowF) + ROWH / 2 - 3;
+      var airK = Math.max(0, Math.min(1, (groundY - 14 - cy) / 30));
+      ctx.fillStyle = 'rgba(16,44,86,' + (0.22 - airK * 0.1) + ')';
+      ctx.beginPath();
+      ctx.ellipse(cx, groundY, 24 * (1 - airK * 0.25), 4.5 * (1 - airK * 0.25), 0, 0, 6.29);
+      ctx.fill();
+
+      if(lastDeathKind === 'fall'){
+        /* sinking into the river, splash rings spreading */
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - hitT * 1.5);
+        if(yetiSticker.ready) drawSticker(yetiSticker, cx - 34, cy - 34 + hitT * 30, 68, 68);
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        for(var rg = 0; rg < 2; rg++){
+          var rr2 = 10 + hitT * 64 - rg * 14;
+          if(rr2 > 2){
+            ctx.beginPath();
+            ctx.ellipse(cx, rowCY(player.row) + 9, rr2, rr2 * 0.3, 0, 0, 6.29);
+            ctx.stroke();
+          }
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        for(var dp = 0; dp < 6; dp++){
+          var ang3 = dp * 1.05 + 0.5;
+          ctx.beginPath();
+          ctx.arc(cx + Math.cos(ang3) * (6 + hitT * 30), cy - 4 - hitT * 22 + (dp % 3) * 2, Math.max(0.4, 2.8 - hitT * 3), 0, 6.29);
+          ctx.fill();
+        }
+        return;
+      }
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(hitT * 7);
+      ctx.globalAlpha = Math.max(0.35, 1 - hitT);
+      if(yetiSticker.ready) drawSticker(yetiSticker, -34, -34, 68, 68);
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      for(var b = 0; b < 6; b++){
+        var ang = b * 1.05 + 0.4, rr = hitT * 46;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr * 0.6, Math.max(0.4, 3.2 - hitT * 3), 0, 6.29);
+        ctx.fill();
+      }
+      return;
+    }
+    var vis = lofiVisual();
+    /* just after landing, ease the drawn centre onto the middle
+       of the floe or boat, so Lofi settles onto its centre
+       instead of clinging to an edge */
+    var dtF = visT ? Math.min(0.05, Math.max(0.001, t - visT)) : 0.016;
+    visT = t;
+    if(visCX === null || hop) visCX = vis.cx;
+    else {
+      visCX += (vis.cx - visCX) * (1 - Math.pow(0.0001, dtF));
+      if(Math.abs(vis.cx - visCX) < 0.4) visCX = vis.cx;
+    }
+    cx = visCX;
+    var feetY = vis.feetY, deckY = vis.deckY;
+    /* contact shadow: flat on the platform's top surface,
+       directly under Lofi's feet, shrinking as he hops */
+    var airK2 = Math.max(0, Math.min(1, vis.lift / 15));
+    ctx.fillStyle = 'rgba(8,38,84,' + ((vis.standIt ? 0.38 : 0.2) * (1 - airK2 * 0.35)) + ')';
+    ctx.beginPath();
+    ctx.ellipse(cx, deckY + 2, 32 * (1 - airK2 * 0.25), 5 * (1 - airK2 * 0.25), 0, 0, 6.29);
+    ctx.fill();
+    if(vis.standIt && airK2 < 0.4){
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(cx, deckY + 2, 32, 5, 0, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+    }
+    /* feet stay planted on the deck: the idle bob only breathes
+       on safe ground, never while standing on a floe or boat */
+    var bob = (!hop && !vis.standIt && !reduced && (state === 'ready' || state === 'playing')) ? Math.sin(t * 2.4) * 1.2 : 0;
+    /* Lofi's drawn size: big enough to read clearly on a phone,
+       still narrower than the floes and boats he rides, so the
+       platform under his feet and the open-water gap to the next
+       one stay visible on both sides of him */
+    var CH = 80;
+    if(!yetiSticker.ready){
+      /* fallback puff while the sticker loads */
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx, feetY + bob - 38, 32, 0, 6.29); ctx.fill();
+      ctx.fillStyle = '#4aa3e0';
+      ctx.beginPath(); ctx.arc(cx - 10, feetY + bob - 45, 5, 0, 6.29); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 10, feetY + bob - 45, 5, 0, 6.29); ctx.fill();
+      return;
+    }
+    drawSticker(yetiSticker, cx - CH / 2, feetY + bob - CH, CH, CH);
+  }
+
+  function draw(t){
+    ctx.clearRect(0, 0, W, H);
+    var row;
+    for(row = ROWS - 1; row >= 0; row--){
+      if(isSafe(row)) drawSafeRow(row);
+      else drawWaterRow(row, t);
+    }
+    drawEntities(t);
+    drawHeadPops();
+    drawLofi(t);
+    drawConfetti();
+    /* light snowfall over everything */
+    if(!reduced){
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      snow.forEach(function(s){
+        var y = (s.y + t * s.s) % H;
+        var x = s.x + Math.sin(t * 0.6 + s.ph) * 8;
+        ctx.beginPath(); ctx.arc(x, y, s.r, 0, 6.29); ctx.fill();
+      });
+    }
+  }
+
+  /* ---------- loop ---------- */
+  var last = 0, elapsed = 0;
+  function loop(ts){
+    var t = ts / 1000;
+    var dt = Math.min(0.033, last ? t - last : 0.016);
+    last = t;
+    elapsed = t;
+    update(dt);
+    draw(elapsed);
+    requestAnimationFrame(loop);
+  }
+  /* ---------- stage size: phones (760px and under, matching the
+     stylesheet's breakpoints) keep the original 960x540 view; the
+     desktop wide view is 1280x572, so the river runs wider at the
+     same fifteen rows, with floes and boats drifting the longer
+     track and the far-bank gold spread across the wider bank.
+     The switch only re-windows the world: if the breakpoint is
+     crossed mid-run, the current crossing is rebuilt for the new
+     width and Lofi restarts that crossing from the near bank,
+     with score, lives and crossing number untouched. ---------- */
+  var mqNarrow = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
+  function applyStageSize(){
+    var m = (mqNarrow && mqNarrow.matches)
+      ? { w:960, h:540 }
+      : { w:1280, h:572 };
+    var changed = (W !== m.w || H !== m.h);
+    if(canvas.width !== m.w || canvas.height !== m.h){
+      canvas.width = m.w; canvas.height = m.h;
+    }
+    W = m.w; H = m.h;
+    BANK_X13 = (m.w === 1280) ? 76 : 44;
+    BANK_X14 = (m.w === 1280) ? 64 : 76;
+    ROWH = (H - BANK_X13 - BANK_X14) / ROWS;
+    TRACK = W + MARGIN * 2;
+    seedSnow();
+    if(changed && rowData[0]){
+      if(state === 'playing' || state === 'ready' || state === 'paused' || state === 'hit'){
+        if(state === 'hit') state = 'playing';
+        setupCrossing();
+      } else {
+        buildCrossing(crossingIdx);
+      }
+    }
+  }
+  applyStageSize();
+  if(mqNarrow){
+    if(mqNarrow.addEventListener) mqNarrow.addEventListener('change', applyStageSize);
+    else if(mqNarrow.addListener) mqNarrow.addListener(applyStageSize);
+  }
+
+  buildCrossing(0);
+  updateHud();
+  requestAnimationFrame(loop);
+
+  /* ---------- input ---------- */
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  crossOverlay.addEventListener('click', advanceCrossing);
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+  document.getElementById('resumeBtn').addEventListener('click', togglePause);
+  document.getElementById('pauseClose').addEventListener('click', togglePause);
+  document.getElementById('pauseBtn').addEventListener('click', function(){
+    if(state === 'playing' || state === 'paused') togglePause();
+  });
+  function bindDir(id, dr, dc){
+    document.getElementById(id).addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      tryMove(dr, dc);
+    });
+  }
+  bindDir('upBtn', 1, 0);
+  bindDir('downBtn', -1, 0);
+  bindDir('leftBtn', 0, -1);
+  bindDir('rightBtn', 0, 1);
+
+  document.addEventListener('keydown', function(e){
+    var code = e.code;
+    if(code === 'Escape' && settingsOverlay && !settingsOverlay.hidden){
+      e.preventDefault();
+      closeSettings();
+      return;
+    }
+    if(code === 'ArrowUp' || code === 'KeyW'){
+      e.preventDefault(); tryMove(1, 0);
+    } else if(code === 'ArrowDown' || code === 'KeyS'){
+      e.preventDefault(); tryMove(-1, 0);
+    } else if(code === 'ArrowLeft' || code === 'KeyA'){
+      e.preventDefault(); tryMove(0, -1);
+    } else if(code === 'ArrowRight' || code === 'KeyD'){
+      e.preventDefault(); tryMove(0, 1);
+    } else if(code === 'Space'){
+      e.preventDefault();
+      if(state === 'ready' || state === 'over' || state === 'won') startGame();
+      else if(state === 'crossdone') advanceCrossing();
+      else tryMove(1, 0);
+    } else if(code === 'KeyP' || code === 'Escape'){
+      if(state === 'playing' || state === 'paused') togglePause();
+    } else if(code === 'KeyM'){
+      setMuted(!muted);
+      if(!muted) sfx.click();
+    } else if(code === 'Enter'){
+      if(state === 'over' || state === 'won' || state === 'ready') startGame();
+      else if(state === 'crossdone') advanceCrossing();
+    }
+  });
+
+  /* touch on canvas: tap = hop forward, swipe = hop that way */
+  var tX = null, tY = null;
+  canvas.addEventListener('touchstart', function(e){
+    tX = e.changedTouches[0].clientX;
+    tY = e.changedTouches[0].clientY;
+  }, { passive: true });
+  canvas.addEventListener('touchend', function(e){
+    if(tX === null) return;
+    var dx = e.changedTouches[0].clientX - tX;
+    var dy = e.changedTouches[0].clientY - tY;
+    tX = null; tY = null;
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < 24){ tryMove(1, 0); return; }
+    if(Math.abs(dx) > Math.abs(dy)) tryMove(0, dx > 0 ? 1 : -1);
+    else tryMove(dy < 0 ? 1 : -1, 0);
+  }, { passive: true });
+  canvas.addEventListener('mousedown', function(){
+    if(state === 'playing') tryMove(1, 0);
+  });
+
+  /* ---------- settings panel ---------- */
+  var settingsOverlay = document.getElementById('settingsOverlay');
+  var settingsBtn = document.getElementById('settingsBtn');
+  var musicVolEl = document.getElementById('musicVol');
+  var soundVolEl = document.getElementById('soundVol');
+  var tipsToggle = document.getElementById('tipsToggle');
+  var noticeBtn = document.getElementById('noticeBtn');
+  var noticeText = document.getElementById('noticeText');
+  var noticeBadge = document.getElementById('noticeBadge');
+  var connectBtn = document.getElementById('connectBtn');
+  var walletStatus = document.getElementById('walletStatus');
+
+  function paintRange(el){
+    var p = Number(el.value);
+    el.style.background = 'linear-gradient(90deg,#4aa8e8 ' + p + '%,#c3dcee ' + p + '%)';
+  }
+  function syncVolumes(){
+    soundVolVal = Number(soundVolEl.value) / 100;
+    musicVolVal = Number(musicVolEl.value) / 100;
+    persisted.soundVol = Number(soundVolEl.value);
+    persisted.musicVol = Number(musicVolEl.value);
+    savePersisted();
+    applyVolumes();
+    paintRange(soundVolEl);
+    paintRange(musicVolEl);
+  }
+  /* restore saved volumes + tips state before first paint of the panel */
+  musicVolEl.value = persisted.musicVol;
+  soundVolEl.value = persisted.soundVol;
+  tipsToggle.classList.toggle('on', tipsOn);
+  tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+  if(!tipsOn) headPops = [];
+  musicVolEl.addEventListener('input', function(){ syncVolumes(); startMusic(); });
+  soundVolEl.addEventListener('input', syncVolumes);
+  /* paint the restored values without overwriting the save on load */
+  soundVolVal = Number(soundVolEl.value) / 100;
+  musicVolVal = Number(musicVolEl.value) / 100;
+  applyVolumes();
+  paintRange(soundVolEl);
+  paintRange(musicVolEl);
+  /* show the saved best in the HUD from the start */
+  if(typeof updateHud === 'function') updateHud();
+
+  function openSettings(){
+    settingsOverlay.hidden = false;
+    if(state === 'playing') togglePause();
+    sfx.click();
+  }
+  function closeSettings(){
+    settingsOverlay.hidden = true;
+    sfx.click();
+  }
+  settingsBtn.addEventListener('click', openSettings);
+  document.getElementById('settingsOk').addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', function(e){
+    if(e.target === settingsOverlay) closeSettings();
+  });
+
+  tipsToggle.addEventListener('click', function(){
+    tipsOn = !tipsOn;
+    persisted.tips = tipsOn;
+    savePersisted();
+    tipsToggle.classList.toggle('on', tipsOn);
+    tipsToggle.setAttribute('aria-checked', tipsOn ? 'true' : 'false');
+    if(!tipsOn) headPops = [];
+    sfx.click();
+  });
+  noticeBtn.addEventListener('click', function(){
+    var show = noticeText.hidden;
+    noticeText.hidden = !show;
+    if(show && noticeBadge) noticeBadge.style.display = 'none';
+    sfx.click();
+  });
+
+  /* ---------- SUI wallet: Wallet Standard discovery + connect ----------
+     Wallets register themselves with the page; Connect asks the first
+     SUI wallet found to connect and shows the account on the button.
+     With no wallet installed the panel says so, plainly. */
+  var suiWallets = [], connectedWallet = null, connectedAddress = '';
+  var wsApi = { registerWallet: function(w){ if(w && suiWallets.indexOf(w) < 0) suiWallets.push(w); } };
+  try{
+    window.addEventListener('wallet-standard:register-wallet', function(e){
+      if(e.detail && typeof e.detail.register === 'function'){
+        try{ e.detail.register(wsApi); }catch(err){}
+      }
+    });
+    window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: wsApi }));
+  }catch(e){}
+  function shortAddr(a){ return a ? a.slice(0, 6) + '…' + a.slice(-4) : ''; }
+  connectBtn.addEventListener('click', function(){
+    if(connectedAddress){
+      if(connectedWallet && connectedWallet.features && connectedWallet.features['standard:disconnect']){
+        try{ connectedWallet.features['standard:disconnect'].disconnect(); }catch(e){}
+      }
+      connectedWallet = null; connectedAddress = '';
+      connectBtn.textContent = 'Connect';
+      connectBtn.classList.remove('connected');
+      walletStatus.textContent = 'Wallet disconnected.';
+      return;
+    }
+    var w = null;
+    for(var i = 0; i < suiWallets.length; i++){
+      var cand = suiWallets[i];
+      if(cand.features && cand.features['standard:connect'] &&
+         (cand.chains || []).some(function(c){ return String(c).indexOf('sui:') === 0; })){ w = cand; break; }
+    }
+    if(!w){
+      walletStatus.textContent = 'No SUI wallet found in this browser. Install a SUI wallet extension, then tap Connect again.';
+      return;
+    }
+    walletStatus.textContent = 'Connecting… approve it in your wallet.';
+    w.features['standard:connect'].connect().then(function(res){
+      var acc = res && res.accounts && res.accounts[0];
+      if(acc && acc.address){
+        connectedWallet = w; connectedAddress = acc.address;
+        connectBtn.textContent = shortAddr(acc.address);
+        connectBtn.classList.add('connected');
+        walletStatus.textContent = 'Connected with ' + (w.name || 'SUI wallet') + ' · ' + shortAddr(acc.address);
+        sfx.click();
+      } else {
+        walletStatus.textContent = 'The wallet returned no account.';
+      }
+    }).catch(function(){
+      walletStatus.textContent = 'Connection cancelled in the wallet.';
+    });
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden && state === 'playing') togglePause();
+  });
+})();
+</script>
+<script>
+/* Header profile pill: reads the same Firebase auth state the save
+   sync above uses (the app is already initialized there; this only
+   listens). Signed in: the pill shows the account's name and, like
+   the hub, the user's real Google profile photo when there is one
+   (the preset yeti otherwise), and links to the hub player page.
+   Signed out: it offers Sign in and links to the hub, where sign-in
+   lives. If Firebase never loads, the pill simply stays a Sign in
+   link to the hub. The avatar img carries referrerpolicy=
+   "no-referrer" (set in the markup and re-asserted in setUser):
+   Google refuses to serve profile photos to a page that sends a
+   Referer, so without it the photo request fails and the error
+   handler below would swap the preset back in. */
+(function(){
+  "use strict";
+  var pill = document.getElementById('profilePill');
+  var avatar = document.getElementById('pillAvatar');
+  var label = document.getElementById('pillLabel');
+  if(!pill || !avatar || !label) return;
+  function setSignedOut(){
+    label.textContent = 'Sign in';
+    avatar.src = '/lofigame/assets/lofi-face-a1b88584.webp';
+    pill.href = '/lofigame/';
+    pill.setAttribute('aria-label', 'Sign in at Lofi Games');
+  }
+  function setUser(user){
+    var name = user.displayName || (user.email ? user.email.split('@')[0] : 'Player');
+    label.textContent = name;
+    /* The signed-in user's Google profile photo
+       (firebase.auth().currentUser.photoURL), read defensively so a
+       half-loaded SDK can never throw here; the auth listener's own
+       user object is the same account and is the fallback. When no
+       photo exists, the preset avatar shows exactly as before. */
+    var photo = user.photoURL || '';
+    try{
+      var cu = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+      if(cu && cu.photoURL) photo = cu.photoURL;
+    }catch(e){ /* keep the listener's photo */ }
+    if(photo){
+      avatar.referrerPolicy = 'no-referrer';
+      avatar.src = photo;
+    } else {
+      avatar.src = '/lofigame/assets/lofi-face-a1b88584.webp';
+    }
+    pill.href = '/lofigame/#/profile';
+    pill.setAttribute('aria-label', 'Signed in as ' + name + '. Open your player page.');
+  }
+  avatar.addEventListener('error', function(){
+    if(avatar.src.indexOf('/lofigame/assets/lofi-face-a1b88584.webp') === -1) avatar.src = '/lofigame/assets/lofi-face-a1b88584.webp';
+  });
+  var tries = 0;
+  (function hook(){
+    if(window.firebase && firebase.auth && firebase.apps && firebase.apps.length){
+      try{
+        firebase.auth().onAuthStateChanged(function(user){
+          if(user) setUser(user); else setSignedOut();
+        });
+        /* Safety net: if the auth callback somehow never arrives,
+           the pill must not sit on Loading forever. */
+        setTimeout(function(){
+          if(label.textContent === 'Loading') setSignedOut();
+        }, 8000);
+        return;
+      }catch(e){ /* fall through to the signed-out pill */ }
+      setSignedOut();
+      return;
+    }
+    if(tries++ < 50){ setTimeout(hook, 200); return; }
+    setSignedOut();
+  })();
+})();
+</script>
+</body>
+</html>
