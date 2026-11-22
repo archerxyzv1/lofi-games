@@ -78,6 +78,10 @@ The live site runs at https://winterplay.online/lofigame/.
 
 This repo holds the Lofi Games project code on its own. The pages reference the `/lofigame/` subpath (game links, shared assets, favicon), so a standalone deployment at a domain root needs those paths rewritten to `/` first. Google sign-in uses the self-hosted Firebase auth handler on `winterplay.online`, so a new domain also needs to be added to the Firebase project's authorized domains.
 
+## Built by
+
+Built by **Archer** — [@0xArcherxyz](https://x.com/0xArcherxyz)
+
 ## Links
 
 - **Play:** https://winterplay.online/lofigame/
