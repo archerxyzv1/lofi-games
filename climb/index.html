@@ -1141,8 +1141,8 @@ body{animation:lofi-fade-in .45s ease-out both}
   var LEVEL_ENDS = [];
   (function(){ var s = 0; for(var n = 0; n < LEVEL_LENGTHS.length; n++){ s += LEVEL_LENGTHS[n]; LEVEL_ENDS.push(s); } })();
   var LEVEL_TOTAL_M = LEVEL_ENDS[LEVEL_ENDS.length - 1]; /* 32,500 */
-  var level = (typeof saveData.level === 'number' ? saveData.level : 0);
-  var levelXP = (typeof saveData.levelXP === 'number' ? saveData.levelXP : 0);
+  var level = (typeof saveData.level === 'number' && isFinite(saveData.level)) ? Math.min(10, Math.max(0, Math.floor(saveData.level))) : 0;
+  var levelXP = (typeof saveData.levelXP === 'number' && isFinite(saveData.levelXP)) ? Math.max(0, Math.floor(saveData.levelXP)) : 0;
   var runLevels = [], runLevelXP = 0; /* levels finished in the current run */
 
   /* ---------- Firebase sync (Lofi Games, project lofi-games) ----------

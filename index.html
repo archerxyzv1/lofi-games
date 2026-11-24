@@ -2273,6 +2273,16 @@ try { if (localStorage.getItem("lofi_theme") === "night") document.documentEleme
     if (s.length < 3) s = "LofiPlayer_" + String(uid || "").slice(0, 6);
     return s.slice(0, 20);
   }
+  /* Username claim (2026-11-25): claim usernames/{name} for this account so
+     no one else can take it. Best-effort only: if the name is already
+     claimed by someone else the write is rejected by the rules and the
+     catch swallows it — the profile keeps its name. */
+  function claimUsername(name, uid){
+    if (!db || !name || !uid) return;
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) return;
+    db.collection("usernames").doc(name).set({ uid: uid }).catch(function(){});
+  }
+
   function ensureProfile(user){
     var ref = db.collection("users").doc(user.uid);
     return ref.get().then(function(snap){
@@ -2282,6 +2292,7 @@ try { if (localStorage.getItem("lofi_theme") === "night") document.documentEleme
         if (addr && d.suiAddress !== addr) {
           ref.update({ suiAddress: addr, updatedAt: TS() }).catch(function(){});
         }
+        if (d.username) claimUsername(d.username, user.uid);
         return d;
       }
       var data = {
@@ -2293,7 +2304,7 @@ try { if (localStorage.getItem("lofi_theme") === "night") document.documentEleme
         createdAt: TS(),
         updatedAt: TS()
       };
-      return ref.set(data).then(function(){ return data; });
+      return ref.set(data).then(function(){ claimUsername(data.username, user.uid); return data; });
     }).catch(function(){ return null; });
   }
 
@@ -2808,7 +2819,7 @@ try { if (localStorage.getItem("lofi_theme") === "night") document.documentEleme
         rank++;
         var d = doc.data() || {};
         var me = state.user && doc.id === state.user.uid;
-        html += '<div class="board-row' + (me ? " me" : "") + '"><span class="rank">' + rank + '</span><span class="avatar">' + avatarHTML(d.avatar || "yeti") + '</span><span class="bname">' + esc(d.username || "Player") + '</span><span class="bxp">' + (d.xp || 0) + ' XP</span></div>';
+        html += '<div class="board-row' + (me ? " me" : "") + '"><span class="rank">' + rank + '</span><span class="avatar">' + avatarHTML(d.avatar || "yeti") + '</span><span class="bname">' + esc(d.username || "Player") + '</span><span class="bxp">' + (Number(d.xp) || 0) + ' XP</span></div>';
       });
       box.innerHTML = html;
     }).catch(function(){
@@ -2910,15 +2921,36 @@ try { if (localStorage.getItem("lofi_theme") === "night") document.documentEleme
     var used = log.day === todayStr() ? (log.count || 0) : 0;
     if (used >= 3) { setStatus("username-status", "You have used today's 3 username changes. Try again tomorrow.", "err"); return; }
     setStatus("username-status", "Checking that name…");
-    db.collection("users").where("username", "==", name).limit(1).get().then(function(snap){
-      var taken = false;
-      snap.forEach(function(doc){ if (doc.id !== state.user.uid) taken = true; });
-      if (taken) { setStatus("username-status", "That username is already taken. Pick another one.", "err"); return null; }
-      return db.collection("users").doc(state.user.uid).update({ username: name, updatedAt: TS() }).then(function(){
+    var oldName = (state.profile && state.profile.username) || "";
+    /* Username claim (2026-11-25): the claim doc makes the name check
+       atomic — the batched write is rejected by the rules if the name was
+       claimed between this check and the write, so two users can never
+       take the same name. The old claim is released only when this account
+       owns it; a name claimed by someone else is left alone. */
+    db.collection("usernames").doc(name).get().then(function(claimSnap){
+      if (claimSnap.exists && claimSnap.data() && claimSnap.data().uid !== state.user.uid) {
+        setStatus("username-status", "That username is already taken. Pick another one.", "err");
+        return null;
+      }
+      var batch = db.batch();
+      batch.set(db.collection("usernames").doc(name), { uid: state.user.uid });
+      var releaseOld = Promise.resolve();
+      if (oldName && oldName !== name) {
+        releaseOld = db.collection("usernames").doc(oldName).get().then(function(oldSnap){
+          if (oldSnap.exists && oldSnap.data() && oldSnap.data().uid === state.user.uid) {
+            batch.delete(db.collection("usernames").doc(oldName));
+          }
+        });
+      }
+      return releaseOld.then(function(){
+        return batch.commit();
+      }).then(function(){
+        return db.collection("users").doc(state.user.uid).update({ username: name, updatedAt: TS() });
+      }).then(function(){
         try { localStorage.setItem("lofi_name_changes_v1", JSON.stringify({ day: todayStr(), count: used + 1 })); } catch (e2) {}
         setStatus("username-status", "Username saved. " + (2 - used) + " change" + (2 - used === 1 ? "" : "s") + " left today.", "ok");
       });
-    }).catch(function(){ setStatus("username-status", "The username could not be saved. Try again.", "err"); });
+    }).catch(function(){ setStatus("username-status", "That username is already taken, or it could not be saved. Try another one.", "err"); });
   });
 
   /* ================= Auth state =================
